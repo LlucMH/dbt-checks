@@ -1,0 +1,37 @@
+# dbt artifacts
+target/
+logs/
+dbt_packages/
+
+# Python environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# macOS
+*.swp
+
+# build artifacts
+dist/
+build/
+
+# dbt partial parsing cache
+.partial_parse.msgpack

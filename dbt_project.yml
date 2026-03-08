@@ -1,0 +1,23 @@
+name: dbt_checks
+version: "0.1.0"
+config-version: 2
+
+profile: dbt_checks
+
+require-dbt-version: [">=1.5.0"]
+
+macro-paths: ["macros"]
+
+model-paths: []
+analysis-paths: []
+test-paths: []
+seed-paths: []
+snapshot-paths: []
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+dispatch:
+  - macro_namespace: dbt_checks
+    search_order: ['dbt_checks', 'dbt']
