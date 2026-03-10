@@ -1,0 +1,7 @@
+dbt_checks:
+  outputs:
+    dev:
+      type: duckdb
+      path: ":memory:"
+      threads: 1
+  target: dev
