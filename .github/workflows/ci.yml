@@ -47,3 +47,7 @@ jobs:
         working-directory: integration_tests
         run: |
           dbt test --select tag:should_fail && exit 1 || exit 0
+
+      - name: Check dbt compilation
+        working-directory: integration_tests
+        run: dbt compile
