@@ -1,0 +1,7 @@
+dbt_checks:
+  outputs:
+    dev:
+      type: duckdb
+      path: "test.duckdb"
+      threads: 2
+  target: dev
