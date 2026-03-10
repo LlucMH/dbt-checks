@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DBT_PROFILES_DIR: ./integration_tests
+      DBT_PROFILES_DIR: .
 
     steps:
       - name: Checkout repository
