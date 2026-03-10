@@ -39,10 +39,10 @@ dbt test
 
 When adding a new check:
 
-1- Implement the macro under *macros/tests/*
-2- Reuse helper macros where possible
-3- Add integration tests in integration_tests
-4- Update the documentation if needed
+    1 - Implement the macro under macros/tests/ 
+    2 - Reuse helper macros where possible  
+    3 - Add integration tests in integration_tests  
+    4 - Update the documentation if needed  
 
 ## Code style
 
