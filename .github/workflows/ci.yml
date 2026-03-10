@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      DBT_PROFILES_DIR: ./integration_tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core dbt-duckdb
+
+      - name: Install package dependencies
+        working-directory: integration_tests
+        run: dbt deps
+
+      - name: Seed test data
+        working-directory: integration_tests
+        run: dbt seed
+
+      - name: Run test models
+        working-directory: integration_tests
+        run: dbt run
+
+      - name: Run passing tests
+        working-directory: integration_tests
+        run: dbt test --select tag:should_pass --warn-error
+
+      - name: Run failing tests
+        working-directory: integration_tests
+        run: |
+          dbt test --select tag:should_fail && exit 1 || exit 0
