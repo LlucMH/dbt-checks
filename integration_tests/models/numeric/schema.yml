@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: non_negative-valid_amounts
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_pass"]
+
+  - name: non_negative-invalid_amounts
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_fail"]
