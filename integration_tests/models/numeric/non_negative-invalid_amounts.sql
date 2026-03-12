@@ -1,1 +1,1 @@
-select * from {{ ref('non_negative-invalid_amounts') }}
+select * from {{ ref('seed-non_negative-invalid_amounts') }}
