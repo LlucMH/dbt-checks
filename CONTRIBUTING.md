@@ -11,7 +11,7 @@ This project aims to provide reusable data quality checks for dbt projects.
 Clone the repository:
 
 ```bash
-git clone https://github.com/<your-org>/dbt-checks
+git clone https://github.com/LlucMH/dbt-checks.git
 cd dbt-checks
 ```
 
