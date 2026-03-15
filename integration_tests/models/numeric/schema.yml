@@ -1,18 +1,114 @@
 version: 2
 
 models:
-  - name: non_negative-valid_amounts
+  - name: between_values-valid
     columns:
-      - name: amount
+      - name: value
+        data_tests:
+          - dbt_checks.between_values:
+              config:
+                tags: ["should_pass"]
+
+  - name: between_values-invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.between_values:
+              config:
+                tags: ["should_fail"]
+
+  - name: greater_or_equal_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_or_equal:
+              config:
+                tags: ["should_pass"]
+
+  - name: greater_or_equal_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_or_equal:
+              config:
+                tags: ["should_fail"]
+
+  - name: greater_than_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_than:
+              config:
+                tags: ["should_pass"]
+
+  - name: greater_than_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_than:
+              config:
+                tags: ["should_fail"]
+
+  - name: less_or_equal_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.less_or_equal:
+              config:
+                tags: ["should_pass"]
+
+  - name: less_or_equal_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.less_or_equal:
+              config:
+                tags: ["should_fail"]
+
+  - name: less_than_lid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.less_than:
+              config:
+                tags: ["should_pass"]
+
+  - name: less_than_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.less_than:
+              config:
+                tags: ["should_fail"]
+
+  - name: non_negative-valid
+    columns:
+      - name: value
         data_tests:
           - dbt_checks.non_negative:
               config:
                 tags: ["should_pass"]
 
-  - name: non_negative-invalid_amounts
+  - name: non_negative-invalid
     columns:
-      - name: amount
+      - name: value
         data_tests:
           - dbt_checks.non_negative:
+              config:
+                tags: ["should_fail"]
+
+  - name: non_positive_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_positive:
+              config:
+                tags: ["should_pass"]
+
+  - name: non_positive_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_positive:
               config:
                 tags: ["should_fail"]
