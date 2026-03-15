@@ -1,19 +1,25 @@
 version: 2
 
 models:
-  - name: between_values-valid
+  - name: between_values_valid
     columns:
       - name: value
         data_tests:
           - dbt_checks.between_values:
+              arguments:
+                min_value: 0
+                max_value: 100
               config:
                 tags: ["should_pass"]
 
-  - name: between_values-invalid
+  - name: between_values_invalid
     columns:
       - name: value
         data_tests:
           - dbt_checks.between_values:
+              arguments:
+                min_value: 0
+                max_value: 100
               config:
                 tags: ["should_fail"]
 
@@ -21,7 +27,9 @@ models:
     columns:
       - name: value
         data_tests:
-          - dbt_checks.greater_or_equal:
+          - dbt_checks.greater_or_equal_than:
+              arguments:
+                min_value: 10
               config:
                 tags: ["should_pass"]
 
@@ -29,7 +37,9 @@ models:
     columns:
       - name: value
         data_tests:
-          - dbt_checks.greater_or_equal:
+          - dbt_checks.greater_or_equal_than:
+              arguments:
+                min_value: 10
               config:
                 tags: ["should_fail"]
 
@@ -38,6 +48,8 @@ models:
       - name: value
         data_tests:
           - dbt_checks.greater_than:
+              arguments:
+                min_value: 10
               config:
                 tags: ["should_pass"]
 
@@ -46,6 +58,8 @@ models:
       - name: value
         data_tests:
           - dbt_checks.greater_than:
+              arguments:
+                min_value: 10
               config:
                 tags: ["should_fail"]
 
@@ -53,7 +67,9 @@ models:
     columns:
       - name: value
         data_tests:
-          - dbt_checks.less_or_equal:
+          - dbt_checks.less_or_equal_than:
+              arguments:
+                max_value: 10
               config:
                 tags: ["should_pass"]
 
@@ -61,15 +77,19 @@ models:
     columns:
       - name: value
         data_tests:
-          - dbt_checks.less_or_equal:
+          - dbt_checks.less_or_equal_than:
+              arguments:
+                max_value: 10
               config:
                 tags: ["should_fail"]
 
-  - name: less_than_lid
+  - name: less_than_valid
     columns:
       - name: value
         data_tests:
           - dbt_checks.less_than:
+              arguments:
+                max_value: 10
               config:
                 tags: ["should_pass"]
 
@@ -78,10 +98,12 @@ models:
       - name: value
         data_tests:
           - dbt_checks.less_than:
+              arguments:
+                max_value: 10
               config:
                 tags: ["should_fail"]
 
-  - name: non_negative-valid
+  - name: non_negative_valid
     columns:
       - name: value
         data_tests:
@@ -89,7 +111,7 @@ models:
               config:
                 tags: ["should_pass"]
 
-  - name: non_negative-invalid
+  - name: non_negative_invalid
     columns:
       - name: value
         data_tests:
