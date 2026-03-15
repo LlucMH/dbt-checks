@@ -1,0 +1,121 @@
+version: 2
+
+models:
+
+  - name: not_blank_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.not_blank:
+              config:
+                tags: ["should_pass"]
+
+  - name: not_blank_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.not_blank:
+              config:
+                tags: ["should_fail"]
+
+  - name: length_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 3
+                max_length: 10
+              config:
+                tags: ["should_pass"]
+
+  - name: length_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 3
+                max_length: 10
+              config:
+                tags: ["should_fail"]
+
+  - name: matches_regex_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.matches_regex:
+              arguments:
+                pattern: "^[^@]+@[^@]+\\.[^@]+$"
+              config:
+                tags: ["should_pass"]
+
+  - name: matches_regex_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.matches_regex:
+              arguments:
+                pattern: "^[^@]+@[^@]+\\.[^@]+$"
+              config:
+                tags: ["should_fail"]
+
+  - name: starts_with_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.starts_with:
+              arguments:
+                prefix: "A"
+              config:
+                tags: ["should_pass"]
+
+  - name: starts_with_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.starts_with:
+              arguments:
+                prefix: "A"
+              config:
+                tags: ["should_fail"]
+
+  - name: ends_with_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.ends_with:
+              arguments:
+                suffix: ".com"
+              config:
+                tags: ["should_pass"]
+
+  - name: ends_with_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.ends_with:
+              arguments:
+                suffix: ".com"
+              config:
+                tags: ["should_fail"]
+
+  - name: contains_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.contains:
+              arguments:
+                substring: "test"
+              config:
+                tags: ["should_pass"]
+
+  - name: contains_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.contains:
+              arguments:
+                substring: "test"
+              config:
+                tags: ["should_fail"]
