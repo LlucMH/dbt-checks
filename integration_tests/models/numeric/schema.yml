@@ -23,7 +23,7 @@ models:
               config:
                 tags: ["should_fail"]
 
-  - name: greater_or_equal_valid
+  - name: greater_or_equal_than_valid
     columns:
       - name: value
         data_tests:
@@ -33,7 +33,7 @@ models:
               config:
                 tags: ["should_pass"]
 
-  - name: greater_or_equal_invalid
+  - name: greater_or_equal_than_invali d
     columns:
       - name: value
         data_tests:
@@ -63,7 +63,7 @@ models:
               config:
                 tags: ["should_fail"]
 
-  - name: less_or_equal_valid
+  - name: less_or_equal_than_valid
     columns:
       - name: value
         data_tests:
@@ -73,7 +73,7 @@ models:
               config:
                 tags: ["should_pass"]
 
-  - name: less_or_equal_invalid
+  - name: less_or_equal_than_invalid
     columns:
       - name: value
         data_tests:
