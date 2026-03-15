@@ -19,7 +19,7 @@ Add the package to your `packages.yml`:
 
 ``` yaml
 packages:
-  - git: https://github.com/your-org/dbt-checks
+  - git: https://github.com/LlucMH/dbt-checks.git
     revision: main
 ```
 
