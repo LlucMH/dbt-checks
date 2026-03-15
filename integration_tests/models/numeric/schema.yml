@@ -33,7 +33,7 @@ models:
               config:
                 tags: ["should_pass"]
 
-  - name: greater_or_equal_than_invali d
+  - name: greater_or_equal_than_invalid
     columns:
       - name: value
         data_tests:
