@@ -1,6 +1,10 @@
 # dbt-checks
 
-**dbt-checks** is a lightweight library of reusable data quality checks
+![CI](https://github.com/LlucMH/dbt-checks/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/github/license/LlucMH/dbt-checks)
+![dbt](https://img.shields.io/badge/dbt-package-orange)
+
+**`dbt-checks`** is a lightweight library of reusable data quality checks
 for dbt projects.
 
 It provides simple, expressive tests that help validate business rules
@@ -10,8 +14,6 @@ The goal is to make common checks easy to apply without writing custom
 SQL every time.
 
 > ⚠️ Early stage project --- feedback and contributions are welcome.
-
-------------------------------------------------------------------------
 
 # Installation
 
@@ -29,7 +31,13 @@ Then install dependencies:
 dbt deps
 ```
 
-------------------------------------------------------------------------
+For production projects it is recommended to pin a version once releases are available:
+
+```yaml
+packages:
+  - git: https://github.com/LlucMH/dbt-checks.git
+    revision: 0.1.0
+```
 
 # Usage
 
@@ -56,72 +64,96 @@ Run tests as usual:
 dbt test
 ```
 
-------------------------------------------------------------------------
-
 # Available Checks
+
+dbt-checks provides reusable data validation tests grouped by category.
 
 ## Numeric
 
-  Check              Description
-  ------------------ ---------------------------------------------
-  `non_negative`     Ensures values are ≥ 0
-  `non_positive`     Ensures values are ≤ 0
-  `greater_than`     Ensures values are greater than a threshold
-  `less_than`        Ensures values are less than a threshold
-  `between_values`   Ensures values fall within a numeric range
+Numeric checks validate numeric ranges and thresholds.
 
-Example:
+Check | Description
+----- | ----------
+`non_negative` | Ensures values are ≥ 0
+`non_positive` | Ensures values are ≤ 0
+`greater_than` | Ensures values are greater than a threshold
+`greater_or_equal_than` | Ensures values are ≥ a threshold
+`less_than` | Ensures values are less than a threshold
+`less_or_equal_than` | Ensures values are ≤ a threshold
+`between_values` | Ensures values fall within a numeric range
+
+Example
 
 ``` yaml
-- dbt_checks.between_values:
-    arguments:
-      min_value: 0
-      max_value: 100
+columns:
+  - name: amount
+    data_tests:
+      - dbt_checks.between_values:
+          arguments:
+            min_value: 0
+            max_value: 100
 ```
-
-------------------------------------------------------------------------
-
 ## String
 
-  Check              Description
-  ------------------ ---------------------------------------------
-  `not_blank`        Ensures strings are not empty or whitespace
-  `length_between`   Validates string length range
-  `matches_regex`    Validates a regex pattern
-  `starts_with`      Ensures string starts with prefix
-  `ends_with`        Ensures string ends with suffix
+String checks validate textual fields such as identifiers or formatted values.
 
-------------------------------------------------------------------------
+Check | Description
+----- | ----------
+`not_blank` | Ensures strings are not empty or whitespace
+`length_between` | Validates string length range
+`matches_regex` | Validates a regex pattern
+`starts_with` | Ensures string starts with prefix
+`ends_with` | Ensures string ends with suffix
+`contains` | Ensures string contains substring
 
-## Temporal
-
-  Check               Description
-  ------------------- --------------------------------------
-  `not_future_date`   Ensures date is not in the future
-  `not_before_date`   Ensures date is after a minimum date
-  `between_dates`     Ensures date is within a range
-  `recent_date`       Ensures date is within N days
-
-Example:
+Example
 
 ``` yaml
-- dbt_checks.recent_date:
-    arguments:
-      max_age_days: 7
+columns:
+  - name: email
+    data_tests:
+      - dbt_checks.matches_regex:
+          arguments:
+            pattern: "^[^@]+@[^@]+\\.[^@]+$"
 ```
+## Temporal
 
-------------------------------------------------------------------------
+Temporal checks validate date and timestamp fields.
 
+Check | Description
+----- | ----------
+`not_future_date` | Ensures date is not in the future
+`not_before_date` | Ensures date is after a minimum date
+`between_dates` | Ensures date is within a range
+`recent_date` | Ensures date is within N days
+`date_diff_less_than` | Ensures difference between two dates is within threshold
+`no_weekend_dates` | Ensures dates do not fall on weekends
+
+Example
+
+``` yaml
+columns:
+  - name: event_date
+    data_tests:
+      - dbt_checks.recent_date:
+          arguments:
+            max_age_days: 7
+```
 ## Aggregation
 
-  Check                      Description
-  -------------------------- ------------------------------------------------
-  `row_count_between`        Ensures model row count is within range
-  `row_count_greater_than`   Ensures model has at least N rows
-  `sum_between`              Ensures sum of a column falls within range
-  `avg_between`              Ensures average of a column falls within range
+Aggregation checks validate dataset-level metrics.
 
-Example:
+Check | Description
+----- | ----------
+`row_count_greater_than` | Ensures model has at least N rows
+`row_count_less_than` | Ensures model has at most N rows
+`row_count_between` | Ensures row count falls within range
+`sum_between` | Ensures column sum falls within range
+`avg_between` | Ensures column average falls within range
+`max_between` | Ensures column maximum falls within range
+`min_between` | Ensures column minimum falls within range
+
+Example
 
 ``` yaml
 models:
@@ -131,27 +163,28 @@ models:
           arguments:
             min_value: 100
 ```
-
-------------------------------------------------------------------------
-
 ## Ratio
 
-  Check                      Description
-  -------------------------- -------------------------------------------
-  `null_ratio_below`         Ensures null ratio is below threshold
-  `positive_ratio_between`   Ensures positive value ratio within range
-  `value_ratio_between`      Ensures specific value ratio within range
+Ratio checks validate proportions of rows matching a condition.
 
-Example:
+Check | Description
+----- | ----------
+`null_ratio_below` | Ensures null ratio is below threshold
+`null_ratio_between` | Ensures null ratio is within range
+`positive_ratio_between` | Ensures positive value ratio within range
+`negative_ratio_between` | Ensures negative value ratio within range
+`value_ratio_between` | Ensures specific value ratio within range
+
+Example
 
 ``` yaml
-- dbt_checks.null_ratio_below:
-    arguments:
-      threshold: 0.05
+columns:
+  - name: email
+    data_tests:
+      - dbt_checks.null_ratio_below:
+          arguments:
+            threshold: 0.05
 ```
-
-------------------------------------------------------------------------
-
 # Supported Warehouses
 
 `dbt-checks` supports common dbt adapters:
@@ -165,8 +198,6 @@ Example:
 
 Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
 
-------------------------------------------------------------------------
-
 # Why dbt-checks?
 
 Many dbt projects repeatedly implement the same validation logic.
@@ -178,8 +209,6 @@ Many dbt projects repeatedly implement the same validation logic.
 -   consistent validation patterns
 -   cross-warehouse compatibility
 
-------------------------------------------------------------------------
-
 # Contributing
 
 Contributions are welcome.
@@ -190,8 +219,6 @@ If you'd like to add a new check:
 2.  Reuse helper macros when possible
 3.  Add documentation
 4.  Add integration tests
-
-------------------------------------------------------------------------
 
 # License
 
