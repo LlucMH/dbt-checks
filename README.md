@@ -133,7 +133,7 @@ Example
 
 ``` yaml
 columns:
-  - name: event_date
+  - name: date
     data_tests:
       - dbt_checks.recent_date:
           arguments:

@@ -129,7 +129,7 @@ Example:
 
 ```yaml
 columns:
-  - name: event_date
+  - name: date
     data_tests:
       - dbt_checks.not_future_date
 ```
