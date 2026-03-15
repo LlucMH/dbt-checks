@@ -1,0 +1,113 @@
+version: 2
+
+models:
+
+  - name: null_ratio_below_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.2
+              config:
+                tags: ["should_pass"]
+
+  - name: null_ratio_below_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.2
+              config:
+                tags: ["should_fail"]
+
+  - name: null_ratio_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.6
+              config:
+                tags: ["should_pass"]
+
+  - name: null_ratio_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.6
+              config:
+                tags: ["should_fail"]
+
+  - name: positive_ratio_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.4
+                max_ratio: 0.8
+              config:
+                tags: ["should_pass"]
+
+  - name: positive_ratio_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.4
+                max_ratio: 0.8
+              config:
+                tags: ["should_fail"]
+
+  - name: negative_ratio_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.6
+              config:
+                tags: ["should_pass"]
+
+  - name: negative_ratio_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.6
+              config:
+                tags: ["should_fail"]
+
+  - name: value_ratio_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                target_value: "A"
+                min_ratio: 0.4
+                max_ratio: 0.8
+              config:
+                tags: ["should_pass"]
+
+  - name: value_ratio_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                target_value: "A"
+                min_ratio: 0.4
+                max_ratio: 0.8
+              config:
+                tags: ["should_fail"]
