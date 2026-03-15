@@ -49,7 +49,7 @@ Example:
 models:
   - name: orders
     columns:
-      - name: amount
+      - name: value
         data_tests:
           - dbt_checks.non_negative
           - dbt_checks.between_values:
@@ -86,7 +86,7 @@ Example
 
 ``` yaml
 columns:
-  - name: amount
+  - name: value
     data_tests:
       - dbt_checks.between_values:
           arguments:
