@@ -90,7 +90,7 @@ models:
           config:
             tags: ["should_pass"]
 
-  - name: date_diff_less_than_valid
+  - name: date_diff_less_than_invalid
     data_tests:
       - dbt_checks.date_diff_less_than:
           arguments:
