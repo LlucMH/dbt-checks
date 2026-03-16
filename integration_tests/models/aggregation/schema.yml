@@ -14,7 +14,7 @@ models:
     data_tests:
       - dbt_checks.row_count_greater_than:
           arguments:
-            min_value: 3
+            min_value: 10
           config:
             tags: ["should_fail"]
 
@@ -70,7 +70,7 @@ models:
           - dbt_checks.sum_between:
               arguments:
                 min_value: 50
-                max_value: 200
+                max_value: 100
               config:
                 tags: ["should_fail"]
 
