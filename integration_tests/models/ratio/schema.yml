@@ -61,7 +61,7 @@ models:
         data_tests:
           - dbt_checks.positive_ratio_between:
               arguments:
-                min_ratio: 0.4
+                min_ratio: 0.6
                 max_ratio: 0.8
               config:
                 tags: ["should_fail"]
@@ -83,7 +83,7 @@ models:
         data_tests:
           - dbt_checks.negative_ratio_between:
               arguments:
-                min_ratio: 0.2
+                min_ratio: 0.5
                 max_ratio: 0.6
               config:
                 tags: ["should_fail"]
