@@ -4,6 +4,6 @@ select *
 from {{ model }}
 where
     {{ column_name }} is not null
-    and not regexp_like({{ column_name }}, '{{ pattern }}')
+    and not ({{ column_name }} ~ '{{ pattern }}')
 
 {% endtest %}
