@@ -81,28 +81,24 @@ models:
                 tags: ["should_fail"]
 
   - name: date_diff_less_than_valid
-    columns:
-      - name: end_date
-        data_tests:
-          - dbt_checks.date_diff_less_than:
-              arguments:
-                start_column: start_date
-                end_column: end_date
-                max_days: 10
-              config:
-                tags: ["should_pass"]
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+          config:
+            tags: ["should_pass"]
 
-  - name: date_diff_less_than_invalid
-    columns:
-      - name: end_date
-        data_tests:
-          - dbt_checks.date_diff_less_than:
-              arguments:
-                start_column: start_date
-                end_column: end_date
-                max_days: 10
-              config:
-                tags: ["should_fail"]
+  - name: date_diff_less_than_valid
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+          config:
+            tags: ["should_fail"]
 
   - name: no_weekend_dates_valid
     columns:
