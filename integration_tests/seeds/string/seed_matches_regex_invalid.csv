@@ -1,4 +1,5 @@
 id,value
-1,test@example.com
-2,user@domain.com
-3,data@test.org
+1,testexample.com
+2,user@
+3,@domain.com
+4,invalid
