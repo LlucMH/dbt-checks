@@ -30,7 +30,7 @@
   {{ return(adapter.dispatch('try_cast_to_timestamp', 'dbt_checks')(expr)) }}
 {% endmacro %}
 
-{# -------------------- default__ fallbacks -------------------- #}
+# -------------------- default__ fallbacks -------------------- #
 
 {% macro default__current_date_sql() %}
   current_date
