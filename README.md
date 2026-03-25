@@ -5,6 +5,7 @@
 ![duckdb](https://img.shields.io/badge/tested%20on-duckdb-blue)
 ![dispatch](https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey)
 ![license](https://img.shields.io/github/license/LlucMH/dbt-checks)
+![version](https://img.shields.io/github/v/release/LlucMH/dbt-checks)
 
 
 **`dbt-checks`** is a lightweight library of reusable data quality checks
