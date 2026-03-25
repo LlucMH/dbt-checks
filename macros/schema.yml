@@ -1,0 +1,287 @@
+version: 2
+
+macros:
+
+  # ----------------------------
+  # Numeric checks
+  # ----------------------------
+
+  - name: non_negative
+    description: Ensures that values are greater than or equal to 0.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+
+  - name: non_positive
+    description: Ensures that values are less than or equal to 0.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+
+  - name: greater_than
+    description: Ensures that values are strictly greater than a threshold.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: value
+        description: Minimum exclusive threshold.
+
+  - name: greater_or_equal_than
+    description: Ensures that values are greater than or equal to a threshold.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: value
+        description: Minimum inclusive threshold.
+
+  - name: less_than
+    description: Ensures that values are strictly less than a threshold.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: value
+        description: Maximum exclusive threshold.
+
+  - name: less_or_equal_than
+    description: Ensures that values are less than or equal to a threshold.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: value
+        description: Maximum inclusive threshold.
+
+  - name: between_values
+    description: Ensures that values fall within a numeric range.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: min_value
+        description: Minimum allowed value (inclusive).
+      - name: max_value
+        description: Maximum allowed value (inclusive).
+
+
+  # ----------------------------
+  # String checks
+  # ----------------------------
+
+  - name: not_blank
+    description: Ensures that string values are not empty or whitespace.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+
+  - name: length_between
+    description: Ensures that string length falls within a specified range.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: min_length
+        description: Minimum allowed length.
+      - name: max_length
+        description: Maximum allowed length.
+
+  - name: matches_regex
+    description: Ensures that values match a given regular expression.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: pattern
+        description: Regular expression pattern.
+
+  - name: starts_with
+    description: Ensures that values start with a given prefix.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: prefix
+        description: Required prefix.
+
+  - name: ends_with
+    description: Ensures that values end with a given suffix.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: suffix
+        description: Required suffix.
+
+  - name: contains
+    description: Ensures that values contain a given substring.
+    arguments:
+      - name: column_name
+        description: Column to validate.
+      - name: substring
+        description: Substring that must be present.
+
+
+  # ----------------------------
+  # Temporal checks
+  # ----------------------------
+
+  - name: not_future_date
+    description: Ensures that dates are not in the future.
+    arguments:
+      - name: column_name
+        description: Date column to validate.
+
+  - name: not_before_date
+    description: Ensures that dates are not before a specified minimum date.
+    arguments:
+      - name: column_name
+        description: Date column to validate.
+      - name: min_date
+        description: Minimum allowed date.
+
+  - name: between_dates
+    description: Ensures that dates fall within a given range.
+    arguments:
+      - name: column_name
+        description: Date column to validate.
+      - name: min_date
+        description: Minimum allowed date.
+      - name: max_date
+        description: Maximum allowed date.
+
+  - name: recent_date
+    description: Ensures that dates are within a specified number of days from today.
+    arguments:
+      - name: column_name
+        description: Date column to validate.
+      - name: max_age_days
+        description: Maximum allowed age in days.
+
+  - name: date_diff_less_than
+    description: Ensures that the difference between two date columns is below a threshold.
+    arguments:
+      - name: start_column
+        description: Start date column.
+      - name: end_column
+        description: End date column.
+      - name: max_days
+        description: Maximum allowed difference in days.
+
+  - name: no_weekend_dates
+    description: Ensures that dates do not fall on weekends.
+    arguments:
+      - name: column_name
+        description: Date column to validate.
+
+
+  # ----------------------------
+  # Aggregation checks
+  # ----------------------------
+
+  - name: row_count_greater_than
+    description: Ensures that the model contains at least a minimum number of rows.
+    arguments:
+      - name: min_value
+        description: Minimum number of rows.
+
+  - name: row_count_less_than
+    description: Ensures that the model contains fewer than a maximum number of rows.
+    arguments:
+      - name: max_value
+        description: Maximum number of rows.
+
+  - name: row_count_between
+    description: Ensures that the model row count falls within a specified range.
+    arguments:
+      - name: min_value
+        description: Minimum number of rows.
+      - name: max_value
+        description: Maximum number of rows.
+
+  - name: sum_between
+    description: Ensures that the sum of a column falls within a specified range.
+    arguments:
+      - name: column_name
+        description: Column to aggregate.
+      - name: min_value
+        description: Minimum allowed sum.
+      - name: max_value
+        description: Maximum allowed sum.
+
+  - name: avg_between
+    description: Ensures that the average of a column falls within a specified range.
+    arguments:
+      - name: column_name
+        description: Column to aggregate.
+      - name: min_value
+        description: Minimum allowed average.
+      - name: max_value
+        description: Maximum allowed average.
+
+  - name: max_between
+    description: Ensures that the maximum value of a column falls within a specified range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: min_value
+        description: Minimum allowed maximum value.
+      - name: max_value
+        description: Maximum allowed maximum value.
+
+  - name: min_between
+    description: Ensures that the minimum value of a column falls within a specified range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: min_value
+        description: Minimum allowed minimum value.
+      - name: max_value
+        description: Maximum allowed minimum value.
+
+
+  # ----------------------------
+  # Ratio checks
+  # ----------------------------
+
+  - name: null_ratio_below
+    description: Ensures that the ratio of null values is below a threshold.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: threshold
+        description: Maximum allowed null ratio.
+
+  - name: null_ratio_between
+    description: Ensures that the ratio of null values falls within a range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: min_ratio
+        description: Minimum allowed ratio.
+      - name: max_ratio
+        description: Maximum allowed ratio.
+
+  - name: positive_ratio_between
+    description: Ensures that the ratio of positive values falls within a range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: min_ratio
+        description: Minimum allowed ratio.
+      - name: max_ratio
+        description: Maximum allowed ratio.
+
+  - name: negative_ratio_between
+    description: Ensures that the ratio of negative values falls within a range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: min_ratio
+        description: Minimum allowed ratio.
+      - name: max_ratio
+        description: Maximum allowed ratio.
+
+  - name: value_ratio_between
+    description: Ensures that the ratio of rows matching a value or condition falls within a range.
+    arguments:
+      - name: column_name
+        description: Column to evaluate.
+      - name: target_value
+        description: Value to match.
+      - name: min_ratio
+        description: Minimum allowed ratio.
+      - name: max_ratio
+        description: Maximum allowed ratio.
