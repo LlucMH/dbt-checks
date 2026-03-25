@@ -1,8 +1,11 @@
 # dbt-checks
 
-![CI](https://github.com/LlucMH/dbt-checks/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/github/license/LlucMH/dbt-checks)
-![dbt](https://img.shields.io/badge/dbt-package-orange)
+![CI](https://img.shields.io/github/actions/workflow/status/LlucMH/dbt-checks/ci.yml?branch=main)
+![dbt](https://img.shields.io/badge/dbt-1.5%2B-orange)
+![duckdb](https://img.shields.io/badge/tested%20on-duckdb-blue)
+![dispatch](https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey)
+![license](https://img.shields.io/github/license/LlucMH/dbt-checks)
+
 
 **`dbt-checks`** is a lightweight library of reusable data quality checks
 for dbt projects.
