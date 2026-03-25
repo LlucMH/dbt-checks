@@ -187,7 +187,7 @@ columns:
 ```
 # Supported Warehouses
 
-`dbt-checks` supports common dbt adapters:
+`dbt-checks` is designed to work across common dbt adapters:
 
 -   Snowflake
 -   BigQuery
@@ -197,6 +197,10 @@ columns:
 -   Postgres
 
 Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
+
+**Tested on DuckDB in CI.**
+
+**Aditional adapters are supported through dbt dispatch (best-efort compatibility).**
 
 # Why dbt-checks?
 
