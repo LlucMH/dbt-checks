@@ -38,3 +38,7 @@ build/
 
 # dbt partial parsing cache
 .partial_parse.msgpack
+
+# DuckDB artifacts
+.duckdb/
+.duckdb
