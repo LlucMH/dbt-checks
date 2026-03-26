@@ -1,12 +1,19 @@
-# dbt-checks
+<p align="center">
+  <img src="assets/dbt-checks banner.png" alt="dbt-checks banner" width="600"/>
+</p>
 
-![CI](https://img.shields.io/github/actions/workflow/status/LlucMH/dbt-checks/ci.yml?branch=main)
-![dbt](https://img.shields.io/badge/dbt-1.5%2B-orange)
-![duckdb](https://img.shields.io/badge/tested%20on-duckdb-blue)
-![dispatch](https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey)
-![license](https://img.shields.io/github/license/LlucMH/dbt-checks)
-![version](https://img.shields.io/github/v/release/LlucMH/dbt-checks)
+---
 
+<p align="center">
+  <img src="https://img.shields.io/github/actions/workflow/status/LlucMH/dbt-checks/ci.yml?branch=main" />
+  <img src="https://img.shields.io/badge/dbt-1.5%2B-orange" />
+  <img src="https://img.shields.io/badge/tested%20on-duckdb-blue" />
+  <img src="https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey" />
+  <img src="https://img.shields.io/github/license/LlucMH/dbt-checks" />
+  <img src="https://img.shields.io/github/v/release/LlucMH/dbt-checks" />
+</p>
+
+---
 
 **`dbt-checks`** is a lightweight library of reusable data quality checks
 for dbt projects.
@@ -230,4 +237,4 @@ If you'd like to add a new check:
 
 # License
 
-MIT
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
