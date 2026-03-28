@@ -42,3 +42,6 @@ build/
 # DuckDB artifacts
 .duckdb/
 .duckdb
+
+#  User-specific files
+.user.yml

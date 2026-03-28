@@ -1,0 +1,38 @@
+# .user.yml.example
+# ============================================================
+# dbt-checks — User Configuration (Optional)
+# ============================================================
+#
+# This file allows you to override local configuration without
+# modifying the project or committing sensitive information.
+#
+# Usage:
+#   1. Copy this file to `.user.yml`
+#   2. Adjust values for your local environment
+#
+# Note:
+#   - `.user.yml` is ignored by git
+#   - Safe for local paths, credentials, and overrides
+# ============================================================
+
+# Path to dbt profiles.yml
+# profiles_dir: "C:/Users/your_user/.dbt"
+
+# Target to use
+# target: dev
+
+# Number of threads
+# threads: 1
+
+# Package-specific variables
+# vars:
+#   dbt_checks:
+#     max_days: 7
+#     allow_weekends: false
+
+# Optional: override project directory
+# project_dir: "."
+
+# Optional: adapter-specific tweaks
+# For example, DuckDB file path
+# duckdb_path: ":memory:"
