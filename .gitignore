@@ -28,6 +28,7 @@ Thumbs.db
 
 # Environment variables
 .env
+.venv/
 
 # macOS
 *.swp
