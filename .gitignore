@@ -45,3 +45,4 @@ build/
 
 #  User-specific files
 .user.yml
+dbt_internal_packages/
