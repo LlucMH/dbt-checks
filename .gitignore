@@ -5,6 +5,8 @@ dbt_packages/
 .dbt_packages/
 integration_tests/target/
 integration_tests/dbt_packages/
+test.duckdb
+*.duckdb
 
 # Python environments
 venv/
