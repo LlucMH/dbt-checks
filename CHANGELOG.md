@@ -6,6 +6,32 @@ The format follows semantic versioning.
 
 ---
 
+## [0.2.0] - 2026-03-30
+
+### Added
+
+- Documentation blocks (`{% docs %}`) for all generic tests
+- Macro-level documentation via `schema.yml`
+- Argument documentation for all tests
+- Domain-based organization:
+  - aggregation
+  - numeric
+  - string
+  - temporal
+  - ratio
+
+### Changed
+
+- Improved project structure for scalability and maintainability
+- Enhanced developer experience when browsing dbt docs
+
+### CI
+
+- Stabilized integration testing workflow
+- Clear separation between `should_pass` and `should_fail` tests
+
+---
+
 ## [0.1.0] - 2026-03-10
 
 ### Added
