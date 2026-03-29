@@ -2,7 +2,7 @@
 -- RATIO DOCS
 -- =========================
 
-{% docs null_ratio_below %}
+{% docs test_null_ratio_below %}
 Ensures that the ratio of null values in a column is below a specified threshold.
 ### Description
 Calculates the proportion of rows where the column value is null and verifies that it does not exceed ### Arguments
@@ -20,7 +20,7 @@ threshold: 0.05
 {% enddocs %}
 
 
-{% docs null_ratio_between %}
+{% docs test_null_ratio_between %}
 Ensures that the ratio of null values falls within a specified range.
 ### Description
 Computes the proportion of null values and checks that it lies between `min_ratio` and `max_ratio`.
@@ -42,7 +42,7 @@ max_ratio: 0.1
 {% enddocs %}
 
 
-{% docs positive_ratio_between %}
+{% docs test_positive_ratio_between %}
 Ensures that the ratio of positive values falls within a specified range.
 ### Description
 Calculates the proportion of rows where the value is greater than 0 and validates it against the defined ### Arguments
@@ -63,7 +63,7 @@ max_ratio: 1.0
 {% enddocs %}
 
 
-{% docs negative_ratio_between %}
+{% docs test_negative_ratio_between %}
 Ensures that the ratio of negative values falls within a specified range.
 ### Description
 Calculates the proportion of rows where the value is less than 0 and checks it against the specified ### Arguments
@@ -84,7 +84,7 @@ max_ratio: 0.1
 {% enddocs %}
 
 
-{% docs value_ratio_between %}
+{% docs test_value_ratio_between %}
 Ensures that the ratio of rows matching a specific value falls within a given range.
 ### Description
 Calculates the proportion of rows where `column_name = value` and verifies that it lies between `min_Useful for validating`:

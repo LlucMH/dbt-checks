@@ -2,7 +2,7 @@
 -- STRING DOCS
 -- =========================
 
-{% docs not_blank %}
+{% docs test_not_blank %}
 Ensures that string values are not empty or whitespace.
 ### Description
 Checks that non-null string values are not empty and do not consist only of spaces or whitespace characters.
@@ -18,7 +18,7 @@ column_name: email
 {% enddocs %}
 
 
-{% docs length_between %}
+{% docs test_length_between %}
 Ensures that string length falls within a specified range.
 ### Description
 Checks that the length of each non-null value is between `min_length` and `max_length`.
@@ -40,7 +40,7 @@ max_length: 3
 {% enddocs %}
 
 
-{% docs matches_regex %}
+{% docs test_matches_regex %}
 Ensures that values match a given regular expression.
 ### Description
 Checks that each non-null value satisfies the provided regex pattern.
@@ -59,7 +59,7 @@ pattern: "^[^@]+@[^@]+\\.[^@]+$"
 {% enddocs %}
 
 
-{% docs starts_with %}
+{% docs test_starts_with %}
 Ensures that values start with a given prefix.
 ### Description
 Checks that each non-null value begins with the specified prefix.
@@ -78,7 +78,7 @@ prefix: "SKU-"
 {% enddocs %}
 
 
-{% docs ends_with %}
+{% docs test_ends_with %}
 Ensures that values end with a given suffix.
 ### Description
 Checks that each non-null value ends with the specified suffix.
@@ -97,7 +97,7 @@ suffix: ".com"
 {% enddocs %}
 
 
-{% docs contains %}
+{% docs test_contains %}
 Ensures that values contain a given substring.
 ### Description
 Checks that each non-null value contains the specified substring.

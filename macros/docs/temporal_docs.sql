@@ -2,7 +2,7 @@
 -- TEMPORAL DOCS
 -- =========================
 
-{% docs not_future_date %}
+{% docs test_not_future_date %}
 Ensures that dates are not in the future.
 ### Description
 Checks that each non-null date value is less than or equal to the current date.
@@ -18,7 +18,7 @@ column_name: order_date
 {% enddocs %}
 
 
-{% docs not_before_date %}
+{% docs test_not_before_date %}
 Ensures that dates are not before a specified minimum date.
 ### Description
 Checks that each non-null date value is on or after the specified minimum date.
@@ -37,7 +37,7 @@ min_date: "2024-01-01"
 {% enddocs %}
 
 
-{% docs between_dates %}
+{% docs test_between_dates %}
 Ensures that dates fall within a given range.
 ### Description
 Checks that each non-null date value is between `min_date` and `max_date`.
@@ -59,7 +59,7 @@ max_date: "2024-12-31"
 {% enddocs %}
 
 
-{% docs recent_date %}
+{% docs test_recent_date %}
 Ensures that dates are within a specified number of days from today.
 ### Description
 Checks that each non-null date value is not older than `max_age_days` compared with the current date.
@@ -78,7 +78,7 @@ max_age_days: 7
 {% enddocs %}
 
 
-{% docs date_diff_less_than %}
+{% docs test_date_diff_less_than %}
 Ensures that the difference between two date columns is below a threshold.
 ### Description
 Checks that the number of days between `start_column` and `end_column` is less than or equal to the defined ### Arguments
@@ -99,7 +99,7 @@ max_days: 10
 {% enddocs %}
 
 
-{% docs no_weekend_dates %}
+{% docs test_no_weekend_dates %}
 Ensures that dates do not fall on weekends.
 ### Description
 Checks that each non-null date value falls on a weekday.
