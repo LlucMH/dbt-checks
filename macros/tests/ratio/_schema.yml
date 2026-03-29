@@ -1,0 +1,47 @@
+version: 2
+
+macros:
+
+  # =========================
+  # RATIO
+  # =========================
+
+  - name: test_null_ratio_between
+    description: "{{ doc('test_null_ratio_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_null_ratio_below
+    description: "{{ doc('test_null_ratio_below') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_positive_ratio_between
+    description: "{{ doc('test_positive_ratio_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_negative_ratio_between
+    description: "{{ doc('test_negative_ratio_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_value_ratio_between
+    description: "{{ doc('test_value_ratio_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+      - name: min_ratio
+      - name: max_ratio

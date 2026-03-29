@@ -1,0 +1,55 @@
+version: 2
+
+macros:
+
+  # =========================
+  # NUMERIC
+  # =========================
+
+  - name: test_between_values
+    description: "{{ doc('test_between_values') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_greater_than
+    description: "{{ doc('test_greater_than') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_greater_or_equal_than
+    description: "{{ doc('test_greater_or_equal_than') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_less_than
+    description: "{{ doc('test_less_than') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_less_or_equal_than
+    description: "{{ doc('test_less_or_equal_than') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_non_negative
+    description: "{{ doc('test_non_negative') }}"
+    arguments:
+      - name: model
+      - name: column_name
+
+  - name: test_non_positive
+    description: "{{ doc('test_non_positive') }}"
+    arguments:
+      - name: model
+      - name: column_name

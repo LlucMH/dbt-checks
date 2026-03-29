@@ -1,0 +1,49 @@
+version: 2
+
+macros:
+
+  # =========================
+  # TEMPORAL
+  # =========================
+
+  - name: test_between_dates
+    description: "{{ doc('test_between_dates') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: start_date
+      - name: end_date
+
+  - name: test_not_before_date
+    description: "{{ doc('test_not_before_date') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: date
+
+  - name: test_not_future_date
+    description: "{{ doc('test_not_future_date') }}"
+    arguments:
+      - name: model
+      - name: column_name
+
+  - name: test_recent_date
+    description: "{{ doc('test_recent_date') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: days
+
+  - name: test_no_weekend_dates
+    description: "{{ doc('test_no_weekend_dates') }}"
+    arguments:
+      - name: model
+      - name: column_name
+
+  - name: test_date_diff_less_than
+    description: "{{ doc('test_date_diff_less_than') }}"
+    arguments:
+      - name: model
+      - name: start_date_column
+      - name: end_date_column
+      - name: max_days

@@ -1,0 +1,49 @@
+version: 2
+
+macros:
+
+  # =========================
+  # STRING
+  # =========================
+
+  - name: test_contains
+    description: "{{ doc('test_contains') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_not_blank
+    description: "{{ doc('test_not_blank') }}"
+    arguments:
+      - name: model
+      - name: column_name
+
+  - name: test_starts_with
+    description: "{{ doc('test_starts_with') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_ends_with
+    description: "{{ doc('test_ends_with') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: value
+
+  - name: test_length_between
+    description: "{{ doc('test_length_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_matches_regex
+    description: "{{ doc('test_matches_regex') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: regex

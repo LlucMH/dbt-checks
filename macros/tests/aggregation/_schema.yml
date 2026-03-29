@@ -1,0 +1,58 @@
+version: 2
+
+macros:
+
+  # =========================
+  # AGGREGATION
+  # =========================
+
+  - name: test_avg_between
+    description: "{{ doc('test_avg_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_sum_between
+    description: "{{ doc('test_sum_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_min_between
+    description: "{{ doc('test_min_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_max_between
+    description: "{{ doc('test_max_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+
+  - name: test_row_count_between
+    description: "{{ doc('test_row_count_between') }}"
+    arguments:
+      - name: model
+      - name: min_value
+      - name: max_value
+
+  - name: test_row_count_greater_than
+    description: "{{ doc('test_row_count_greater_than') }}"
+    arguments:
+      - name: model
+      - name: value
+
+  - name: test_row_count_less_than
+    description: "{{ doc('test_row_count_less_than') }}"
+    arguments:
+      - name: model
+      - name: value
