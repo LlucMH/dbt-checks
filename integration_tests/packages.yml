@@ -1,2 +1,3 @@
 packages:
-  - local: ..
+  - git: https://github.com/LlucMH/dbt-checks.git
+    revision: v0.1.0

@@ -1,4 +1,5 @@
 packages:
-  - local: ..
+  - git: https://github.com/LlucMH/dbt-checks.git
     name: dbt_checks
-sha1_hash: c787411b652dd5d587210a94ffee257da65a5a49
+    revision: c44d2fbea20e3c3254d1e4f55a22f9cf4d877393
+sha1_hash: 24897807e29e4abe4b6c1714dade6f53cb4d007d

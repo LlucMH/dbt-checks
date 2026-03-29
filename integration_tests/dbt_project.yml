@@ -9,6 +9,8 @@ seed-paths: ["seeds"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
 
+packages-install-path: "../.dbt_packages"
+
 target-path: "target"
 clean-targets:
   - "target"
