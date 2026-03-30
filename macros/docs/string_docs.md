@@ -10,11 +10,9 @@ Checks that non-null string values are not empty and do not consist only of spac
 - **column_name** *(string)*
 Column to evaluate.
 ### Example
-```yaml
-tests:
-- dbt_checks.not_blank:
-column_name: email
-```
+    tests:
+        - dbt_checks.not_blank:
+            column_name: email
 {% enddocs %}
 
 
@@ -30,13 +28,11 @@ Minimum allowed length.
 - **max_length** *(integer)*
 Maximum allowed length.
 ### Example
-```yaml
-tests:
-- dbt_checks.length_between:
-column_name: country_code
-min_length: 2
-max_length: 3
-```
+    tests:
+        - dbt_checks.length_between:
+            column_name: country_code
+            min_length: 2
+            max_length: 3
 {% enddocs %}
 
 
@@ -50,12 +46,10 @@ Column to evaluate.
 - **pattern** *(string)*
 Regular expression pattern.
 ### Example
-```yaml
-tests:
-- dbt_checks.matches_regex:
-column_name: email
-pattern: "^[^@]+@[^@]+\\.[^@]+$"
-```
+    tests:
+        - dbt_checks.matches_regex:
+            column_name: email
+            pattern: "^[^@]+@[^@]+\\.[^@]+$"
 {% enddocs %}
 
 
@@ -69,12 +63,10 @@ Column to evaluate.
 - **prefix** *(string)*
 Required prefix.
 ### Example
-```yaml
-tests:
-- dbt_checks.starts_with:
-column_name: sku
-prefix: "SKU-"
-```
+    tests:
+        - dbt_checks.starts_with:
+            column_name: sku
+            prefix: "SKU-"
 {% enddocs %}
 
 
@@ -88,12 +80,10 @@ Column to evaluate.
 - **suffix** *(string)*
 Required suffix.
 ### Example
-```yaml
-tests:
-- dbt_checks.ends_with:
-column_name: website
-suffix: ".com"
-```
+    tests:
+        - dbt_checks.ends_with:
+            column_name: website
+            suffix: ".com"
 {% enddocs %}
 
 
@@ -107,10 +97,8 @@ Column to evaluate.
 - **substring** *(string)*
 Substring that must be present.
 ### Example
-```yaml
-tests:
-- dbt_checks.contains:
-column_name: description
-substring: "premium"
-```
+    tests:
+        - dbt_checks.contains:
+            column_name: description
+            substring: "premium"
 {% enddocs %}

@@ -10,11 +10,9 @@ Checks that the total row count of the model is greater than the specified minim
 - **min_value** *(integer)*
 Minimum required row count.
 ### Example
-```yaml
-tests:
-- dbt_checks.row_count_greater_than:
-min_value: 100
-```
+    tests:
+        - dbt_checks.row_count_greater_than:
+            min_value: 100
 {% enddocs %}
 
 
@@ -26,11 +24,9 @@ Checks that the total row count of the model is less than the specified maximum.
 - **max_value** *(integer)*
 Maximum allowed row count.
 ### Example
-```yaml
-tests:
-- dbt_checks.row_count_less_than:
-max_value: 1000000
-```
+    tests:
+        - dbt_checks.row_count_less_than:
+            max_value: 1000000
 {% enddocs %}
 
 
@@ -44,12 +40,10 @@ Minimum allowed row count.
 - **max_value** *(integer)*
 Maximum allowed row count.
 ### Example
-```yaml
-tests:
-- dbt_checks.row_count_between:
-min_value: 10
-max_value: 1000
-```
+    tests:
+        - dbt_checks.row_count_between:
+            min_value: 10
+            max_value: 1000
 {% enddocs %}
 
 
@@ -65,13 +59,11 @@ Minimum allowed sum.
 - **max_value** *(number)*
 Maximum allowed sum.
 ### Example
-```yaml
-tests:
-- dbt_checks.sum_between:
-column_name: revenue
-min_value: 1000
-max_value: 100000
-```
+    tests:
+        - dbt_checks.sum_between:
+            column_name: revenue
+            min_value: 1000
+            max_value: 100000
 {% enddocs %}
 
 
@@ -87,13 +79,11 @@ Minimum allowed average.
 - **max_value** *(number)*
 Maximum allowed average.
 ### Example
-```yaml
-tests:
-- dbt_checks.avg_between:
-column_name: order_value
-min_value: 10
-max_value: 200
-```
+    tests:
+        - dbt_checks.avg_between:
+            column_name: order_value
+            min_value: 10
+            max_value: 200
 {% enddocs %}
 
 
@@ -109,13 +99,11 @@ Minimum allowed maximum value.
 - **max_value** *(number)*
 Maximum allowed maximum value.
 ### Example
-```yaml
-tests:
-- dbt_checks.max_between:
-column_name: latency_ms
-min_value: 1
-max_value: 500
-```
+    tests:
+        - dbt_checks.max_between:
+            column_name: latency_ms
+            min_value: 1
+            max_value: 500
 {% enddocs %}
 
 
@@ -131,11 +119,9 @@ Minimum allowed minimum value.
 - **max_value** *(number)*
 Maximum allowed minimum value.
 ### Example
-```yaml
-tests:
-- dbt_checks.min_between:
-column_name: temperature
-min_value: -10
-max_value: 50
-```
+    tests:
+        - dbt_checks.min_between:
+            column_name: temperature
+            min_value: -10
+            max_value: 50
 {% enddocs %}

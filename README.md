@@ -33,7 +33,7 @@ Add the package to your `packages.yml`:
 ``` yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.0
+    revision: v0.2.1
 ```
 
 Then install dependencies:
@@ -47,7 +47,7 @@ For production projects it is recommended to pin a version once releases are ava
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: 0.2.0
+    revision: 0.2.1
 ```
 
 # Usage
