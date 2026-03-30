@@ -73,7 +73,8 @@ Maximum allowed age in days.
 {% docs test_date_diff_less_than %}
 Ensures that the difference between two date columns is below a threshold.
 ### Description
-Checks that the number of days between `start_column` and `end_column` is less than or equal to the defined ### Arguments
+Checks that the number of days between `start_column` and `end_column` is less than or equal to the defined.
+### Arguments
 - **start_column** *(string)*
 Start date column.
 - **end_column** *(string)*
