@@ -6,6 +6,17 @@ The format follows semantic versioning.
 
 ---
 
+## [0.2.1] - 2026-03-30
+
+### Fixed
+- Improve formatting of YAML examples in documentation
+- Use proper Markdown code blocks for better readability in dbt docs
+
+### Changed
+- Standardize example rendering across all test documentation
+
+---
+
 ## [0.2.0] - 2026-03-30
 
 ### Added
