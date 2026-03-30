@@ -10,11 +10,9 @@ Validates that all non-null values in the column are zero or positive.
 - **column_name** *(string)*
 Column to evaluate.
 ### Example
-```yaml
-tests:
-- dbt_checks.non_negative:
-column_name: amount
-```
+    tests:
+        - dbt_checks.non_negative:
+            column_name: amount
 {% enddocs %}
 
 
@@ -26,11 +24,9 @@ Validates that all non-null values in the column are zero or negative.
 - **column_name** *(string)*
 Column to evaluate.
 ### Example
-```yaml
-tests:
-- dbt_checks.non_positive:
-column_name: balance_delta
-```
+    tests:
+        - dbt_checks.non_positive:
+            column_name: balance_delta
 {% enddocs %}
 
 
@@ -44,12 +40,10 @@ Column to evaluate.
 - **value** *(number)*
 Minimum exclusive threshold.
 ### Example
-```yaml
-tests:
-- dbt_checks.greater_than:
-column_name: quantity
-value: 0
-```
+    tests:
+        - dbt_checks.greater_than:
+            column_name: quantity
+            value: 0
 {% enddocs %}
 
 
@@ -63,12 +57,10 @@ Column to evaluate.
 - **value** *(number)*
 Minimum inclusive threshold.
 ### Example
-```yaml
-tests:
-- dbt_checks.greater_or_equal_than:
-column_name: quantity
-value: 0
-```
+    tests:
+        - dbt_checks.greater_or_equal_than:
+            column_name: quantity
+            value: 0
 {% enddocs %}
 
 
@@ -82,12 +74,10 @@ Column to evaluate.
 - **value** *(number)*
 Maximum exclusive threshold.
 ### Example
-```yaml
-tests:
-- dbt_checks.less_than:
-column_name: discount_rate
-value: 1
-```
+    tests:
+        - dbt_checks.less_than:
+            column_name: discount_rate
+            value: 1
 {% enddocs %}
 
 
@@ -101,12 +91,10 @@ Column to evaluate.
 - **value** *(number)*
 Maximum inclusive threshold.
 ### Example
-```yaml
-tests:
-- dbt_checks.less_or_equal_than:
-column_name: discount_rate
-value: 1
-```
+    tests:
+        - dbt_checks.less_or_equal_than:
+            column_name: discount_rate
+            value: 1
 {% enddocs %}
 
 
@@ -122,11 +110,9 @@ Minimum allowed value (inclusive).
 - **max_value** *(number)*
 Maximum allowed value (inclusive).
 ### Example
-```yaml
-tests:
-- dbt_checks.between_values:
-column_name: score
-min_value: 0
-max_value: 100
-```
+    tests:
+        - dbt_checks.between_values:
+            column_name: score
+            min_value: 0
+            max_value: 100
 {% enddocs %}

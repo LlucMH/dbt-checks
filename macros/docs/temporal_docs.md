@@ -10,11 +10,9 @@ Checks that each non-null date value is less than or equal to the current date.
 - **column_name** *(string)*
 Date column to evaluate.
 ### Example
-```yaml
-tests:
-- dbt_checks.not_future_date:
-column_name: order_date
-```
+    tests:
+        - dbt_checks.not_future_date:
+            column_name: order_date
 {% enddocs %}
 
 
@@ -28,12 +26,10 @@ Date column to evaluate.
 - **min_date** *(date or string)*
 Minimum allowed date.
 ### Example
-```yaml
-tests:
-- dbt_checks.not_before_date:
-column_name: signup_date
-min_date: "2024-01-01"
-```
+    tests:
+        - dbt_checks.not_before_date:
+            column_name: signup_date
+            min_date: "2024-01-01"
 {% enddocs %}
 
 
@@ -49,13 +45,11 @@ Minimum allowed date.
 - **max_date** *(date or string)*
 Maximum allowed date.
 ### Example
-```yaml
-tests:
-- dbt_checks.between_dates:
-column_name: event_date
-min_date: "2024-01-01"
-max_date: "2024-12-31"
-```
+    tests:
+        - dbt_checks.between_dates:
+            column_name: event_date
+            min_date: "2024-01-01"
+            max_date: "2024-12-31"
 {% enddocs %}
 
 
@@ -69,12 +63,10 @@ Date column to evaluate.
 - **max_age_days** *(integer)*
 Maximum allowed age in days.
 ### Example
-```yaml
-tests:
-- dbt_checks.recent_date:
-column_name: updated_at
-max_age_days: 7
-```
+    tests:
+        - dbt_checks.recent_date:
+            column_name: updated_at
+            max_age_days: 7
 {% enddocs %}
 
 
@@ -89,13 +81,11 @@ End date column.
 - **max_days** *(integer)*
 Maximum allowed difference in days.
 ### Example
-```yaml
-tests:
-- dbt_checks.date_diff_less_than:
-start_column: created_date
-end_column: fulfilled_date
-max_days: 10
-```
+    tests:
+        - dbt_checks.date_diff_less_than:
+            start_column: created_date
+            end_column: fulfilled_date
+            max_days: 10
 {% enddocs %}
 
 
@@ -107,9 +97,7 @@ Checks that each non-null date value falls on a weekday.
 - **column_name** *(string)*
 Date column to evaluate.
 ### Example
-```yaml
-tests:
-- dbt_checks.no_weekend_dates:
-column_name: settlement_date
-```
+    tests:
+        - dbt_checks.no_weekend_dates:
+            column_name: settlement_date
 {% enddocs %}

@@ -11,12 +11,10 @@ Column to evaluate.
 - **threshold** *(float)*
 Maximum allowed null ratio (between 0 and 1).
 ### Example
-```yaml
-tests:
-- dbt_checks.null_ratio_below:
-column_name: user_id
-threshold: 0.05
-```
+    tests:
+        - dbt_checks.null_ratio_below:
+            column_name: user_id
+            threshold: 0.05
 {% enddocs %}
 
 
@@ -32,13 +30,11 @@ Minimum allowed ratio (inclusive).
 - **max_ratio** *(float)*
 Maximum allowed ratio (inclusive).
 ### Example
-```yaml
-tests:
-- dbt_checks.null_ratio_between:
-column_name: user_id
-min_ratio: 0.0
-max_ratio: 0.1
-```
+    tests:
+        - dbt_checks.null_ratio_between:
+            column_name: user_id
+            min_ratio: 0.0
+            max_ratio: 0.1
 {% enddocs %}
 
 
@@ -53,13 +49,11 @@ Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
 ### Example
-```yaml
-tests:
-- dbt_checks.positive_ratio_between:
-column_name: revenue
-min_ratio: 0.8
-max_ratio: 1.0
-```
+    tests:
+        - dbt_checks.positive_ratio_between:
+            column_name: revenue
+            min_ratio: 0.8
+            max_ratio: 1.0
 {% enddocs %}
 
 
@@ -74,13 +68,11 @@ Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
 ### Example
-```yaml
-tests:
-- dbt_checks.negative_ratio_between:
-column_name: balance
-min_ratio: 0.0
-max_ratio: 0.1
-```
+    tests:
+        - dbt_checks.negative_ratio_between:
+            column_name: balance
+            min_ratio: 0.0
+            max_ratio: 0.1
 {% enddocs %}
 
 
@@ -101,12 +93,10 @@ Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
 ### Example
-```yaml
-tests:
-- dbt_checks.value_ratio_between:
-column_name: status
-value: 'active'
-min_ratio: 0.7
-max_ratio: 0.95
-```
+    tests:
+        - dbt_checks.value_ratio_between:
+            column_name: status
+            value: 'active'
+            min_ratio: 0.7
+            max_ratio: 0.95
 {% enddocs %}
