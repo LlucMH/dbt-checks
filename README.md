@@ -15,25 +15,22 @@
 
 ---
 
-**`dbt-checks`** is a lightweight library of reusable data quality checks
-for dbt projects.
+**`dbt-checks`** is a lightweight library of reusable data quality checks for dbt projects.
 
-It provides simple, expressive tests that help validate business rules
-and data integrity directly in your dbt models.
+It provides simple, expressive tests to validate business rules and data integrity directly in your models — without writing custom SQL every time.
 
-The goal is to make common checks easy to apply without writing custom
-SQL every time.
+> ⚠️ Early-stage project — feedback and contributions are welcome.
 
-> ⚠️ Early stage project --- feedback and contributions are welcome.
+---
 
 # Installation
 
 Add the package to your `packages.yml`:
 
-``` yaml
+```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.2
+    revision: v0.2.3
 ```
 
 Then install dependencies:
@@ -42,13 +39,7 @@ Then install dependencies:
 dbt deps
 ```
 
-For production projects it is recommended to pin a version once releases are available:
-
-```yaml
-packages:
-  - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.2
-```
+💡 Always pin a version in production projects.
 
 # Usage
 
@@ -228,7 +219,7 @@ Many dbt projects repeatedly implement the same validation logic.
 
 Contributions are welcome.
 
-If you'd like to add a new check:
+To add a new check:
 
 1.  Implement it in `macros/tests`
 2.  Reuse helper macros when possible
