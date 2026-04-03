@@ -1,51 +1,46 @@
+# ----------------------
 # dbt artifacts
+# ----------------------
 target/
 logs/
 dbt_packages/
 .dbt_packages/
-integration_tests/target/
-integration_tests/dbt_packages/
-test.duckdb
-*.duckdb
-
-# Python environments
-venv/
-.venv/
-env/
-ENV/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# IDE files
-.vscode/
-.idea/
-
-# Environment variables
-.env
-.venv/
-
-# macOS
-*.swp
-
-# build artifacts
-dist/
-build/
-
-# dbt partial parsing cache
+dbt_internal_packages/
 .partial_parse.msgpack
 
-# DuckDB artifacts
-.duckdb/
-.duckdb
+# DuckDB
+*.duckdb
 
-#  User-specific files
+# ----------------------
+# Python
+# ----------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# ----------------------
+# Environment variables
+# ----------------------
+.env
+
+# ----------------------
+# Build artifacts
+# ----------------------
+build/
+dist/
+
+# ----------------------
+# IDE / OS
+# ----------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# ----------------------
+# User-specific
+# ----------------------
 .user.yml
-dbt_internal_packages/
