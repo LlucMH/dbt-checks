@@ -6,6 +6,21 @@ The format follows semantic versioning.
 
 ---
 
+## [0.2.3] - 2026-04-04
+
+### Fixed
+- Stabilize CI behavior for `should_pass` and `should_fail` integration tests
+- Ensure documentation compiles correctly with `dbt docs generate`
+- Clean repository from local development artifacts
+
+### Changed
+- Improve CI pipeline with documentation validation
+- Refine `.gitignore` for better repository hygiene
+- Improve README structure and usage clarity
+- Validate installation from tagged releases
+
+---
+
 ## [0.2.2] - 2026-03-30
 
 ### Fixed
