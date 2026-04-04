@@ -6,7 +6,7 @@ The format follows semantic versioning.
 
 ---
 
-## [0.2.3] - 2026-04-04
+## [0.2.4] - 2026-04-04
 
 ### Fixed
 - Stabilize CI behavior for `should_pass` and `should_fail` integration tests
@@ -19,12 +19,20 @@ The format follows semantic versioning.
 - Improve README structure and usage clarity
 - Validate installation from tagged releases
 
+
+---
+
+## [0.2.3] - Skipped
+
+### Notes
+- Version skipped due to CI failure before realise
+
 ---
 
 ## [0.2.2] - 2026-03-30
 
-### Fixed
-- Fix `test_date_diff_less_than` doc
+### Added
+- Full documentation for all tests
 
 ---
 
