@@ -10,13 +10,13 @@ Checks that the total row count of the model is greater than the specified minim
 This check is not affected by NULL values since it operates on total row count.
 
 ### Arguments
-- **min_value** *(integer)*
+- **value** *(integer)*
 Minimum required row count.
 
 ### Example
     tests:
         - dbt_checks.row_count_greater_than:
-            min_value: 100
+            value: 100
 {% enddocs %}
 
 
@@ -28,13 +28,13 @@ Checks that the total row count of the model is less than the specified maximum.
 This check is not affected by NULL values since it operates on total row count.
 
 ### Arguments
-- **max_value** *(integer)*
+- **value** *(integer)*
 Maximum allowed row count.
 
 ### Example
     tests:
         - dbt_checks.row_count_less_than:
-            max_value: 1000000
+            value: 1000000
 {% enddocs %}
 
 
