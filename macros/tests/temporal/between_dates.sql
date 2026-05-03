@@ -1,12 +1,17 @@
 {% test between_dates(model, column_name, min_date, max_date) %}
 
+with base as (
+    select cast({{ column_name }} as date) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
+    value is not null
     and (
-        {{ column_name }} < cast('{{ min_date }}' as date)
-        or {{ column_name }} > cast('{{ max_date }}' as date)
+        value < cast('{{ min_date }}' as date)
+        or value > cast('{{ max_date }}' as date)
     )
 
 {% endtest %}
