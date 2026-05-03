@@ -1,2 +1,1 @@
-select *
-from {{ ref('seed_aggregation_nulls') }}
+select * from {{ ref('seed_aggregation_nulls') }}
