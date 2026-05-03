@@ -6,6 +6,33 @@ The format follows semantic versioning.
 
 ---
 
+## [0.2.5] - 2026-05-03
+
+### Added
+- Consistent NULL handling strategy across all checks
+- Explicit NULL validation via:
+  - `null_ratio_below`
+  - `null_ratio_between`
+
+### Changed
+- Most checks now ignore NULL values by default
+- NULL validation is no longer implicit and must be handled explicitly
+- Ratio-based checks provide the primary mechanism for controlling NULL behavior
+
+### Fixed
+- Inconsistent behavior when columns contained NULL values
+- Ambiguous results caused by implicit NULL handling across different tests
+
+### Docs
+- Added dedicated section explaining NULL handling strategy
+- Clarified how each check behaves in the presence of NULL values
+
+### Notes
+- NULL handling is now explicit and predictable
+- Users should use ratio-based checks to control NULL-related constraints
+
+---
+
 ## [0.2.4] - 2026-04-04
 
 ### Fixed
