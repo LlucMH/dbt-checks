@@ -31,6 +31,15 @@ The format follows semantic versioning.
 - NULL handling is now explicit and predictable
 - Users should use ratio-based checks to control NULL-related constraints
 
+### Breaking Changes
+- Standarized comparison checks to use `value`argument:
+  - greater_than
+  - greater_or_equal_than
+  - less_than
+  - less_or_equal_than
+
+Previous arguments like `min_value`or `threshold`are no longer supported.
+
 ---
 
 ## [0.2.4] - 2026-04-04
