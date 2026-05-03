@@ -18,6 +18,7 @@ ratio as (
 
 select *
 from ratio
-where null_ratio > {{ threshold }}
+where null_ratio is null
+   or null_ratio > {{ threshold }}
 
 {% endtest %}

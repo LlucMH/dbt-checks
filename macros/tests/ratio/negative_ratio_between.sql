@@ -18,7 +18,8 @@ ratio as (
 
 select *
 from ratio
-where negative_ratio < {{ min_ratio }}
+where negative_ratio is null
+   or negative_ratio < {{ min_ratio }}
    or negative_ratio > {{ max_ratio }}
 
 {% endtest %}

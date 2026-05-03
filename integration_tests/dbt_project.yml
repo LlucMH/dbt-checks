@@ -9,9 +9,9 @@ seed-paths: ["seeds"]
 test-paths: ["tests"]
 macro-paths: ["macros"]
 
-packages-install-path: "../.dbt_packages"
+packages-install-path: "{{ env_var('DBT_PACKAGES_INSTALL_PATH', 'dbt_packages') }}"
 
 target-path: "target"
 clean-targets:
   - "target"
-  - "dbt_packages"
+  - "{{ env_var('DBT_PACKAGES_INSTALL_PATH', 'dbt_packages') }}"

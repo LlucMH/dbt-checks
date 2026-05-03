@@ -1,0 +1,437 @@
+version: 2
+
+models:
+  - name: numeric_nulls
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.non_positive:
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.greater_than:
+              arguments:
+                value: 0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.greater_or_equal_than:
+              arguments:
+                value: 5
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_than:
+              arguments:
+                value: 100
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_or_equal_than:
+              arguments:
+                value: 20
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_values:
+              arguments:
+                min_value: 0
+                max_value: 100
+              config:
+                tags: ["should_pass"]
+
+  - name: numeric_all_null
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.non_positive:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.greater_than:
+              arguments:
+                value: 0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.greater_or_equal_than:
+              arguments:
+                value: 0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_than:
+              arguments:
+                value: 100
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_or_equal_than:
+              arguments:
+                value: 100
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_values:
+              arguments:
+                min_value: 0
+                max_value: 100
+              config:
+                tags: ["should_pass"]
+
+  - name: string_nulls
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.not_blank:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 3
+                max_length: 20
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.contains:
+              arguments:
+                substring: "a"
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.starts_with:
+              arguments:
+                prefix: "a"
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.ends_with:
+              arguments:
+                suffix: "z"
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.matches_regex:
+              arguments:
+                pattern: "^[a-z]+$"
+              config:
+                tags: ["should_fail"]
+
+
+  - name: string_all_null
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.not_blank:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 1
+                max_length: 20
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.contains:
+              arguments:
+                substring: "a"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.starts_with:
+              arguments:
+                prefix: "a"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.ends_with:
+              arguments:
+                suffix: "z"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.matches_regex:
+              arguments:
+                pattern: "^[a-z]+$"
+              config:
+                tags: ["should_pass"]
+
+  - name: temporal_nulls
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.not_future_date:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.not_before_date:
+              arguments:
+                min_date: "2024-01-01"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: "2024-01-01"
+                max_date: "2024-12-31"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 10000
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.no_weekend_dates:
+              config:
+                tags: ["should_fail"]
+
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+          config:
+            tags: ["should_pass"]
+
+
+  - name: temporal_all_null
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.not_future_date:
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.not_before_date:
+              arguments:
+                min_date: "2024-01-01"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: "2024-01-01"
+                max_date: "2024-12-31"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 10000
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.no_weekend_dates:
+              config:
+                tags: ["should_pass"]
+
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+          config:
+            tags: ["should_pass"]
+
+  - name: aggregation_nulls
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 2
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_less_than:
+          arguments:
+            value: 10
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 3
+            max_value: 10
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.sum_between:
+          arguments:
+            column_name: value
+            min_value: 50
+            max_value: 100
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.avg_between:
+          arguments:
+            column_name: value
+            min_value: 10
+            max_value: 30
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.min_between:
+          arguments:
+            column_name: value
+            min_value: 10
+            max_value: 20
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_between:
+          arguments:
+            column_name: value
+            min_value: 20
+            max_value: 30
+          config:
+            tags: ["should_pass"]
+
+
+  - name: aggregation_all_null
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 1
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_less_than:
+          arguments:
+            value: 10
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 1
+            max_value: 10
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.sum_between:
+          arguments:
+            column_name: value
+            min_value: 0
+            max_value: 100
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.avg_between:
+          arguments:
+            column_name: value
+            min_value: 0
+            max_value: 100
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.min_between:
+          arguments:
+            column_name: value
+            min_value: 0
+            max_value: 100
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.max_between:
+          arguments:
+            column_name: value
+            min_value: 0
+            max_value: 100
+          config:
+            tags: ["should_fail"]
+
+  - name: ratio_nulls
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.5
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.3
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.4
+                max_ratio: 0.6
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.2
+                max_ratio: 0.3
+              config:
+                tags: ["should_pass"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "active"
+                min_ratio: 0.4
+                max_ratio: 0.6
+              config:
+                tags: ["should_pass"]
+
+  - name: ratio_all_null
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 1.0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 1.0
+                max_ratio: 1.0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.0
+                max_ratio: 0.0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.0
+                max_ratio: 0.0
+              config:
+                tags: ["should_pass"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "active"
+                min_ratio: 0.0
+                max_ratio: 0.0
+              config:
+                tags: ["should_pass"]

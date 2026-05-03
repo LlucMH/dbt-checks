@@ -1,4 +1,4 @@
-{% test row_count_less_than(model, max_value) %}
+{% test row_count_less_than(model, value) %}
 
 with validation as (
     select count(*) as row_count
@@ -7,6 +7,6 @@ with validation as (
 
 select *
 from validation
-where row_count >= {{ max_value }}
+where row_count >= {{ value }}
 
 {% endtest %}

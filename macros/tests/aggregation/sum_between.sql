@@ -7,7 +7,8 @@ with validation as (
 
 select *
 from validation
-where metric_value < {{ min_value }}
+where metric_value is null
+   or metric_value < {{ min_value }}
    or metric_value > {{ max_value }}
 
 {% endtest %}

@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.4
+    revision: v0.2.5
 ```
 
 Then install dependencies:
@@ -65,6 +65,26 @@ Run tests as usual:
 ``` bash
 dbt test
 ```
+
+# NULL Handling
+
+dbt-checks follows a consistent and explicit null-handling strategy.
+
+Most checks ignore null values by default.
+Use dedicated checks to validate null presence.
+
+## Summary:
+
+- Numeric        → ignored  
+- String         → ignored  
+- Temporal       → ignored  
+- Aggregation    → ignored (SQL behavior)  
+- Row count      → includes nulls  
+- Ratio checks   → explicit handling  
+
+Use:
+- null_ratio_below
+- null_ratio_between
 
 # Available Checks
 
@@ -144,6 +164,7 @@ columns:
 ## Aggregation
 
 Aggregation checks validate dataset-level metrics.
+Nulls follow SQL behavior (ignored in aggregation).
 
 Check | Description
 ----- | ----------
@@ -154,6 +175,8 @@ Check | Description
 `avg_between` | Ensures column average falls within range
 `max_between` | Ensures column maximum falls within range
 `min_between` | Ensures column minimum falls within range
+
+**If all values are null → test fails**
 
 Example
 
@@ -176,6 +199,10 @@ Check | Description
 `positive_ratio_between` | Ensures positive value ratio within range
 `negative_ratio_between` | Ensures negative value ratio within range
 `value_ratio_between` | Ensures specific value ratio within range
+
+**Null handling:**
+- null_ratio_* explicitly evaluates nulls
+- others use total row count as denominator
 
 Example
 
@@ -213,6 +240,7 @@ Many dbt projects repeatedly implement the same validation logic.
 -   reusable checks
 -   simple configuration
 -   consistent validation patterns
+-   Predictable null handling 
 -   cross-warehouse compatibility
 
 # Contributing
@@ -224,7 +252,7 @@ To add a new check:
 1.  Implement it in `macros/tests`
 2.  Reuse helper macros when possible
 3.  Add documentation
-4.  Add integration tests
+4.  Add integration tests (including null behavior)
 
 # License
 
