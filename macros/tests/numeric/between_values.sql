@@ -1,16 +1,21 @@
 {% test between_values(model, column_name, min_value, max_value, inclusive=true) %}
 
+with base as (
+    select cast({{ column_name }} as numeric) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
+    value is not null
     and (
         {% if inclusive %}
-            {{ column_name }} < {{ min_value }}
-            or {{ column_name }} > {{ max_value }}
+            value < {{ min_value }}
+            or value > {{ max_value }}
         {% else %}
-            {{ column_name }} <= {{ min_value }}
-            or {{ column_name }} >= {{ max_value }}
+            value <= {{ min_value }}
+            or value >= {{ max_value }}
         {% endif %}
     )
 

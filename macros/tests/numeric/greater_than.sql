@@ -1,9 +1,14 @@
 {% test greater_than(model, column_name, value) %}
 
+with base as (
+    select cast({{ column_name }} as numeric) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and {{ column_name }} <= {{ value }}
+    value is not null
+    and value <= {{ value }}
 
 {% endtest %}

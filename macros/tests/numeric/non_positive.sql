@@ -1,9 +1,14 @@
 {% test non_positive(model, column_name) %}
 
+with base as (
+    select cast({{ column_name }} as numeric) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and {{ column_name }} > 0
+    value is not null
+    and value > 0
 
 {% endtest %}
