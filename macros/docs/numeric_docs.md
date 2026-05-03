@@ -6,9 +6,14 @@
 Ensures that values are greater than or equal to 0.
 ### Description
 Validates that all non-null values in the column are zero or positive.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+
 ### Example
     tests:
         - dbt_checks.non_negative:
@@ -20,9 +25,14 @@ Column to evaluate.
 Ensures that values are less than or equal to 0.
 ### Description
 Validates that all non-null values in the column are zero or negative.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+
 ### Example
     tests:
         - dbt_checks.non_positive:
@@ -34,11 +44,16 @@ Column to evaluate.
 Ensures that values are strictly greater than a threshold.
 ### Description
 Checks that every non-null value in the column is greater than the specified threshold.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **value** *(number)*
 Minimum exclusive threshold.
+
 ### Example
     tests:
         - dbt_checks.greater_than:
@@ -51,11 +66,16 @@ Minimum exclusive threshold.
 Ensures that values are greater than or equal to a threshold.
 ### Description
 Checks that every non-null value in the column is greater than or equal to the specified threshold.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **value** *(number)*
 Minimum inclusive threshold.
+
 ### Example
     tests:
         - dbt_checks.greater_or_equal_than:
@@ -68,11 +88,16 @@ Minimum inclusive threshold.
 Ensures that values are strictly less than a threshold.
 ### Description
 Checks that every non-null value in the column is below the specified threshold.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **value** *(number)*
 Maximum exclusive threshold.
+
 ### Example
     tests:
         - dbt_checks.less_than:
@@ -85,11 +110,16 @@ Maximum exclusive threshold.
 Ensures that values are less than or equal to a threshold.
 ### Description
 Checks that every non-null value in the column is less than or equal to the specified threshold.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **value** *(number)*
 Maximum inclusive threshold.
+
 ### Example
     tests:
         - dbt_checks.less_or_equal_than:
@@ -102,6 +132,10 @@ Maximum inclusive threshold.
 Ensures that values fall within a numeric range.
 ### Description
 Checks that every non-null value in the column is between `min_value` and `max_value`.
+
+NULL values are ignored.  
+If all values are NULL, the check passes by default.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -109,6 +143,7 @@ Column to evaluate.
 Minimum allowed value (inclusive).
 - **max_value** *(number)*
 Maximum allowed value (inclusive).
+
 ### Example
     tests:
         - dbt_checks.between_values:

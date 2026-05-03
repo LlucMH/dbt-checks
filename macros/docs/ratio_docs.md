@@ -5,11 +5,17 @@
 {% docs test_null_ratio_below %}
 Ensures that the ratio of null values in a column is below a specified threshold.
 ### Description
-Calculates the proportion of rows where the column value is null and verifies that it does not exceed ### Arguments
+Calculates the proportion of rows where the column value is NULL and verifies that it does not exceed the defined threshold.
+
+All rows are considered in the denominator.  
+If the table is empty, the ratio defaults to 0.
+
+### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **threshold** *(float)*
 Maximum allowed null ratio (between 0 and 1).
+
 ### Example
     tests:
         - dbt_checks.null_ratio_below:
@@ -21,7 +27,11 @@ Maximum allowed null ratio (between 0 and 1).
 {% docs test_null_ratio_between %}
 Ensures that the ratio of null values falls within a specified range.
 ### Description
-Computes the proportion of null values and checks that it lies between `min_ratio` and `max_ratio`.
+Computes the proportion of NULL values and checks that it lies between `min_ratio` and `max_ratio`.
+
+All rows are considered in the denominator.  
+If the table is empty, the ratio defaults to 0.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -29,6 +39,7 @@ Column to evaluate.
 Minimum allowed ratio (inclusive).
 - **max_ratio** *(float)*
 Maximum allowed ratio (inclusive).
+
 ### Example
     tests:
         - dbt_checks.null_ratio_between:
@@ -41,13 +52,20 @@ Maximum allowed ratio (inclusive).
 {% docs test_positive_ratio_between %}
 Ensures that the ratio of positive values falls within a specified range.
 ### Description
-Calculates the proportion of rows where the value is greater than 0 and validates it against the defined ### Arguments
+Calculates the proportion of rows where the value is greater than 0 and validates it against the defined range.
+
+All rows are considered in the denominator.  
+NULL values are ignored in the numerator but included in the denominator.  
+If the table is empty, the ratio defaults to 0.
+
+### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **min_ratio** *(float)*
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+
 ### Example
     tests:
         - dbt_checks.positive_ratio_between:
@@ -60,13 +78,20 @@ Maximum allowed ratio.
 {% docs test_negative_ratio_between %}
 Ensures that the ratio of negative values falls within a specified range.
 ### Description
-Calculates the proportion of rows where the value is less than 0 and checks it against the specified ### Arguments
+Calculates the proportion of rows where the value is less than 0 and checks it against the specified range.
+
+All rows are considered in the denominator.  
+NULL values are ignored in the numerator but included in the denominator.  
+If the table is empty, the ratio defaults to 0.
+
+### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **min_ratio** *(float)*
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+
 ### Example
     tests:
         - dbt_checks.negative_ratio_between:
@@ -79,10 +104,17 @@ Maximum allowed ratio.
 {% docs test_value_ratio_between %}
 Ensures that the ratio of rows matching a specific value falls within a given range.
 ### Description
-Calculates the proportion of rows where `column_name = value` and verifies that it lies between `min_Useful for validating`:
+Calculates the proportion of rows where `column_name = value` and verifies that it lies between `min_ratio` and `max_ratio`.
+
+All rows are considered in the denominator.  
+NULL values are ignored in the numerator but included in the denominator.  
+If the table is empty, the ratio defaults to 0.
+
+Useful for validating:
 - category distributions
 - status proportions
 - boolean flags
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -92,6 +124,7 @@ Target value to match.
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+
 ### Example
     tests:
         - dbt_checks.value_ratio_between:

@@ -6,9 +6,14 @@
 Ensures that dates are not in the future.
 ### Description
 Checks that each non-null date value is less than or equal to the current date.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
+
 ### Example
     tests:
         - dbt_checks.not_future_date:
@@ -20,11 +25,16 @@ Date column to evaluate.
 Ensures that dates are not before a specified minimum date.
 ### Description
 Checks that each non-null date value is on or after the specified minimum date.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
 - **min_date** *(date or string)*
 Minimum allowed date.
+
 ### Example
     tests:
         - dbt_checks.not_before_date:
@@ -37,6 +47,10 @@ Minimum allowed date.
 Ensures that dates fall within a given range.
 ### Description
 Checks that each non-null date value is between `min_date` and `max_date`.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
@@ -44,6 +58,7 @@ Date column to evaluate.
 Minimum allowed date.
 - **max_date** *(date or string)*
 Maximum allowed date.
+
 ### Example
     tests:
         - dbt_checks.between_dates:
@@ -57,11 +72,16 @@ Maximum allowed date.
 Ensures that dates are within a specified number of days from today.
 ### Description
 Checks that each non-null date value is not older than `max_age_days` compared with the current date.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
 - **max_age_days** *(integer)*
 Maximum allowed age in days.
+
 ### Example
     tests:
         - dbt_checks.recent_date:
@@ -73,7 +93,11 @@ Maximum allowed age in days.
 {% docs test_date_diff_less_than %}
 Ensures that the difference between two date columns is below a threshold.
 ### Description
-Checks that the number of days between `start_column` and `end_column` is less than or equal to the defined.
+Checks that the number of days between `start_column` and `end_column` is less than or equal to the defined threshold.
+
+Rows where either date is NULL are ignored.  
+Use ratio-based checks if you need to validate NULL presence.
+
 ### Arguments
 - **start_column** *(string)*
 Start date column.
@@ -81,6 +105,7 @@ Start date column.
 End date column.
 - **max_days** *(integer)*
 Maximum allowed difference in days.
+
 ### Example
     tests:
         - dbt_checks.date_diff_less_than:
@@ -94,9 +119,14 @@ Maximum allowed difference in days.
 Ensures that dates do not fall on weekends.
 ### Description
 Checks that each non-null date value falls on a weekday.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
+
 ### Example
     tests:
         - dbt_checks.no_weekend_dates:

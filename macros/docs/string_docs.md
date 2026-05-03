@@ -6,9 +6,14 @@
 Ensures that string values are not empty or whitespace.
 ### Description
 Checks that non-null string values are not empty and do not consist only of spaces or whitespace characters.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+
 ### Example
     tests:
         - dbt_checks.not_blank:
@@ -20,6 +25,10 @@ Column to evaluate.
 Ensures that string length falls within a specified range.
 ### Description
 Checks that the length of each non-null value is between `min_length` and `max_length`.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -27,6 +36,7 @@ Column to evaluate.
 Minimum allowed length.
 - **max_length** *(integer)*
 Maximum allowed length.
+
 ### Example
     tests:
         - dbt_checks.length_between:
@@ -40,11 +50,16 @@ Maximum allowed length.
 Ensures that values match a given regular expression.
 ### Description
 Checks that each non-null value satisfies the provided regex pattern.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **pattern** *(string)*
 Regular expression pattern.
+
 ### Example
     tests:
         - dbt_checks.matches_regex:
@@ -57,11 +72,16 @@ Regular expression pattern.
 Ensures that values start with a given prefix.
 ### Description
 Checks that each non-null value begins with the specified prefix.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **prefix** *(string)*
 Required prefix.
+
 ### Example
     tests:
         - dbt_checks.starts_with:
@@ -74,11 +94,16 @@ Required prefix.
 Ensures that values end with a given suffix.
 ### Description
 Checks that each non-null value ends with the specified suffix.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **suffix** *(string)*
 Required suffix.
+
 ### Example
     tests:
         - dbt_checks.ends_with:
@@ -91,11 +116,16 @@ Required suffix.
 Ensures that values contain a given substring.
 ### Description
 Checks that each non-null value contains the specified substring.
+
+NULL values are ignored.  
+Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explicitly.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
 - **substring** *(string)*
 Substring that must be present.
+
 ### Example
     tests:
         - dbt_checks.contains:

@@ -6,9 +6,13 @@
 Ensures that the model contains at least a minimum number of rows.
 ### Description
 Checks that the total row count of the model is greater than the specified minimum.
+
+This check is not affected by NULL values since it operates on total row count.
+
 ### Arguments
 - **min_value** *(integer)*
 Minimum required row count.
+
 ### Example
     tests:
         - dbt_checks.row_count_greater_than:
@@ -20,9 +24,13 @@ Minimum required row count.
 Ensures that the model contains fewer than a maximum number of rows.
 ### Description
 Checks that the total row count of the model is less than the specified maximum.
+
+This check is not affected by NULL values since it operates on total row count.
+
 ### Arguments
 - **max_value** *(integer)*
 Maximum allowed row count.
+
 ### Example
     tests:
         - dbt_checks.row_count_less_than:
@@ -34,11 +42,15 @@ Maximum allowed row count.
 Ensures that the model row count falls within a specified range.
 ### Description
 Checks that the total number of rows in the model is between `min_value` and `max_value`.
+
+This check is not affected by NULL values since it operates on total row count.
+
 ### Arguments
 - **min_value** *(integer)*
 Minimum allowed row count.
 - **max_value** *(integer)*
 Maximum allowed row count.
+
 ### Example
     tests:
         - dbt_checks.row_count_between:
@@ -51,6 +63,10 @@ Maximum allowed row count.
 Ensures that the sum of a column falls within a specified range.
 ### Description
 Checks that the sum of non-null values in the column is between `min_value` and `max_value`.
+
+NULL values are ignored.  
+If all values are NULL, the result is considered invalid.
+
 ### Arguments
 - **column_name** *(string)*
 Column to aggregate.
@@ -58,6 +74,7 @@ Column to aggregate.
 Minimum allowed sum.
 - **max_value** *(number)*
 Maximum allowed sum.
+
 ### Example
     tests:
         - dbt_checks.sum_between:
@@ -71,6 +88,10 @@ Maximum allowed sum.
 Ensures that the average of a column falls within a specified range.
 ### Description
 Checks that the average of non-null values in the column is between `min_value` and `max_value`.
+
+NULL values are ignored.  
+If all values are NULL, the result is considered invalid.
+
 ### Arguments
 - **column_name** *(string)*
 Column to aggregate.
@@ -78,6 +99,7 @@ Column to aggregate.
 Minimum allowed average.
 - **max_value** *(number)*
 Maximum allowed average.
+
 ### Example
     tests:
         - dbt_checks.avg_between:
@@ -91,6 +113,10 @@ Maximum allowed average.
 Ensures that the maximum value of a column falls within a specified range.
 ### Description
 Checks that the maximum non-null value in the column is between `min_value` and `max_value`.
+
+NULL values are ignored.  
+If all values are NULL, the result is considered invalid.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -98,6 +124,7 @@ Column to evaluate.
 Minimum allowed maximum value.
 - **max_value** *(number)*
 Maximum allowed maximum value.
+
 ### Example
     tests:
         - dbt_checks.max_between:
@@ -111,6 +138,10 @@ Maximum allowed maximum value.
 Ensures that the minimum value of a column falls within a specified range.
 ### Description
 Checks that the minimum non-null value in the column is between `min_value` and `max_value`.
+
+NULL values are ignored.  
+If all values are NULL, the result is considered invalid.
+
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
@@ -118,6 +149,7 @@ Column to evaluate.
 Minimum allowed minimum value.
 - **max_value** *(number)*
 Maximum allowed minimum value.
+
 ### Example
     tests:
         - dbt_checks.min_between:
