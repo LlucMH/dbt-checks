@@ -1,9 +1,14 @@
 {% test contains(model, column_name, substring) %}
 
+with base as (
+    select cast({{ column_name }} as varchar) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and {{ column_name }} not like '%{{ substring }}%'
+    value is not null
+    and value not like '%{{ substring }}%'
 
 {% endtest %}

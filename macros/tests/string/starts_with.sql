@@ -1,9 +1,14 @@
 {% test starts_with(model, column_name, prefix) %}
 
+with base as (
+    select cast({{ column_name }} as varchar) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and {{ column_name }} not like '{{ prefix }}%'
+    value is not null
+    and value not like '{{ prefix }}%'
 
 {% endtest %}
