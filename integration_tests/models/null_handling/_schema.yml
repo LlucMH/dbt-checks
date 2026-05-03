@@ -305,7 +305,7 @@ models:
     data_tests:
       - dbt_checks.row_count_greater_than:
           arguments:
-            value: 1
+            value: 2
           config:
             tags: ["should_pass"]
 
