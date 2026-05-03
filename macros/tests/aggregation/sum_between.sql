@@ -1,8 +1,9 @@
 {% test sum_between(model, column_name, min_value, max_value) %}
 
 with validation as (
-    select coalesce(sum({{ column_name }}), 0) as metric_value
+    select sum(cast({{ column_name }} as numeric)) as metric_value
     from {{ model }}
+    where {{ column_name }} is not null
 )
 
 select *
