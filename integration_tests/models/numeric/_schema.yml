@@ -29,7 +29,7 @@ models:
         data_tests:
           - dbt_checks.greater_or_equal_than:
               arguments:
-                min_value: 10
+                value: 10
               config:
                 tags: ["should_pass"]
 
@@ -39,7 +39,7 @@ models:
         data_tests:
           - dbt_checks.greater_or_equal_than:
               arguments:
-                min_value: 10
+                value: 10
               config:
                 tags: ["should_fail"]
 
@@ -49,7 +49,7 @@ models:
         data_tests:
           - dbt_checks.greater_than:
               arguments:
-                min_value: 10
+                value: 10
               config:
                 tags: ["should_pass"]
 
@@ -59,7 +59,7 @@ models:
         data_tests:
           - dbt_checks.greater_than:
               arguments:
-                min_value: 10
+                value: 10
               config:
                 tags: ["should_fail"]
 
@@ -69,7 +69,7 @@ models:
         data_tests:
           - dbt_checks.less_or_equal_than:
               arguments:
-                max_value: 10
+                value: 10
               config:
                 tags: ["should_pass"]
 
@@ -79,7 +79,7 @@ models:
         data_tests:
           - dbt_checks.less_or_equal_than:
               arguments:
-                max_value: 10
+                value: 10
               config:
                 tags: ["should_fail"]
 
@@ -89,7 +89,7 @@ models:
         data_tests:
           - dbt_checks.less_than:
               arguments:
-                max_value: 10
+                value: 10
               config:
                 tags: ["should_pass"]
 
@@ -99,7 +99,7 @@ models:
         data_tests:
           - dbt_checks.less_than:
               arguments:
-                max_value: 10
+                value: 10
               config:
                 tags: ["should_fail"]
 
