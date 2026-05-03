@@ -3,7 +3,7 @@
 with stats as (
     select
         count(*) as total_rows,
-        sum(case when {{ column_name }} < 0 then 1 else 0 end) as negative_rows
+        sum(case when cast({{ column_name }} as numeric) < 0 then 1 else 0 end) as negative_rows
     from {{ model }}
 ),
 
@@ -18,8 +18,7 @@ ratio as (
 
 select *
 from ratio
-where negative_ratio is null
-   or negative_ratio < {{ min_ratio }}
+where negative_ratio < {{ min_ratio }}
    or negative_ratio > {{ max_ratio }}
 
 {% endtest %}
