@@ -6,6 +6,50 @@ The format follows semantic versioning.
 
 ---
 
+## [0.2.6] - 2026-05-04
+
+### Added
+- Comprehensive edge case validation across all test macros
+- New integration test suites covering:
+  - empty tables (empty_tables)
+  - type casting scenarios (type_casting)
+  - extreme values (extreme_values)
+  - boundary conditions (boundary_values)
+- Full coverage across all check families:
+  - numeric
+  - string
+  - temporal
+  - aggregation
+  - ratio
+- Validation of strict vs inclusive behavior for comparison-based tests
+- Temporal edge case coverage including:
+  - current date boundaries
+  - weekday/weekend validation
+  - date differences and limits
+
+### Changed
+- Improved robustness of test macros under edge conditions
+- Standardized behavior when handling:
+  - empty datasets
+  - mixed-type columns
+  - boundary values in comparisons
+
+### Fixed
+- Cross-database type issues in string and temporal tests
+- Inconsistent behavior when applying functions to non-typed columns
+- Errors caused by implicit type inference in edge scenarios
+- Issues in no_weekend_dates when handling derived columns
+
+### CI
+- Expanded CI to validate all edge case scenarios
+- Ensures consistent behavior across adapters and data shapes
+
+### Notes
+- Edge case handling is now explicitly validated and stable
+- Seeds are not used for edge cases to guarantee type control and reproducibility
+
+---
+
 ## [0.2.5] - 2026-05-03
 
 ### Added
@@ -37,8 +81,10 @@ The format follows semantic versioning.
   - greater_or_equal_than
   - less_than
   - less_or_equal_than
+  - row_count_greater_than
+  - row_count_less_than
 
-Previous arguments like `min_value`or `threshold`are no longer supported.
+Previous arguments like `min_value` or `threshold`are no longer supported.
 
 ---
 
