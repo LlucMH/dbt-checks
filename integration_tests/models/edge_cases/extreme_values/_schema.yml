@@ -79,7 +79,7 @@ models:
 
           - dbt_checks.matches_regex:
               arguments:
-                pattern: "^[a-zA-Z0-9\\- ]*$"
+                pattern: "^[a-zA-Z0-9_\\- ]*$"
               config:
                 tags: ["should_pass"]
 

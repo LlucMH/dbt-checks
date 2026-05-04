@@ -1,6 +1,6 @@
 select * from (values
     (1),
-    (2),
-    (3),
+    (11),
+    (123),
     (null)
 ) as t(value)
