@@ -9,6 +9,6 @@ select *
 from base
 where
     value is not null
-    and {{ dbt_checks.day_of_week_sun0(value) }} in (0, 6)
+    and {{ dbt_checks.day_of_week_sun0("value") }} in (0, 6)
 
 {% endtest %}
