@@ -1,12 +1,17 @@
 {% test length_between(model, column_name, min_length, max_length) %}
 
+with base as (
+    select cast({{ column_name }} as varchar) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
+    value is not null
     and (
-        length({{ column_name }}) < {{ min_length }}
-        or length({{ column_name }}) > {{ max_length }}
+        length(value) < {{ min_length }}
+        or length(value) > {{ max_length }}
     )
 
 {% endtest %}

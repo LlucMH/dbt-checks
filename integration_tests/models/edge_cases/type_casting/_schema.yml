@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: numeric_as_string
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_than:
+              arguments:
+                value: 5
+              config:
+                tags: ["should_pass"]
+          - dbt_checks.between_values:
+              arguments:
+                min_value: 0
+                max_value: 100
+              config:
+                tags: ["should_pass"]
+
+  - name: string_as_int
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.not_blank:
+              config:
+                tags: ["should_pass"]
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 1
+                max_length: 5
+              config:
+                tags: ["should_pass"]
+          - dbt_checks.contains:
+              arguments:
+                substring: "1"
+              config:
+                tags: ["should_pass"]
+
+  - name: date_as_string
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.not_before_date:
+              arguments:
+                min_date: "2024-01-01"
+              config:
+                tags: ["should_pass"]
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: "2024-01-01"
+                max_date: "2024-12-31"
+              config:
+                tags: ["should_pass"]
+
+  - name: mixed_ratio
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.3
+                max_ratio: 0.7
+              config:
+                tags: ["should_pass"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "active"
+                min_ratio: 0.3
+                max_ratio: 0.7
+              config:
+                tags: ["should_pass"]

@@ -3,7 +3,7 @@
 with stats as (
     select
         count(*) as total_rows,
-        sum(case when {{ column_name }} = '{{ value }}' then 1 else 0 end) as value_rows
+        sum(case when cast({{ column_name }} as varchar) = '{{ value }}' then 1 else 0 end) as value_rows
     from {{ model }}
 ),
 
@@ -18,8 +18,7 @@ ratio as (
 
 select *
 from ratio
-where value_ratio is null
-   or value_ratio < {{ min_ratio }}
+where value_ratio < {{ min_ratio }}
    or value_ratio > {{ max_ratio }}
 
 {% endtest %}

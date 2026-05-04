@@ -1,9 +1,14 @@
 {% test not_blank(model, column_name) %}
 
+with base as (
+    select cast({{ column_name }} as varchar) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and trim({{ column_name }}) = ''
+    value is not null
+    and trim(value) = ''
 
 {% endtest %}

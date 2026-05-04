@@ -1,9 +1,14 @@
 {% test not_future_date(model, column_name) %}
 
+with base as (
+    select cast({{ column_name }} as date) as value
+    from {{ model }}
+)
+
 select *
-from {{ model }}
+from base
 where
-    {{ column_name }} is not null
-    and {{ column_name }} > {{ dbt_checks.current_date_sql() }}
+    value is not null
+    and value > {{ dbt_checks.current_date_sql() }}
 
 {% endtest %}

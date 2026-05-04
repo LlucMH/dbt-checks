@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.5
+    revision: v0.2.6
 ```
 
 Then install dependencies:
@@ -186,7 +186,7 @@ models:
     data_tests:
       - dbt_checks.row_count_greater_than:
           arguments:
-            min_value: 100
+            value: 100
 ```
 ## Ratio
 
