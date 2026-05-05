@@ -12,7 +12,8 @@ with base as (
 
 validation as (
     select
-        *,
+        start_date,
+        end_date,
         {{ dbt_checks.datediff_days('start_date', 'end_date') }} as diff_days
     from base
 )
