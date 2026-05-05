@@ -5,16 +5,23 @@ with base as (
         cast({{ start_column }} as date) as start_date,
         cast({{ end_column }} as date) as end_date
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
+    {% if where %}
+    where {{ where }}
     {% endif %}
+),
+
+validation as (
+    select
+        *,
+        {{ dbt_checks.datediff_days('start_date', 'end_date') }} as diff_days
+    from base
 )
 
 select *
-from base
+from validation
 where
     start_date is not null
     and end_date is not null
-    and {{ dbt_checks.datediff_days('start_date', 'end_date') }} > {{ max_days }}
+    and diff_days > {{ max_days }}
 
 {% endtest %}
