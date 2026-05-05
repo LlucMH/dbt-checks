@@ -1,10 +1,13 @@
-{% test value_ratio_between(model, column_name, value, min_ratio, max_ratio) %}
+{% test value_ratio_between(model, column_name, value, min_ratio, max_ratio, where=None) %}
 
 with stats as (
     select
         count(*) as total_rows,
         sum(case when cast({{ column_name }} as varchar) = '{{ value }}' then 1 else 0 end) as value_rows
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 ),
 
 ratio as (

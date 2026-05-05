@@ -1,8 +1,11 @@
-{% test row_count_between(model, min_value, max_value) %}
+{% test row_count_between(model, min_value, max_value, where=None) %}
 
 with validation as (
     select count(*) as row_count
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *

@@ -1,8 +1,11 @@
-{% test ends_with(model, column_name, suffix) %}
+{% test ends_with(model, column_name, suffix, where=None) %}
 
 with base as (
     select cast({{ column_name }} as varchar) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *

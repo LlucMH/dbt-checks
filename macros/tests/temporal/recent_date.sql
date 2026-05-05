@@ -1,8 +1,11 @@
-{% test recent_date(model, column_name, max_age_days) %}
+{% test recent_date(model, column_name, max_age_days, where=None) %}
 
 with base as (
     select cast({{ column_name }} as date) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *

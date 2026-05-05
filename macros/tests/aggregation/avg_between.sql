@@ -1,9 +1,12 @@
-{% test avg_between(model, column_name, min_value, max_value) %}
+{% test avg_between(model, column_name, min_value, max_value, where=None) %}
 
 with validation as (
     select avg(cast({{ column_name }} as numeric)) as metric_value
     from {{ model }}
     where {{ column_name }} is not null
+    {% if where is not none %}
+        and {{ where }}
+    {% endif %}
 )
 
 select *

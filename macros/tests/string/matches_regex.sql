@@ -1,8 +1,11 @@
-{% test matches_regex(model, column_name, pattern) %}
+{% test matches_regex(model, column_name, pattern, where=None) %}
 
 with base as (
     select cast({{ column_name }} as varchar) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *

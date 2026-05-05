@@ -1,8 +1,11 @@
-{% test not_before_date(model, column_name, min_date) %}
+{% test not_before_date(model, column_name, min_date, where=None) %}
 
 with base as (
     select cast({{ column_name }} as date) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *
