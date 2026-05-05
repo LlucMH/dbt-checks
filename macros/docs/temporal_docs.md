@@ -13,6 +13,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -34,6 +36,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Date column to evaluate.
 - **min_date** *(date or string)*
 Minimum allowed date.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -58,6 +62,8 @@ Date column to evaluate.
 Minimum allowed date.
 - **max_date** *(date or string)*
 Maximum allowed date.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -81,6 +87,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Date column to evaluate.
 - **max_age_days** *(integer)*
 Maximum allowed age in days.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -105,6 +113,8 @@ Start date column.
 End date column.
 - **max_days** *(integer)*
 Maximum allowed difference in days.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -126,6 +136,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 ### Arguments
 - **column_name** *(string)*
 Date column to evaluate.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:

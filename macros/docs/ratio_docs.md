@@ -15,6 +15,8 @@ If the table is empty, the ratio defaults to 0.
 Column to evaluate.
 - **threshold** *(float)*
 Maximum allowed null ratio (between 0 and 1).
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -39,6 +41,8 @@ Column to evaluate.
 Minimum allowed ratio (inclusive).
 - **max_ratio** *(float)*
 Maximum allowed ratio (inclusive).
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -65,6 +69,8 @@ Column to evaluate.
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -91,6 +97,8 @@ Column to evaluate.
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -124,6 +132,8 @@ Target value to match.
 Minimum allowed ratio.
 - **max_ratio** *(float)*
 Maximum allowed ratio.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
