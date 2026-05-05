@@ -1,0 +1,248 @@
+version: 2
+
+models:
+  - name: where_filter_base
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              arguments:
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.non_positive:
+              arguments:
+                where: "status = 'inactive'"
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.greater_than:
+              arguments:
+                value: 0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.greater_or_equal_than:
+              arguments:
+                value: 10
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_than:
+              arguments:
+                value: 100
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.less_or_equal_than:
+              arguments:
+                value: 20
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_values:
+              arguments:
+                min_value: 10
+                max_value: 20
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+      - name: text_value
+        data_tests:
+          - dbt_checks.not_blank:
+              arguments:
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.length_between:
+              arguments:
+                min_length: 5
+                max_length: 8
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.matches_regex:
+              arguments:
+                pattern: "^alpha.*$"
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.starts_with:
+              arguments:
+                prefix: "alpha"
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.ends_with:
+              arguments:
+                suffix: "a"
+                where: "text_value = 'alpha'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.contains:
+              arguments:
+                substring: "alpha"
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+      - name: date
+        data_tests:
+          - dbt_checks.not_future_date:
+              arguments:
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.not_before_date:
+              arguments:
+                min_date: "2024-01-01"
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: "2024-01-01"
+                max_date: "2024-01-31"
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 10000
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.no_weekend_dates:
+              arguments:
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 1
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_less_than:
+          arguments:
+            value: 3
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 2
+            max_value: 2
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.sum_between:
+          arguments:
+            column_name: value
+            min_value: 30
+            max_value: 30
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.avg_between:
+          arguments:
+            column_name: value
+            min_value: 15
+            max_value: 15
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.min_between:
+          arguments:
+            column_name: value
+            min_value: 10
+            max_value: 10
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_between:
+          arguments:
+            column_name: value
+            min_value: 20
+            max_value: 20
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+  - name: where_filter_ratio
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.0
+                max_ratio: 0.0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 1.0
+                max_ratio: 1.0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.0
+                max_ratio: 0.0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "active"
+                min_ratio: 1.0
+                max_ratio: 1.0
+                where: "category = 'A'"
+              config:
+                tags: ["should_pass"]
