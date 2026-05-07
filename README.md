@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.2.6
+    revision: v0.3.0
 ```
 
 Then install dependencies:
@@ -64,6 +64,35 @@ Run tests as usual:
 
 ``` bash
 dbt test
+```
+
+# Scoped Checks with `where`
+
+All checks support an optional `where` argument to apply validations only to a subset of rows.
+
+This is useful when you want to validate specific business segments, statuses, partitions, or recent data.
+
+Example:
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.greater_than:
+              arguments:
+                value: 0
+                where: "status = 'active'"
+```
+
+The `where` expression is applied before the check runs.
+
+
+Y en **Why dbt-checks?**, añade:
+
+```md
+- scoped checks with optional `where` filters
 ```
 
 # NULL Handling

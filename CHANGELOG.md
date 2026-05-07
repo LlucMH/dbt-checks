@@ -6,6 +6,21 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.0] - 2026-05-07
+
+### Added
+- Add optional `where` argument to all checks
+- Allow checks to be applied to filtered subsets of data
+- Add integration tests for filtered validation scenarios
+
+### Changed
+- Test macros now apply validation after an optional row filter
+
+### Notes
+- This enables scoped data quality rules such as validating only active records, recent partitions, or specific categories.
+
+---
+
 ## [0.2.6] - 2026-05-04
 
 ### Added
