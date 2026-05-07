@@ -13,6 +13,8 @@ If all values are NULL, the check passes by default.
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -32,6 +34,8 @@ If all values are NULL, the check passes by default.
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -53,6 +57,8 @@ If all values are NULL, the check passes by default.
 Column to evaluate.
 - **value** *(number)*
 Minimum exclusive threshold.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -75,6 +81,8 @@ If all values are NULL, the check passes by default.
 Column to evaluate.
 - **value** *(number)*
 Minimum inclusive threshold.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -97,6 +105,8 @@ If all values are NULL, the check passes by default.
 Column to evaluate.
 - **value** *(number)*
 Maximum exclusive threshold.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -119,6 +129,8 @@ If all values are NULL, the check passes by default.
 Column to evaluate.
 - **value** *(number)*
 Maximum inclusive threshold.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -143,6 +155,8 @@ Column to evaluate.
 Minimum allowed value (inclusive).
 - **max_value** *(number)*
 Maximum allowed value (inclusive).
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:

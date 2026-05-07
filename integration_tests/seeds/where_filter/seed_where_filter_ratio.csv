@@ -1,0 +1,5 @@
+value,status,category
+10,active,A
+20,active,A
+-5,inactive,B
+,inactive,B

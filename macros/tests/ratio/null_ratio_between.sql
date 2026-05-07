@@ -1,10 +1,13 @@
-{% test null_ratio_between(model, column_name, min_ratio, max_ratio) %}
+{% test null_ratio_between(model, column_name, min_ratio, max_ratio, where=None) %}
 
 with stats as (
     select
         count(*) as total_rows,
         sum(case when {{ column_name }} is null then 1 else 0 end) as null_rows
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 ),
 
 ratio as (

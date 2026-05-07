@@ -13,6 +13,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 ### Arguments
 - **column_name** *(string)*
 Column to evaluate.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -36,6 +38,8 @@ Column to evaluate.
 Minimum allowed length.
 - **max_length** *(integer)*
 Maximum allowed length.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -59,6 +63,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Column to evaluate.
 - **pattern** *(string)*
 Regular expression pattern.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -81,6 +87,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Column to evaluate.
 - **prefix** *(string)*
 Required prefix.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -103,6 +111,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Column to evaluate.
 - **suffix** *(string)*
 Required suffix.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -125,6 +135,8 @@ Use `null_ratio_below` or `null_ratio_between` to validate NULL presence explici
 Column to evaluate.
 - **substring** *(string)*
 Substring that must be present.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:

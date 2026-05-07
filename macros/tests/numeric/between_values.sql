@@ -1,8 +1,11 @@
-{% test between_values(model, column_name, min_value, max_value, inclusive=true) %}
+{% test between_values(model, column_name, min_value, max_value, inclusive=true, where=None) %}
 
 with base as (
     select cast({{ column_name }} as numeric) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *

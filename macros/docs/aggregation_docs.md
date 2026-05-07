@@ -12,6 +12,8 @@ This check is not affected by NULL values since it operates on total row count.
 ### Arguments
 - **value** *(integer)*
 Minimum required row count.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -30,6 +32,8 @@ This check is not affected by NULL values since it operates on total row count.
 ### Arguments
 - **value** *(integer)*
 Maximum allowed row count.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -50,6 +54,8 @@ This check is not affected by NULL values since it operates on total row count.
 Minimum allowed row count.
 - **max_value** *(integer)*
 Maximum allowed row count.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -74,6 +80,8 @@ Column to aggregate.
 Minimum allowed sum.
 - **max_value** *(number)*
 Maximum allowed sum.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -99,6 +107,8 @@ Column to aggregate.
 Minimum allowed average.
 - **max_value** *(number)*
 Maximum allowed average.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -124,6 +134,8 @@ Column to evaluate.
 Minimum allowed maximum value.
 - **max_value** *(number)*
 Maximum allowed maximum value.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:
@@ -149,6 +161,8 @@ Column to evaluate.
 Minimum allowed minimum value.
 - **max_value** *(number)*
 Maximum allowed minimum value.
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
 
 ### Example
     tests:

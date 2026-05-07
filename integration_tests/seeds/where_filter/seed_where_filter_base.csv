@@ -1,0 +1,5 @@
+value,text_value,date,status,category,start_date,end_date
+10,alpha,2024-01-01,active,A,2024-01-01,2024-01-05
+20,alphabet,2024-01-02,active,A,2024-01-02,2024-01-05
+-5,beta,2024-01-06,inactive,B,2024-01-01,2024-01-20
+150,,2030-01-01,inactive,B,2024-01-01,2024-03-01

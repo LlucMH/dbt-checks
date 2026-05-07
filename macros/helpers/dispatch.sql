@@ -10,8 +10,8 @@
   {{ return(adapter.dispatch('dateadd_days', 'dbt_checks')(date_expr, n_days)) }}
 {% endmacro %}
 
-{% macro datediff_days(start_date, end_date) %}
-  {{ return(adapter.dispatch('datediff_days', 'dbt_checks')(start_date, end_date)) }}
+{% macro datediff_days(start_date_expr, end_date_expr) %}
+  {{ return(adapter.dispatch('datediff_days', 'dbt_checks')(start_date_expr, end_date_expr)) }}
 {% endmacro %}
 
 {% macro regex_match(expr, pattern) %}
@@ -44,8 +44,8 @@
   dateadd(day, {{ n_days }}, {{ date_expr }})
 {% endmacro %}
 
-{% macro default__datediff_days(start_date, end_date) %}
-  datediff(day, {{ start_date }}, {{ end_date }})
+{% macro default__datediff_days(start_date_expr, end_date_expr) %}
+  datediff('day', {{ start_date_expr }}, {{ end_date_expr }})
 {% endmacro %}
 
 {% macro default__regex_match(expr, pattern) %}

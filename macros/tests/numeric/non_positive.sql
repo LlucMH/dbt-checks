@@ -1,8 +1,11 @@
-{% test non_positive(model, column_name) %}
+{% test non_positive(model, column_name, where=None) %}
 
 with base as (
     select cast({{ column_name }} as numeric) as value
     from {{ model }}
+    {% if where is not none %}
+        where {{ where }}
+    {% endif %}
 )
 
 select *
