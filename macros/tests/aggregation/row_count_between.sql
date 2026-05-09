@@ -1,16 +1,24 @@
 {% test row_count_between(model, min_value, max_value, where=None) %}
 
 with validation as (
-    select count(*) as row_count
+    select
+        count(*) as metric_value
     from {{ model }}
     {% if where is not none %}
         where {{ where }}
     {% endif %}
 )
 
-select *
+select
+    metric_value as actual_value,
+    {{ min_value }} as expected_min_value,
+    {{ max_value }} as expected_max_value,
+    'row_count_between' as failed_check,
+    'Row count must be between {{ min_value }} and {{ max_value }}' as failure_reason,
+    '{{ where if where is not none else "none" }}' as applied_condition
 from validation
-where row_count < {{ min_value }}
-   or row_count > {{ max_value }}
+where
+    metric_value < {{ min_value }}
+    or metric_value > {{ max_value }}
 
 {% endtest %}
