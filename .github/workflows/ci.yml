@@ -32,6 +32,22 @@ jobs:
         working-directory: integration_tests
         run: dbt deps
 
+      - name: Assert test selection is not empty
+        working-directory: integration_tests
+        run: |
+          dbt ls --select tag:should_pass --resource-type test | grep .
+          dbt ls --select tag:should_fail --resource-type test | grep .
+
+      - name: Check no select star in test macros
+        run: |
+          ! grep -R -i "select \*" macros/tests
+
+      - name: Check standardized failure output columns
+        run: |
+          grep -R "failed_check" macros/tests
+          grep -R "failure_reason" macros/tests
+          grep -R "applied_condition" macros/tests
+
       - name: Seed test data
         working-directory: integration_tests
         run: dbt seed
