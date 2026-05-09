@@ -32,6 +32,10 @@ jobs:
         working-directory: integration_tests
         run: dbt deps
 
+      - name: Check dbt parsing
+        working-directory: integration_tests
+        run: dbt parse
+
       - name: Assert test selection is not empty
         working-directory: integration_tests
         run: |
@@ -153,7 +157,11 @@ jobs:
               lines.append("| " + " | ".join(headers) + " |")
               lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
               for row in rows:
-                  lines.append("| " + " | ".join("" if v is None else str(v) for v in row) + " |")
+                  safe_values = [
+                      "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
+                      for v in row
+                  ]
+                  lines.append("| " + " | ".join(safe_values) + " |")
               return "\n".join(lines)
 
           output = ["# dbt-checks failure output", ""]
