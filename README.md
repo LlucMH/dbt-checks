@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.0
+    revision: v0.3.1
 ```
 
 Then install dependencies:
@@ -94,6 +94,83 @@ Y en **Why dbt-checks?**, añade:
 ```md
 - scoped checks with optional `where` filters
 ```
+
+# Standardized Failure Output
+
+dbt-checks provides standardized and human-readable failure outputs designed for easier debugging and CI visibility.
+
+Instead of generic outputs like:
+
+```text
+Got 1 result, configured to fail if != 0
+```
+
+checks now expose contextual failure information.
+
+## Row-level checks
+
+Example output:
+
+| failing_value | expected_min_value | failed_check | failure_reason |
+| --- | --- | --- | --- |
+| -5 | 0 | non_negative | Value must be greater than or equal to 0 |
+
+Used by:
+- numeric checks
+- string checks
+- most temporal checks
+
+---
+
+## Aggregation checks
+
+Example output:
+
+| actual_value | expected_min_value | expected_max_value |
+| --- | --- | --- |
+| 1500 | 0 | 1000 |
+
+Used by:
+- avg_between
+- sum_between
+- min_between
+- max_between
+- row_count_between
+
+---
+
+## Ratio checks
+
+Example output:
+
+| actual_ratio | expected_min_ratio | expected_max_ratio |
+| --- | --- | --- |
+| 0.92 | 0.0 | 0.80 |
+
+Used by:
+- null_ratio_between
+- positive_ratio_between
+- negative_ratio_between
+- value_ratio_between
+
+---
+
+## Additional Context
+
+Checks may also expose:
+
+- `failed_check`
+- `failure_reason`
+- `applied_condition`
+- `actual_length`
+- `actual_diff_days`
+- `actual_day_of_week`
+
+This makes dbt-checks outputs easier to:
+- debug in CI
+- inspect in stored failures
+- integrate with observability tooling
+- consume programmatically
 
 # NULL Handling
 
@@ -266,11 +343,14 @@ Many dbt projects repeatedly implement the same validation logic.
 
 `dbt-checks` provides:
 
--   reusable checks
--   simple configuration
--   consistent validation patterns
--   Predictable null handling 
--   cross-warehouse compatibility
+- reusable checks
+- simple configuration
+- scoped checks with optional `where` filters
+- standardized failure outputs
+- CI-friendly debugging context
+- predictable null handling
+- consistent validation patterns
+- cross-warehouse compatibility
 
 # Contributing
 

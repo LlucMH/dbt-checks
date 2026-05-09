@@ -6,6 +6,81 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.1] - 2026-05-10
+
+### Added
+- Standardized failure outputs across all checks
+- Human-readable failure context for CI and debugging
+- Consistent output schema for:
+  - row-level checks
+  - aggregation checks
+  - ratio checks
+  - temporal checks
+- Explicit failure metadata:
+  - `failed_check`
+  - `failure_reason`
+  - `applied_condition`
+- Contextual expected values in failure outputs:
+  - `expected_min_value`
+  - `expected_max_value`
+  - `expected_min_ratio`
+  - `expected_max_ratio`
+  - `expected_min_date`
+  - `expected_max_date`
+  - `expected_pattern`
+  - `expected_prefix`
+  - `expected_suffix`
+  - `expected_substring`
+- Additional debugging context:
+  - `actual_value`
+  - `actual_ratio`
+  - `actual_length`
+  - `actual_diff_days`
+  - `actual_day_of_week`
+
+### Changed
+- Standardized internal naming conventions:
+  - `check_value`
+  - `metric_value`
+  - `metric_ratio`
+- Removed remaining `select *` usage from test macros
+- Improved consistency across all check families:
+  - numeric
+  - string
+  - temporal
+  - aggregation
+  - ratio
+- CI now stores and exposes enriched failure outputs
+- GitHub Actions summary now displays formatted failing rows
+
+### CI
+- Added validation to ensure:
+  - all `should_pass` tests pass
+  - all `should_fail` tests fail
+- Added regression checks preventing:
+  - `select *` usage
+  - missing standardized failure columns
+- Added `dbt parse` validation
+- Added enriched failure output reporting via `--store-failures`
+- Upload dbt artifacts for debugging:
+  - `target/`
+  - `logs/`
+
+### Docs
+- Added standardized failure output documentation
+- Added examples for:
+  - row-level failure outputs
+  - aggregation failure outputs
+  - ratio failure outputs
+  - filtered checks using `where`
+
+### Notes
+- This release focuses on developer experience, CI readability, and debugging clarity
+- Failure outputs are now designed to be machine-readable and CI-friendly
+- This release establishes the failure output contract used by future grouped and advanced checks
+
+---
+
 ## [0.3.0] - 2026-05-07
 
 ### Added
