@@ -6,7 +6,7 @@ with base as (
         cast({{ end_column }} as date) as check_end_date
     from {{ model }}
     {% if where %}
-    where {{ where }}
+        where {{ where }}
     {% endif %}
 ),
 
@@ -18,7 +18,14 @@ validation as (
     from base
 )
 
-select *
+select
+    check_start_date as failing_start_date,
+    check_end_date as failing_end_date,
+    diff_days as actual_diff_days,
+    {{ max_days }} as expected_max_days,
+    'date_diff_less_than' as failed_check,
+    'Date difference must be less than {{ max_days }} days' as failure_reason,
+    '{{ where if where is not none else "none" }}' as applied_condition
 from validation
 where
     check_start_date is not null

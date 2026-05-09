@@ -3,7 +3,12 @@
 with stats as (
     select
         count(*) as total_rows,
-        sum(case when cast({{ column_name }} as numeric) > 0 then 1 else 0 end) as positive_rows
+        sum(
+            case
+                when cast({{ column_name }} as numeric) > 0 then 1
+                else 0
+            end
+        ) as positive_rows
     from {{ model }}
     {% if where is not none %}
         where {{ where }}
@@ -15,13 +20,20 @@ ratio as (
         case
             when total_rows = 0 then 0
             else positive_rows * 1.0 / total_rows
-        end as positive_ratio
+        end as metric_ratio
     from stats
 )
 
-select *
+select
+    metric_ratio as actual_ratio,
+    {{ min_ratio }} as expected_min_ratio,
+    {{ max_ratio }} as expected_max_ratio,
+    'positive_ratio_between' as failed_check,
+    'Positive ratio must be between {{ min_ratio }} and {{ max_ratio }}' as failure_reason,
+    '{{ where if where is not none else "none" }}' as applied_condition
 from ratio
-where positive_ratio < {{ min_ratio }}
-   or positive_ratio > {{ max_ratio }}
+where
+    metric_ratio < {{ min_ratio }}
+    or metric_ratio > {{ max_ratio }}
 
 {% endtest %}

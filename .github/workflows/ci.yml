@@ -26,11 +26,31 @@ jobs:
       - name: Install dbt
         run: |
           python -m pip install --upgrade pip
-          pip install dbt-core==1.11.7 dbt-duckdb==1.10.1
+          pip install dbt-core==1.11.7 dbt-duckdb==1.10.1 duckdb
 
       - name: Install package dependencies
         working-directory: integration_tests
         run: dbt deps
+
+      - name: Check dbt parsing
+        working-directory: integration_tests
+        run: dbt parse
+
+      - name: Assert test selection is not empty
+        working-directory: integration_tests
+        run: |
+          dbt ls --select tag:should_pass --resource-type test | grep .
+          dbt ls --select tag:should_fail --resource-type test | grep .
+
+      - name: Check no select star in test macros
+        run: |
+          ! grep -R -i "select \*" macros/tests
+
+      - name: Check standardized failure output columns
+        run: |
+          grep -R "failed_check" macros/tests
+          grep -R "failure_reason" macros/tests
+          grep -R "applied_condition" macros/tests
 
       - name: Seed test data
         working-directory: integration_tests
@@ -44,10 +64,130 @@ jobs:
         working-directory: integration_tests
         run: dbt test --select tag:should_pass --warn-error
 
-      - name: Run failing tests
+      - name: Assert passing tests passed
         working-directory: integration_tests
         run: |
-          dbt test --select tag:should_fail && exit 1 || exit 0
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("target/run_results.json") as f:
+              results = json.load(f)["results"]
+
+          failed = [
+              r["unique_id"]
+              for r in results
+              if r.get("status") != "pass"
+          ]
+
+          if failed:
+              print("Some tests tagged should_pass did not pass:")
+              for test in failed:
+                  print(f"- {test}")
+              sys.exit(1)
+
+          print("All tests tagged should_pass passed successfully.")
+          PY
+
+      - name: Run failing tests and store failure rows
+        working-directory: integration_tests
+        run: |
+          dbt test --select tag:should_fail --store-failures || true
+
+      - name: Assert expected failing tests failed
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("target/run_results.json") as f:
+              results = json.load(f)["results"]
+
+          passed = [
+              r["unique_id"]
+              for r in results
+              if r.get("status") == "pass"
+          ]
+
+          if passed:
+              print("Some tests tagged should_fail unexpectedly passed:")
+              for test in passed:
+                  print(f"- {test}")
+              sys.exit(1)
+
+          print("All tests tagged should_fail failed as expected.")
+          PY
+
+      - name: Print enriched failure outputs
+        if: always()
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import glob
+          import os
+          import duckdb
+
+          db_files = glob.glob("**/*.duckdb", recursive=True)
+
+          if not db_files:
+              print("No DuckDB database found.")
+              raise SystemExit(0)
+
+          db_path = max(db_files, key=os.path.getmtime)
+          print(f"Using DuckDB database: {db_path}")
+
+          con = duckdb.connect(db_path, read_only=True)
+
+          tables = con.execute("""
+              select table_schema, table_name
+              from information_schema.tables
+              where table_schema ilike '%dbt_test__audit%'
+              order by table_name
+          """).fetchall()
+
+          if not tables:
+              print("No stored failure tables found.")
+              raise SystemExit(0)
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+
+          def to_markdown(headers, rows):
+              lines = []
+              lines.append("| " + " | ".join(headers) + " |")
+              lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+              for row in rows:
+                  safe_values = [
+                      "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
+                      for v in row
+                  ]
+                  lines.append("| " + " | ".join(safe_values) + " |")
+              return "\n".join(lines)
+
+          output = ["# dbt-checks failure output", ""]
+
+          for schema, table in tables:
+              query = f'select * from "{schema}"."{table}" limit 20'
+              result = con.execute(query)
+              headers = [col[0] for col in result.description]
+              rows = result.fetchall()
+
+              if not rows:
+                  continue
+
+              output.append(f"## `{table}`")
+              output.append("")
+              output.append(to_markdown(headers, rows))
+              output.append("")
+
+          final_output = "\n".join(output)
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
 
       - name: Check dbt compilation
         working-directory: integration_tests
@@ -56,3 +196,12 @@ jobs:
       - name: Check documentation generation
         working-directory: integration_tests
         run: dbt docs generate
+
+      - name: Upload dbt artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-artifacts
+          path: |
+            integration_tests/target
+            integration_tests/logs
