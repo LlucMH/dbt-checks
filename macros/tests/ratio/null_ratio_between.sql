@@ -3,7 +3,12 @@
 with stats as (
     select
         count(*) as total_rows,
-        sum(case when {{ column_name }} is null then 1 else 0 end) as null_rows
+        sum(
+            case
+                when {{ column_name }} is null then 1
+                else 0
+            end
+        ) as null_rows
     from {{ model }}
     {% if where is not none %}
         where {{ where }}
@@ -15,13 +20,20 @@ ratio as (
         case
             when total_rows = 0 then 0
             else null_rows * 1.0 / total_rows
-        end as null_ratio
+        end as metric_ratio
     from stats
 )
 
-select *
+select
+    metric_ratio as actual_ratio,
+    {{ min_ratio }} as expected_min_ratio,
+    {{ max_ratio }} as expected_max_ratio,
+    'null_ratio_between' as failed_check,
+    'Null ratio must be between {{ min_ratio }} and {{ max_ratio }}' as failure_reason,
+    '{{ where if where is not none else "none" }}' as applied_condition
 from ratio
-where null_ratio < {{ min_ratio }}
-   or null_ratio > {{ max_ratio }}
+where
+    metric_ratio < {{ min_ratio }}
+    or metric_ratio > {{ max_ratio }}
 
 {% endtest %}
