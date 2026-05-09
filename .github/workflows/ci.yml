@@ -44,6 +44,31 @@ jobs:
         working-directory: integration_tests
         run: dbt test --select tag:should_pass --warn-error
 
+      - name: Assert passing tests passed
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+
+          with open("target/run_results.json") as f:
+              results = json.load(f)["results"]
+
+          failed = [
+              r["unique_id"]
+              for r in results
+              if r.get("status") != "pass"
+          ]
+
+          if failed:
+              print("Some tests tagged should_pass did not pass:")
+              for test in failed:
+                  print(f"- {test}")
+              sys.exit(1)
+
+          print("All tests tagged should_pass passed successfully.")
+          PY
+
       - name: Run failing tests and store failure rows
         working-directory: integration_tests
         run: |
