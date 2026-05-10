@@ -1,5 +1,7 @@
 {% test row_count_between(model, min_value, max_value, where=None) %}
 
+{{ dbt_checks.validate_non_negative_integer(min_value, 'min_value') }}
+{{ dbt_checks.validate_non_negative_integer(max_value, 'max_value') }}
 {{ dbt_checks.validate_min_max(min_value, max_value) }}
 
 with validation as (
