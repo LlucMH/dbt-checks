@@ -2,17 +2,15 @@
 
 with base as (
     select
-        cast({{ column_name }} as date) as check_value
+        {{ dbt_checks.as_date(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 ),
 
 validation as (
     select
         check_value,
-        {{ dbt_checks.dateadd_days(dbt_checks.current_date_sql(), -1 * max_age_days) }} as expected_min_date
+        {{ dbt_checks.days_ago(max_age_days) }} as expected_min_date
     from base
 )
 
@@ -22,10 +20,13 @@ select
     {{ max_age_days }} as expected_max_age_days,
     'recent_date' as failed_check,
     'Date must be within the last {{ max_age_days }} days' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from validation
 where
     check_value is not null
-    and check_value < expected_min_date
+    and {{ dbt_checks.build_recent_date_predicate(
+        'check_value',
+        max_age_days
+    ) }}
 
 {% endtest %}
