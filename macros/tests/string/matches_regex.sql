@@ -1,5 +1,7 @@
 {% test matches_regex(model, column_name, pattern, where=None) %}
 
+{{ dbt_checks.validate_required_string(pattern, 'pattern') }}
+
 with base as (
     select
         {{ dbt_checks.as_string(column_name) }} as check_value
