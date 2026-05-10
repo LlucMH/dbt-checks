@@ -593,7 +593,6 @@ Many dbt projects repeatedly implement the same validation logic.
 `dbt-checks` uses reusable internal helper macros to standardize SQL generation across all checks.
 
 Internal helpers include:
-
 - casting helpers
 - reusable predicates
 - ratio utilities
@@ -603,9 +602,9 @@ Internal helpers include:
 
 ### Date helper design
 
-`as_date()` intentionally accepts both column references and SQL date expressions.
-
-This allows temporal checks to work with static columns as well as dynamic boundaries.
+Temporal helpers intentionally support both:
+- static ISO date literals
+- SQL date expressions
 
 Examples:
 
@@ -615,7 +614,26 @@ current_date
 current_date - interval '7 days'
 ```
 
-For this reason, temporal checks consistently rely on `as_date()` instead of implementing manual date casts individually.
+This allows temporal checks to work with:
+- static date boundaries
+- dynamic temporal windows
+- adapter-specific SQL date expressions
+
+Examples:
+
+```sql
+min_date: "2024-01-01"
+max_date: current_date
+```
+
+Temporal checks consistently rely on centralized helper macros instead of implementing manual date casts individually.
+
+This includes:
+- `as_date()`
+- `cast_to_date()`
+- reusable temporal predicates
+
+SQL expressions are safely rendered and escaped internally to preserve cross-warehouse compatibility and predictable SQL generation.
 
 This improves:
 - maintainability
