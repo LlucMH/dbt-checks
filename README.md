@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.3
+    revision: v0.3.3-
 ```
 
 Then install dependencies:
@@ -184,6 +184,93 @@ Use dedicated checks to validate null presence.
 Use:
 - null_ratio_below
 - null_ratio_between
+
+# Severity Configuration
+
+`dbt-checks` uses native dbt severity configuration.
+
+You can decide whether a failing check should raise a warning or fail the pipeline.
+
+## Warning severity
+
+Use `severity: warn` for checks that should be monitored but should not block execution.
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: email
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.05
+              config:
+                severity: warn
+```
+
+Useful for:
+
+- exploratory checks
+- soft data quality monitoring
+- checks being progressively rolled out
+- non-critical business rules
+
+## Error severity
+
+Use `severity: error` for checks that should fail the pipeline when violated.
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 100
+          config:
+            severity: error
+```
+
+Useful for:
+
+- production-critical validations
+- data contract checks
+- downstream-breaking issues
+- SLA violations
+
+## warn_if and error_if
+
+You can also use dbt's native `warn_if` and `error_if` configuration.
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: email
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.05
+              config:
+                severity: warn
+                warn_if: "> 0"
+```
+
+## CI behavior
+
+In CI, you can decide whether warnings should fail the pipeline.
+
+This command treats warnings as failures:
+
+```bash
+dbt test --warn-error
+```
+
+Recommended rollout strategy:
+
+1. Add new checks as `severity: warn`
+2. Monitor failures in CI or dbt artifacts
+3. Fix upstream data quality issues
+4. Promote stable checks to `severity: error`
 
 # Available Checks
 
@@ -361,6 +448,8 @@ Many dbt projects repeatedly implement the same validation logic.
 - reusable internal helper architecture
 - consistent SQL generation across checks
 - centralized casting, predicates, ratios, and filtering logic
+- native dbt severity support
+- clear warn/error usage guidance
 
 # Internal Architecture
 
