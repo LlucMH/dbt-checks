@@ -95,9 +95,19 @@
 
     {% if value is none or value | trim == '' %}
         {{ exceptions.raise_compiler_error(
-            "Invalid argument: " ~ arg_name ~ " must be a valid date string"
+            "Invalid argument: " ~ arg_name ~ " must be a valid date literal or SQL date expression"
         ) }}
     {% endif %}
+
+{% endmacro %}
+
+
+{% macro is_iso_date_literal(value) %}
+
+    {{ return(
+        value is string
+        and modules.re.match('^\\d{4}-\\d{2}-\\d{2}$', value)
+    ) }}
 
 {% endmacro %}
 
@@ -106,6 +116,17 @@
 
     {{ dbt_checks.validate_required_date(min_date, 'min_date') }}
     {{ dbt_checks.validate_required_date(max_date, 'max_date') }}
+
+    {% if dbt_checks.is_iso_date_literal(min_date)
+        and dbt_checks.is_iso_date_literal(max_date) %}
+
+        {% if min_date > max_date %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid arguments: min_date cannot be greater than max_date"
+            ) }}
+        {% endif %}
+
+    {% endif %}
 
 {% endmacro %}
 
