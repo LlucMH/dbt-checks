@@ -6,6 +6,33 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.4] - 2026-05-10
+
+### Added
+- Documentation for native dbt severity configuration
+- Examples for:
+  - `severity: warn`
+  - `severity: error`
+  - `warn_if`
+  - `error_if`
+  - CI usage with `--warn-error`
+- Integration tests covering:
+  - warning severity behavior
+  - error severity behavior
+  - `warn_if` behavior
+  - `error_if` behavior
+
+### Changed
+- Improved README guidance for production adoption
+- Added recommended rollout strategy for new checks
+
+### Notes
+- This release does not change test macro behavior
+- dbt-checks relies on native dbt severity handling
+- No breaking changes
+
+---
+
 ## [0.3.3] - 2026-05-10
 
 ### Added

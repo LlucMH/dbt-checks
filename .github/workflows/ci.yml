@@ -101,6 +101,24 @@ jobs:
         working-directory: integration_tests
         run: dbt run
 
+      - name: Run severity warn tests
+        working-directory: integration_tests
+        run: dbt test --select tag:severity_warn
+
+      - name: Assert severity error tests fail
+        working-directory: integration_tests
+        run: |
+          dbt test --select tag:severity_error && exit 1 || exit 0
+
+      - name: Run warn_if tests
+        working-directory: integration_tests
+        run: dbt test --select tag:severity_warn_if
+
+      - name: Assert error_if tests fail
+        working-directory: integration_tests
+        run: |
+          dbt test --select tag:severity_error_if && exit 1 || exit 0
+
       - name: Run passing tests
         working-directory: integration_tests
         run: dbt test --select tag:should_pass --warn-error
