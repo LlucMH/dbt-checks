@@ -36,11 +36,17 @@ jobs:
         working-directory: integration_tests
         run: dbt parse
 
+      - name: Validate invalid configurations fail compilation
+        working-directory: integration_tests
+        run: |
+          dbt parse --select tag:should_fail_compile && exit 1 || exit 0
+
       - name: Assert test selection is not empty
         working-directory: integration_tests
         run: |
           dbt ls --select tag:should_pass --resource-type test | grep .
           dbt ls --select tag:should_fail --resource-type test | grep .
+          dbt ls --select tag:should_fail_compile --resource-type test | grep .
 
       - name: Check no select star in test macros
         run: |
@@ -51,6 +57,10 @@ jobs:
           grep -R "failed_check" macros/tests
           grep -R "failure_reason" macros/tests
           grep -R "applied_condition" macros/tests
+
+      - name: Check validation guards usage
+        run: |
+          grep -R "validate_" macros/tests
 
       - name: Seed test data
         working-directory: integration_tests
@@ -156,19 +166,23 @@ jobs:
               lines = []
               lines.append("| " + " | ".join(headers) + " |")
               lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+
               for row in rows:
                   safe_values = [
                       "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
                       for v in row
                   ]
                   lines.append("| " + " | ".join(safe_values) + " |")
+
               return "\n".join(lines)
 
           output = ["# dbt-checks failure output", ""]
 
           for schema, table in tables:
               query = f'select * from "{schema}"."{table}" limit 20'
+
               result = con.execute(query)
+
               headers = [col[0] for col in result.description]
               rows = result.fetchall()
 
@@ -181,6 +195,7 @@ jobs:
               output.append("")
 
           final_output = "\n".join(output)
+
           print(final_output)
 
           if summary_path:
