@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as varchar) as check_value
+        {{ dbt_checks.as_string(column_name) }} as check_value
     from {{ model }}
-    {% if where %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -14,10 +12,13 @@ select
     '{{ pattern }}' as expected_pattern,
     'matches_regex' as failed_check,
     'Value must match regex pattern "{{ pattern }}"' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
     check_value is not null
-    and not {{ dbt_checks.regex_match('check_value', pattern) }}
+    and {{ dbt_checks.build_regex_not_match_predicate(
+        'check_value',
+        pattern
+    ) }}
 
 {% endtest %}

@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as varchar) as check_value
+        {{ dbt_checks.as_string(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -16,13 +14,14 @@ select
     {{ max_length }} as expected_max_length,
     'length_between' as failed_check,
     'Value length must be between {{ min_length }} and {{ max_length }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
     check_value is not null
-    and (
-        length(check_value) < {{ min_length }}
-        or length(check_value) > {{ max_length }}
-    )
+    and {{ dbt_checks.build_between_predicate(
+        'length(check_value)',
+        min_length,
+        max_length
+    ) }}
 
 {% endtest %}
