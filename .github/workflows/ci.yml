@@ -93,6 +93,30 @@ jobs:
         run: |
           grep -R "validate_" macros/tests
 
+      - name: Check internal helper macros exist
+        run: |
+          grep -R '{% macro as_numeric' macros
+          grep -R '{% macro as_string' macros
+          grep -R '{% macro as_date' macros
+          grep -R '{% macro safe_ratio' macros
+          grep -R '{% macro apply_where' macros
+          grep -R '{% macro apply_and_where' macros
+          grep -R '{% macro applied_condition' macros
+
+      - name: Check README documents core UX features
+        run: |
+          grep -i "where" README.md
+          grep -i "NULL Handling" README.md
+          grep -i "Severity Configuration" README.md
+          grep -i "Standardized Failure Output" README.md
+          grep -i "Real-world Usage Patterns" README.md
+          grep -i "Validation Guards" README.md
+          grep -i "Production Adoption Recommendations" README.md
+
+      - name: Check README installation version is current
+        run: |
+          grep "revision: v0.3.5" README.md
+
       - name: Seed test data
         working-directory: integration_tests
         run: dbt seed
