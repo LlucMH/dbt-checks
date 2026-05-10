@@ -4,9 +4,7 @@ with validation as (
     select
         count(*) as metric_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -14,9 +12,9 @@ select
     {{ value }} as expected_max_value,
     'row_count_less_than' as failed_check,
     'Row count must be less than {{ value }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from validation
 where
-    metric_value >= {{ value }}
+    {{ dbt_checks.build_less_than_predicate('metric_value', value) }}
 
 {% endtest %}

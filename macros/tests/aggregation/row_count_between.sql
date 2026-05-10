@@ -4,9 +4,7 @@ with validation as (
     select
         count(*) as metric_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -15,10 +13,9 @@ select
     {{ max_value }} as expected_max_value,
     'row_count_between' as failed_check,
     'Row count must be between {{ min_value }} and {{ max_value }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from validation
 where
-    metric_value < {{ min_value }}
-    or metric_value > {{ max_value }}
+    {{ dbt_checks.build_between_predicate('metric_value', min_value, max_value) }}
 
 {% endtest %}
