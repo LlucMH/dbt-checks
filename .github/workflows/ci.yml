@@ -36,11 +36,10 @@ jobs:
         working-directory: integration_tests
         run: dbt parse
 
-      - name: Install invalid config package dependencies
-        working-directory: integration_tests_invalid_configs
-        env:
-          DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
-        run: dbt deps
+      - name: Prepare invalid config project macros
+        run: |
+          rm -rf integration_tests_invalid_configs/macros
+          cp -R macros integration_tests_invalid_configs/macros
 
       - name: Validate invalid configurations fail due to validation guards
         working-directory: integration_tests_invalid_configs
@@ -251,3 +250,5 @@ jobs:
           path: |
             integration_tests/target
             integration_tests/logs
+            integration_tests_invalid_configs/target
+            integration_tests_invalid_configs/invalid_config_output.log
