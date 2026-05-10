@@ -43,11 +43,6 @@
 {% endmacro %}
 
 
-{% macro apply_where(where) %}
-    {{ return(adapter.dispatch('apply_where', 'dbt_checks')(where)) }}
-{% endmacro %}
-
-
 # -------------------- default__ fallbacks -------------------- #
 
 
@@ -97,14 +92,5 @@
         when {{ denominator }} = 0 then 0
         else {{ numerator }} * 1.0 / {{ denominator }}
     end
-
-{% endmacro %}
-
-
-{% macro default__apply_where(where) %}
-
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
 
 {% endmacro %}
