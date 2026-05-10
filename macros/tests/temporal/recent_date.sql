@@ -1,5 +1,7 @@
 {% test recent_date(model, column_name, max_age_days, where=None) %}
 
+{{ dbt_checks.validate_positive_integer(max_age_days, 'max_age_days') }}
+
 with base as (
     select
         {{ dbt_checks.as_date(column_name) }} as check_value

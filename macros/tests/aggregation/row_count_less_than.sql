@@ -1,5 +1,7 @@
 {% test row_count_less_than(model, value, where=None) %}
 
+{{ dbt_checks.validate_positive_integer(value, 'value') }}
+
 with validation as (
     select
         count(*) as metric_value
