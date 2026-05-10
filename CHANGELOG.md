@@ -6,6 +6,37 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.3] - 2026-05-10
+
+### Added
+- Compile-time validation guards for invalid test configurations
+- Validation helpers for:
+  - numeric bounds
+  - ratio bounds
+  - integer arguments
+  - boolean arguments
+  - required strings
+  - date expressions
+  - ISO date range validation
+
+### Changed
+- All configurable tests now validate arguments before SQL generation
+- Invalid configurations now fail during dbt compilation with explicit error messages
+
+### Examples of detected invalid configurations
+- `min_value > max_value`
+- ratios outside `0..1`
+- invalid integer arguments
+- invalid boolean values
+- empty required strings
+- invalid date ranges for ISO date literals
+
+### Notes
+- SQL date expressions such as `current_date` remain supported
+- ISO date literals are validated more strictly when possible
+
+---
+
 ## [0.3.2] - 2026-05-10
 
 ### Added

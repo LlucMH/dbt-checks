@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.2
+    revision: v0.3.3
 ```
 
 Then install dependencies:
@@ -313,6 +313,20 @@ columns:
           arguments:
             threshold: 0.05
 ```
+
+# Validation Guards
+
+`dbt-checks` validates test arguments during compilation to detect invalid configurations early.
+
+Examples of invalid configurations detected automatically:
+
+- `min_value > max_value`
+- ratios outside `0..1`
+- empty required strings
+- invalid integer arguments
+- invalid boolean values
+- invalid date ranges for ISO date literals
+
 # Supported Warehouses
 
 `dbt-checks` is designed to work across common dbt adapters:
