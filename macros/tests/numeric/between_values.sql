@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as numeric) as check_value
+        {{ dbt_checks.as_numeric(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -15,26 +13,20 @@ select
     {{ max_value }} as expected_max_value,
     {{ inclusive }} as inclusive,
     'between_values' as failed_check,
-
     {% if inclusive %}
         'Value must be between {{ min_value }} and {{ max_value }} inclusive' as failure_reason
     {% else %}
         'Value must be strictly between {{ min_value }} and {{ max_value }}' as failure_reason
     {% endif %},
-
-    '{{ where if where is not none else "none" }}' as applied_condition
-
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
     check_value is not null
-    and (
-        {% if inclusive %}
-            check_value < {{ min_value }}
-            or check_value > {{ max_value }}
-        {% else %}
-            check_value <= {{ min_value }}
-            or check_value >= {{ max_value }}
-        {% endif %}
-    )
+    and {{ dbt_checks.build_between_predicate(
+        'check_value',
+        min_value,
+        max_value,
+        inclusive
+    ) }}
 
 {% endtest %}

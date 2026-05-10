@@ -2,12 +2,10 @@
 
 with validation as (
     select
-        sum(cast({{ column_name }} as numeric)) as metric_value
+        sum({{ dbt_checks.as_numeric(column_name) }}) as metric_value
     from {{ model }}
     where {{ column_name }} is not null
-    {% if where is not none %}
-        and {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_and_where(where) }}
 )
 
 select
@@ -16,11 +14,10 @@ select
     {{ max_value }} as expected_max_value,
     'sum_between' as failed_check,
     'Sum value must be between {{ min_value }} and {{ max_value }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from validation
 where
     metric_value is null
-    or metric_value < {{ min_value }}
-    or metric_value > {{ max_value }}
+    or {{ dbt_checks.build_between_predicate('metric_value', min_value, max_value) }}
 
 {% endtest %}

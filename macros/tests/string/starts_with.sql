@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as varchar) as check_value
+        {{ dbt_checks.as_string(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -14,10 +12,13 @@ select
     '{{ prefix }}' as expected_prefix,
     'starts_with' as failed_check,
     'Value must start with "{{ prefix }}"' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
     check_value is not null
-    and check_value not like '{{ prefix }}%'
+    and {{ dbt_checks.build_starts_with_predicate(
+        'check_value',
+        prefix
+    ) }}
 
 {% endtest %}

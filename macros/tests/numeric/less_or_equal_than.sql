@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as numeric) as check_value
+        {{ dbt_checks.as_numeric(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 )
 
 select
@@ -14,10 +12,14 @@ select
     {{ value }} as expected_max_value,
     'less_or_equal_than' as failed_check,
     'Value must be less than or equal to {{ value }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
     check_value is not null
-    and check_value > {{ value }}
+    and {{ dbt_checks.build_less_than_predicate(
+        'check_value',
+        value,
+        true
+    ) }}
 
 {% endtest %}

@@ -2,11 +2,9 @@
 
 with base as (
     select
-        cast({{ column_name }} as date) as check_value
+        {{ dbt_checks.as_date(column_name) }} as check_value
     from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_where(where) }}
 ),
 
 validation as (
@@ -22,10 +20,10 @@ select
     'weekday only' as expected_date_type,
     'no_weekend_dates' as failed_check,
     'Date must not fall on a weekend' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from validation
 where
     check_value is not null
-    and day_of_week in (0, 6)
+    and {{ dbt_checks.build_no_weekend_date_predicate('day_of_week') }}
 
 {% endtest %}

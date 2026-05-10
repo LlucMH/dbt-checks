@@ -30,7 +30,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.1
+    revision: v0.3.2
 ```
 
 Then install dependencies:
@@ -87,13 +87,6 @@ models:
 ```
 
 The `where` expression is applied before the check runs.
-
-
-Y en **Why dbt-checks?**, añade:
-
-```md
-- scoped checks with optional `where` filters
-```
 
 # Standardized Failure Output
 
@@ -351,6 +344,28 @@ Many dbt projects repeatedly implement the same validation logic.
 - predictable null handling
 - consistent validation patterns
 - cross-warehouse compatibility
+- reusable internal helper architecture
+- consistent SQL generation across checks
+- centralized casting, predicates, ratios, and filtering logic
+
+# Internal Architecture
+
+`dbt-checks` uses reusable internal helper macros to standardize SQL generation across all checks.
+
+Internal helpers include:
+
+- casting helpers
+- reusable predicates
+- ratio utilities
+- filter application helpers
+- date utilities
+- validation helpers
+
+This improves:
+- maintainability
+- adapter compatibility
+- consistency
+- future extensibility
 
 # Contributing
 

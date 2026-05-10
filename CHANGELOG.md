@@ -6,6 +6,30 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.2] - 2026-05-10
+
+### Added
+- Internal helper macros for reusable casting, filtering, predicates, dates, and ratios
+- Shared helpers:
+  - `as_numeric`
+  - `as_string`
+  - `as_date`
+  - `safe_ratio`
+  - `apply_where`
+  - `applied_condition`
+  - reusable predicate builders
+
+### Changed
+- Refactored numeric, string, temporal, aggregation, and ratio checks to use shared helper macros
+- Reduced duplicated SQL across test macros
+- Improved maintainability and consistency of generated SQL
+
+### Notes
+- This release is internal and does not change the public test API
+- No breaking changes
+
+---
+
 ## [0.3.1] - 2026-05-10
 
 ### Added
