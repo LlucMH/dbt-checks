@@ -6,6 +6,19 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.7] - 2026-05-10
+
+### Added
+- Added explicit coverage for dynamic date expressions in temporal checks.
+
+### Changed
+- Documented the design decision behind `as_date()` accepting both column references and SQL date expressions.
+
+### Fixed
+- Improved consistency of temporal helper usage across checks.
+
+---
+
 ## [0.3.6] - 2026-05-10
 
 ### Added

@@ -115,3 +115,37 @@ models:
           - dbt_checks.no_weekend_dates:
               config:
                 tags: ["should_fail"]
+
+  - name: date_expression_pass
+    columns:
+      - name: event_date
+        tests:
+          - dbt_checks.not_future_date:
+              tags: ['should_pass']
+
+  - name: recent_date_expression_pass
+    columns:
+      - name: event_date
+        tests:
+          - dbt_checks.recent_date:
+              days: 7
+              tags: ['should_pass']
+
+  - name: date_expression_boundaries_pass
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: current_date - interval '30 days'
+                max_date: current_date
+              config:
+                tags: ['should_pass']
+
+  - name: current_date_pass
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.not_future_date:
+              config:
+                tags: ['should_pass']

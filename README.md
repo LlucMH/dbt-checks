@@ -55,7 +55,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.6
+    revision: v0.3.7
 ```
 
 Then install dependencies:
@@ -600,6 +600,22 @@ Internal helpers include:
 - filter application helpers
 - date utilities
 - validation helpers
+
+### Date helper design
+
+`as_date()` intentionally accepts both column references and SQL date expressions.
+
+This allows temporal checks to work with static columns as well as dynamic boundaries.
+
+Examples:
+
+```sql
+created_at
+current_date
+current_date - interval '7 days'
+```
+
+For this reason, temporal checks consistently rely on `as_date()` instead of implementing manual date casts individually.
 
 This improves:
 - maintainability

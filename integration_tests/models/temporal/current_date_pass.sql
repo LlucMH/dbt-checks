@@ -1,0 +1,1 @@
+select current_date as event_date
