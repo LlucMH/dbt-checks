@@ -34,7 +34,13 @@
 
 
 {% macro default__cast_to_date(value) %}
-    cast('{{ value }}' as date)
+    {%- set value_str = value | string | trim -%}
+
+    {%- if dbt_checks.is_iso_date_literal(value_str) -%}
+        cast('{{ value_str }}' as date)
+    {%- else -%}
+        cast({{ value_str }} as date)
+    {%- endif -%}
 {% endmacro %}
 
 
