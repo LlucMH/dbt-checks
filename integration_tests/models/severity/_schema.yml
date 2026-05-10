@@ -1,0 +1,21 @@
+version: 2
+
+models:
+
+  - name: severity_warn
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: [severity_warn]
+                severity: warn
+
+  - name: severity_error
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: [severity_error]
+                severity: error
