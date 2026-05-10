@@ -1,5 +1,7 @@
 {% test greater_or_equal_than(model, column_name, value, where=None) %}
 
+{{ dbt_checks.validate_required_number(value, 'value') }}
+
 with base as (
     select
         {{ dbt_checks.as_numeric(column_name) }} as check_value

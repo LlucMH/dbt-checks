@@ -1,5 +1,7 @@
 {% test date_diff_less_than(model, start_column, end_column, max_days, where=None) %}
 
+{{ dbt_checks.validate_non_negative_integer(max_days, 'max_days') }}
+
 with base as (
     select
         {{ dbt_checks.as_date(start_column) }} as check_start_date,

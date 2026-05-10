@@ -1,10 +1,18 @@
-{% macro validate_min_max(min_value, max_value) %}
+{% macro validate_required_number(value, arg_name='value') %}
 
-    {% if min_value is none or max_value is none %}
+    {% if value is none %}
         {{ exceptions.raise_compiler_error(
-            "Invalid arguments: min_value and max_value are required"
+            "Invalid argument: " ~ arg_name ~ " is required"
         ) }}
     {% endif %}
+
+{% endmacro %}
+
+
+{% macro validate_min_max(min_value, max_value) %}
+
+    {{ dbt_checks.validate_required_number(min_value, 'min_value') }}
+    {{ dbt_checks.validate_required_number(max_value, 'max_value') }}
 
     {% if min_value > max_value %}
         {{ exceptions.raise_compiler_error(
@@ -36,7 +44,12 @@
 
     {{ dbt_checks.validate_ratio(min_ratio, 'min_ratio') }}
     {{ dbt_checks.validate_ratio(max_ratio, 'max_ratio') }}
-    {{ dbt_checks.validate_min_max(min_ratio, max_ratio) }}
+
+    {% if min_ratio > max_ratio %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid arguments: min_ratio cannot be greater than max_ratio"
+        ) }}
+    {% endif %}
 
 {% endmacro %}
 
@@ -54,11 +67,7 @@
 
 {% macro validate_positive_number(value, arg_name='value') %}
 
-    {% if value is none %}
-        {{ exceptions.raise_compiler_error(
-            "Invalid argument: " ~ arg_name ~ " is required"
-        ) }}
-    {% endif %}
+    {{ dbt_checks.validate_required_number(value, arg_name) }}
 
     {% if value <= 0 %}
         {{ exceptions.raise_compiler_error(
@@ -71,11 +80,7 @@
 
 {% macro validate_non_negative_number(value, arg_name='value') %}
 
-    {% if value is none %}
-        {{ exceptions.raise_compiler_error(
-            "Invalid argument: " ~ arg_name ~ " is required"
-        ) }}
-    {% endif %}
+    {{ dbt_checks.validate_required_number(value, arg_name) }}
 
     {% if value < 0 %}
         {{ exceptions.raise_compiler_error(
@@ -86,24 +91,23 @@
 {% endmacro %}
 
 
-{% macro validate_required_number(value, arg_name='value') %}
+{% macro validate_required_date(value, arg_name='value') %}
 
-    {% if value is none %}
+    {% if value is none or value | trim == '' %}
         {{ exceptions.raise_compiler_error(
-            "Invalid argument: " ~ arg_name ~ " is required"
+            "Invalid argument: " ~ arg_name ~ " must be a valid date literal or SQL date expression"
         ) }}
     {% endif %}
 
 {% endmacro %}
 
 
-{% macro validate_required_date(value, arg_name='value') %}
+{% macro is_iso_date_literal(value) %}
 
-    {% if value is none or value | trim == '' %}
-        {{ exceptions.raise_compiler_error(
-            "Invalid argument: " ~ arg_name ~ " must be a valid date string"
-        ) }}
-    {% endif %}
+    {{ return(
+        value is string
+        and modules.re.match('^\\d{4}-\\d{2}-\\d{2}$', value)
+    ) }}
 
 {% endmacro %}
 
@@ -112,5 +116,59 @@
 
     {{ dbt_checks.validate_required_date(min_date, 'min_date') }}
     {{ dbt_checks.validate_required_date(max_date, 'max_date') }}
+
+    {% if dbt_checks.is_iso_date_literal(min_date)
+        and dbt_checks.is_iso_date_literal(max_date) %}
+
+        {% if min_date > max_date %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid arguments: min_date cannot be greater than max_date"
+            ) }}
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}
+
+
+{% macro validate_positive_integer(value, arg_name='value') %}
+
+    {{ dbt_checks.validate_positive_number(value, arg_name) }}
+
+    {% if value != value | int %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " must be an integer"
+        ) }}
+    {% endif %}
+
+{% endmacro %}
+
+
+{% macro validate_non_negative_integer(value, arg_name='value') %}
+
+    {{ dbt_checks.validate_non_negative_number(value, arg_name) }}
+
+    {% if value != value | int %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " must be an integer"
+        ) }}
+    {% endif %}
+
+{% endmacro %}
+
+
+{% macro validate_boolean(value, arg_name='value') %}
+
+    {% if value is none %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " is required"
+        ) }}
+    {% endif %}
+
+    {% if value not in [true, false] %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " must be true or false"
+        ) }}
+    {% endif %}
 
 {% endmacro %}

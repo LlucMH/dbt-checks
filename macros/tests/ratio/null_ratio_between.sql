@@ -1,5 +1,7 @@
 {% test null_ratio_between(model, column_name, min_ratio, max_ratio, where=None) %}
 
+{{ dbt_checks.validate_ratio_bounds(min_ratio, max_ratio) }}
+
 with
 {{ dbt_checks.calculate_ratio_cte(
     model,

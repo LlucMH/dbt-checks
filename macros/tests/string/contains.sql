@@ -1,5 +1,7 @@
 {% test contains(model, column_name, substring, where=None) %}
 
+{{ dbt_checks.validate_required_string(substring, 'substring') }}
+
 with base as (
     select
         {{ dbt_checks.as_string(column_name) }} as check_value

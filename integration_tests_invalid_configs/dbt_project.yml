@@ -1,0 +1,23 @@
+name: integration_tests_invalid_configs
+version: "1.0"
+config-version: 2
+
+profile: integration_tests_invalid_configs
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+
+packages-install-path: "{{ env_var('DBT_PACKAGES_INSTALL_PATH', 'dbt_packages') }}"
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "{{ env_var('DBT_PACKAGES_INSTALL_PATH', 'dbt_packages') }}"
+
+models:
+  integration_tests_invalid_configs:
+    +materialized: view
+
+dispatch:
+  - macro_namespace: dbt_checks
+    search_order: ["dbt_checks", "dbt"]

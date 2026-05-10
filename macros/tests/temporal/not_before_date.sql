@@ -1,5 +1,7 @@
 {% test not_before_date(model, column_name, min_date, where=None) %}
 
+{{ dbt_checks.validate_required_date(min_date, 'min_date') }}
+
 with base as (
     select
         {{ dbt_checks.as_date(column_name) }} as check_value

@@ -1,5 +1,7 @@
 {% test ends_with(model, column_name, suffix, where=None) %}
 
+{{ dbt_checks.validate_required_string(suffix, 'suffix') }}
+
 with base as (
     select
         {{ dbt_checks.as_string(column_name) }} as check_value

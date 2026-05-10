@@ -1,0 +1,147 @@
+version: 2
+
+models:
+
+  - name: invalid_min_max
+    columns:
+      - name: value
+        data_tests:
+
+          - dbt_checks.between_values:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_value: 10
+                max_value: 0
+
+          - dbt_checks.row_count_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_value: 100
+                max_value: 10
+
+          - dbt_checks.length_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_length: 20
+                max_length: 5
+
+  - name: invalid_ratio
+    columns:
+      - name: value
+        data_tests:
+
+          - dbt_checks.null_ratio_below:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                threshold: 2
+
+          - dbt_checks.null_ratio_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_ratio: 0.8
+                max_ratio: 0.2
+
+          - dbt_checks.positive_ratio_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_ratio: -1
+                max_ratio: 0.5
+
+          - dbt_checks.negative_ratio_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_ratio: 0.1
+                max_ratio: 5
+
+          - dbt_checks.value_ratio_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                value: ""
+                min_ratio: 0.1
+                max_ratio: 0.9
+
+  - name: invalid_boolean
+    columns:
+      - name: value
+        data_tests:
+
+          - dbt_checks.between_values:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_value: 0
+                max_value: 10
+                inclusive: "yes"
+
+          - dbt_checks.between_values:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_value: 0
+                max_value: 10
+                inclusive: 1
+
+  - name: invalid_integer
+    columns:
+      - name: value
+        data_tests:
+
+          - dbt_checks.recent_date:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                max_age_days: 1.5
+
+          - dbt_checks.date_diff_less_than:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                start_column: value
+                end_column: value
+                max_days: 2.7
+
+          - dbt_checks.row_count_less_than:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                value: 1.2
+
+          - dbt_checks.row_count_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_value: 0.5
+                max_value: 10
+
+  - name: invalid_date_range
+    columns:
+      - name: value
+        data_tests:
+
+          - dbt_checks.between_dates:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_date: "2025-12-31"
+                max_date: "2024-01-01"
+
+          - dbt_checks.not_before_date:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_date: ""
+
+          - dbt_checks.between_dates:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                min_date: null
+                max_date: "2024-01-01"

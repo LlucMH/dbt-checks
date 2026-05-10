@@ -1,5 +1,7 @@
 {% test starts_with(model, column_name, prefix, where=None) %}
 
+{{ dbt_checks.validate_required_string(prefix, 'prefix') }}
+
 with base as (
     select
         {{ dbt_checks.as_string(column_name) }} as check_value

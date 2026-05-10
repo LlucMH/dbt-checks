@@ -1,5 +1,8 @@
 {% test value_ratio_between(model, column_name, value, min_ratio, max_ratio, where=None) %}
 
+{{ dbt_checks.validate_ratio_bounds(min_ratio, max_ratio) }}
+{{ dbt_checks.validate_required_string(value, 'value') }}
+
 with
 {{ dbt_checks.calculate_ratio_cte(
     model,
