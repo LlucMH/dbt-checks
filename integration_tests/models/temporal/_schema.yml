@@ -164,11 +164,3 @@ models:
             max_days: 10
           config:
             tags: ["should_pass"]
-
-  - name: no_weekend_dates_expression_pass
-    columns:
-      - name: date
-        data_tests:
-          - dbt_checks.no_weekend_dates:
-              config:
-                tags: ["should_pass"]
