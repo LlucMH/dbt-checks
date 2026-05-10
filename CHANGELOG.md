@@ -6,6 +6,34 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.6] - 2026-05-10
+
+### Added
+- CI validation for internal helper macros:
+  - `as_numeric`
+  - `as_string`
+  - `as_date`
+  - `safe_ratio`
+  - `apply_where`
+  - `apply_and_where`
+  - `applied_condition`
+- CI validation for README core UX sections
+- CI validation for current installation version in README
+- Additional CI safeguards for documentation consistency
+
+### Changed
+- Improved CI coverage for internal package architecture
+- Improved CI coverage for documentation quality
+- Improved release consistency validation
+
+### Notes
+- No macro behavior changes
+- No SQL generation changes
+- No breaking changes
+- Fully compatible with previous `0.3.x` releases
+
+---
+
 ## [0.3.5] - 2026-05-10
 
 ### Added
