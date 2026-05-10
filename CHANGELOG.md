@@ -14,8 +14,13 @@ The format follows semantic versioning.
   - `severity: warn`
   - `severity: error`
   - `warn_if`
+  - `error_if`
   - CI usage with `--warn-error`
-- Integration tests covering warning and error severity behavior
+- Integration tests covering:
+  - warning severity behavior
+  - error severity behavior
+  - `warn_if` behavior
+  - `error_if` behavior
 
 ### Changed
 - Improved README guidance for production adoption

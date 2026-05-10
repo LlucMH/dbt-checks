@@ -237,9 +237,9 @@ Useful for:
 - downstream-breaking issues
 - SLA violations
 
-## warn_if and error_if
+## `warn_if` and `error_if`
 
-You can also use dbt's native `warn_if` and `error_if` configuration.
+dbt also allows severity thresholds based on the number of failing rows.
 
 ```yaml
 models:
@@ -254,6 +254,33 @@ models:
                 severity: warn
                 warn_if: "> 0"
 ```
+
+This is useful when you want small issues to raise warnings but larger issues to fail the pipeline.
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                warn_if: "> 0"
+                error_if: "> 10"
+```
+
+In this example:
+
+- 1 to 10 failing rows produce a warning
+- more than 10 failing rows produce an error
+
+This is useful for progressive adoption:
+
+1. Start with `warn_if`
+2. Monitor failures
+3. Fix upstream issues
+4. Tighten thresholds over time
+5. Promote checks to hard errors
 
 ## CI behavior
 
