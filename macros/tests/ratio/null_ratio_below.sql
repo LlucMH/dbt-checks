@@ -1,5 +1,7 @@
 {% test null_ratio_below(model, column_name, threshold, where=None) %}
 
+{{ dbt_checks.validate_ratio(threshold, 'threshold') }}
+
 with
 {{ dbt_checks.calculate_ratio_cte(
     model,
