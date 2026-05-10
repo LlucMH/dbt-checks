@@ -17,3 +17,11 @@
     '{{ where if where is not none else "none" }}'
 
 {% endmacro %}
+
+{% macro apply_and_where(where) %}
+
+    {% if where is not none %}
+        and {{ where }}
+    {% endif %}
+
+{% endmacro %}

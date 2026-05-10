@@ -5,9 +5,7 @@ with validation as (
         sum({{ dbt_checks.as_numeric(column_name) }}) as metric_value
     from {{ model }}
     where {{ column_name }} is not null
-    {% if where is not none %}
-        and {{ where }}
-    {% endif %}
+    {{ dbt_checks.apply_and_where(where) }}
 )
 
 select
