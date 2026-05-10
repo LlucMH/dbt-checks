@@ -1,0 +1,15 @@
+name: integration_tests_invalid_configs
+version: "1.0"
+config-version: 2
+
+profile: integration_tests_invalid_configs
+
+model-paths: ["models"]
+
+models:
+  integration_tests_invalid_configs:
+    +materialized: view
+
+dispatch:
+  - macro_namespace: dbt_checks
+    search_order: ["dbt_checks", "dbt"]

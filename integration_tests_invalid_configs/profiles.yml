@@ -1,0 +1,8 @@
+integration_tests_invalid_configs:
+  target: dev
+
+  outputs:
+    dev:
+      type: duckdb
+      path: integration_tests_invalid_configs.duckdb
+      threads: 1
