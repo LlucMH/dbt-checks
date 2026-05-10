@@ -6,6 +6,23 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.7] - 2026-05-11
+
+### Added
+- Added support for SQL date expressions in temporal boundaries such as `min_date` and `max_date`.
+- Added integration coverage for dynamic SQL date expressions across temporal checks.
+
+### Changed
+- Expanded the temporal helper architecture to consistently support both ISO date literals and SQL date expressions.
+- Improved documentation around temporal helper design and dynamic date boundary behavior.
+
+### Fixed
+- Fixed temporal boundary rendering for SQL date expressions containing quotes.
+- Improved consistency of temporal helper usage across checks.
+- Improved SQL escaping behavior in temporal failure outputs.
+
+---
+
 ## [0.3.6] - 2026-05-10
 
 ### Added

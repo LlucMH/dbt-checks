@@ -55,7 +55,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.6
+    revision: v0.3.7
 ```
 
 Then install dependencies:
@@ -593,13 +593,47 @@ Many dbt projects repeatedly implement the same validation logic.
 `dbt-checks` uses reusable internal helper macros to standardize SQL generation across all checks.
 
 Internal helpers include:
-
 - casting helpers
 - reusable predicates
 - ratio utilities
 - filter application helpers
 - date utilities
 - validation helpers
+
+### Date helper design
+
+Temporal helpers intentionally support both:
+- static ISO date literals
+- SQL date expressions
+
+Examples:
+
+```sql
+created_at
+current_date
+current_date - interval '7 days'
+```
+
+This allows temporal checks to work with:
+- static date boundaries
+- dynamic temporal windows
+- adapter-specific SQL date expressions
+
+Examples:
+
+```sql
+min_date: "2024-01-01"
+max_date: current_date
+```
+
+Temporal checks consistently rely on centralized helper macros instead of implementing manual date casts individually.
+
+This includes:
+- `as_date()`
+- `cast_to_date()`
+- reusable temporal predicates
+
+SQL expressions are safely rendered and escaped internally to preserve cross-warehouse compatibility and predictable SQL generation.
 
 This improves:
 - maintainability

@@ -1,0 +1,1 @@
+select current_date - interval '3 days' as date

@@ -115,3 +115,52 @@ models:
           - dbt_checks.no_weekend_dates:
               config:
                 tags: ["should_fail"]
+
+  - name: not_future_date_expression_pass
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.not_future_date:
+              config:
+                tags: ["should_pass"]
+
+  - name: not_before_date_expression_pass
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.not_before_date:
+              arguments:
+                min_date: current_date - interval '30 days'
+              config:
+                tags: ["should_pass"]
+
+  - name: between_dates_expression_pass
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.between_dates:
+              arguments:
+                min_date: current_date - interval '30 days'
+                max_date: current_date
+              config:
+                tags: ["should_pass"]
+
+  - name: recent_date_expression_pass
+    columns:
+      - name: date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+              config:
+                tags: ["should_pass"]
+
+  - name: date_diff_less_than_expression_pass
+    data_tests:
+      - dbt_checks.date_diff_less_than:
+          arguments:
+            start_column: start_date
+            end_column: end_date
+            max_days: 10
+          config:
+            tags: ["should_pass"]
