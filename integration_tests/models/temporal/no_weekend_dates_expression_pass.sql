@@ -1,0 +1,1 @@
+select current_date + ((1 - extract(dow from current_date) + 7) % 7) as date

@@ -1,1 +1,0 @@
-select current_date - interval '7 days' as event_date
