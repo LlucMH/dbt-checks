@@ -19,3 +19,23 @@ models:
               config:
                 tags: [severity_error]
                 severity: error
+
+  - name: severity_warn_if
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: [severity_warn_if]
+                warn_if: ">0"
+                error_if: ">10"
+
+  - name: severity_error_if
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: [severity_error_if]
+                warn_if: ">0"
+                error_if: ">1"
