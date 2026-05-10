@@ -14,7 +14,12 @@ select
     {{ dbt_checks.cast_to_date(min_date) }} as expected_min_date,
     {{ dbt_checks.cast_to_date(max_date) }} as expected_max_date,
     'between_dates' as failed_check,
-    {{ dbt.string_literal("Date must be between " ~ min_date ~ " and " ~ max_date) }} as failure_reason,
+    {{ dbt.string_literal(
+        "Date must be between "
+        ~ dbt_checks.escape_sql_string(min_date)
+        ~ " and "
+        ~ dbt_checks.escape_sql_string(max_date)
+    ) }} as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where

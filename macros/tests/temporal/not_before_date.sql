@@ -13,7 +13,10 @@ select
     check_value as failing_value,
     {{ dbt_checks.cast_to_date(min_date) }} as expected_min_date,
     'not_before_date' as failed_check,
-    {{ dbt.string_literal("Date must not be before " ~ min_date) }} as failure_reason,
+    {{ dbt.string_literal(
+        "Date must not be before "
+        ~ dbt_checks.escape_sql_string(min_date)
+    ) }} as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition
 from base
 where
