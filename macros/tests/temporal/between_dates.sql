@@ -1,5 +1,7 @@
 {% test between_dates(model, column_name, min_date, max_date, where=None) %}
 
+{{ dbt_checks.validate_date_range(min_date, max_date) }}
+
 with base as (
     select
         {{ dbt_checks.as_date(column_name) }} as check_value
