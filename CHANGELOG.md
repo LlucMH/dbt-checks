@@ -6,6 +6,37 @@ The format follows semantic versioning.
 
 ---
 
+## [0.3.5] - 2026-05-10
+
+### Added
+- Table of Contents for improved navigation
+- Real-world usage pattern examples
+- Scoped validation examples using `where`
+- Production adoption recommendations
+- Warehouse compatibility matrix
+- Documentation for:
+  - NULL handling behavior
+  - empty table behavior
+  - ratio division safety
+  - validation guard behavior
+- Additional standardized failure output examples
+
+### Changed
+- Expanded README with production-oriented guidance
+- Improved failure output documentation
+- Improved severity rollout guidance
+- Improved installation and usage documentation
+- Clarified edge case behavior across check categories
+- Improved readability and structure of documentation
+
+### Notes
+- No macro behavior changes
+- No SQL generation changes
+- No breaking changes
+- Fully compatible with previous `0.3.x` releases
+
+---
+
 ## [0.3.4] - 2026-05-10
 
 ### Added
