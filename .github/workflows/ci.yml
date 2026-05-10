@@ -42,14 +42,14 @@ jobs:
           DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
         run: dbt deps
 
-      - name: Validate invalid configurations fail compilation
+      - name: Validate invalid configurations fail due to validation guards
         working-directory: integration_tests_invalid_configs
         env:
           DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
         run: |
           set +e
-          dbt compile
-          status=$?
+          dbt compile 2>&1 | tee invalid_config_output.log
+          status=${PIPESTATUS[0]}
           set -e
 
           if [ "$status" -eq 0 ]; then
@@ -57,7 +57,22 @@ jobs:
             exit 1
           fi
 
-          echo "Invalid configuration project failed compilation as expected."
+          if grep -q "dbt_checks' is undefined" invalid_config_output.log; then
+            echo "Invalid configuration project failed because dbt_checks was not installed."
+            exit 1
+          fi
+
+          if grep -q "macro that does not exist" invalid_config_output.log; then
+            echo "Invalid configuration project failed because a macro could not be found."
+            exit 1
+          fi
+
+          if ! grep -q "Invalid argument\|Invalid arguments" invalid_config_output.log; then
+            echo "Invalid configuration project failed, but not because of validation guards."
+            exit 1
+          fi
+
+          echo "Invalid configuration project failed due to validation guards as expected."
 
       - name: Assert test selection is not empty
         working-directory: integration_tests
