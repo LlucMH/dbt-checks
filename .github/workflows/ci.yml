@@ -47,7 +47,17 @@ jobs:
         env:
           DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
         run: |
-          dbt parse && exit 1 || exit 0
+          set +e
+          dbt compile
+          status=$?
+          set -e
+
+          if [ "$status" -eq 0 ]; then
+            echo "Expected invalid configuration project to fail compilation, but it passed."
+            exit 1
+          fi
+
+          echo "Invalid configuration project failed compilation as expected."
 
       - name: Assert test selection is not empty
         working-directory: integration_tests
@@ -187,7 +197,6 @@ jobs:
 
           for schema, table in tables:
               query = f'select * from "{schema}"."{table}" limit 20'
-
               result = con.execute(query)
 
               headers = [col[0] for col in result.description]
