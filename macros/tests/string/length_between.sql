@@ -1,5 +1,7 @@
 {% test length_between(model, column_name, min_length, max_length, where=None) %}
 
+{{ dbt_checks.validate_min_max(min_length, max_length) }}
+
 with base as (
     select
         {{ dbt_checks.as_string(column_name) }} as check_value
