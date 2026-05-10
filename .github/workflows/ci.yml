@@ -36,17 +36,24 @@ jobs:
         working-directory: integration_tests
         run: dbt parse
 
+      - name: Install invalid config package dependencies
+        working-directory: integration_tests_invalid_configs
+        env:
+          DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
+        run: dbt deps
+
       - name: Validate invalid configurations fail compilation
-        working-directory: integration_tests
+        working-directory: integration_tests_invalid_configs
+        env:
+          DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests_invalid_configs
         run: |
-          dbt parse --select tag:should_fail_compile && exit 1 || exit 0
+          dbt parse && exit 1 || exit 0
 
       - name: Assert test selection is not empty
         working-directory: integration_tests
         run: |
           dbt ls --select tag:should_pass --resource-type test | grep .
           dbt ls --select tag:should_fail --resource-type test | grep .
-          dbt ls --select tag:should_fail_compile --resource-type test | grep .
 
       - name: Check no select star in test macros
         run: |
