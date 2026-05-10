@@ -1,28 +1,11 @@
 {% test null_ratio_between(model, column_name, min_ratio, max_ratio, where=None) %}
 
-with stats as (
-    select
-        count(*) as total_rows,
-        sum(
-            case
-                when {{ column_name }} is null then 1
-                else 0
-            end
-        ) as null_rows
-    from {{ model }}
-    {% if where is not none %}
-        where {{ where }}
-    {% endif %}
-),
-
-ratio as (
-    select
-        case
-            when total_rows = 0 then 0
-            else null_rows * 1.0 / total_rows
-        end as metric_ratio
-    from stats
-)
+with
+{{ dbt_checks.calculate_ratio_cte(
+    model,
+    column_name ~ " is null",
+    where
+) }}
 
 select
     metric_ratio as actual_ratio,
@@ -30,10 +13,13 @@ select
     {{ max_ratio }} as expected_max_ratio,
     'null_ratio_between' as failed_check,
     'Null ratio must be between {{ min_ratio }} and {{ max_ratio }}' as failure_reason,
-    '{{ where if where is not none else "none" }}' as applied_condition
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
 from ratio
 where
-    metric_ratio < {{ min_ratio }}
-    or metric_ratio > {{ max_ratio }}
+    {{ dbt_checks.build_between_predicate(
+        'metric_ratio',
+        min_ratio,
+        max_ratio
+    ) }}
 
 {% endtest %}
