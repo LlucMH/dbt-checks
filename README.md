@@ -15,6 +15,31 @@
 
 ---
 
+# Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Scoped Checks with `where`](#scoped-checks-with-where)
+- [Standardized Failure Output](#standardized-failure-output)
+- [NULL Handling](#null-handling)
+- [Severity Configuration](#severity-configuration)
+- [Real-world Usage Patterns](#real-world-usage-patterns)
+- [Available Checks](#available-checks)
+  - [Numeric](#numeric)
+  - [String](#string)
+  - [Temporal](#temporal)
+  - [Aggregation](#aggregation)
+  - [Ratio](#ratio)
+- [Validation Guards](#validation-guards)
+- [Supported Warehouses](#supported-warehouses)
+- [Why dbt-checks?](#why-dbt-checks)
+- [Internal Architecture](#internal-architecture)
+- [Production Adoption Recommendations](#production-adoption-recommendations)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
 **`dbt-checks`** is a lightweight library of reusable data quality checks for dbt projects.
 
 It provides simple, expressive tests to validate business rules and data integrity directly in your models — without writing custom SQL every time.
@@ -30,7 +55,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.4
+    revision: v0.3.5
 ```
 
 Then install dependencies:
@@ -43,7 +68,7 @@ dbt deps
 
 # Usage
 
-Checks can be added directly to models or columns in your schema files.
+Checks can be applied at both model-level and column-level in your schema files.
 
 Example:
 
@@ -68,7 +93,7 @@ dbt test
 
 # Scoped Checks with `where`
 
-All checks support an optional `where` argument to apply validations only to a subset of rows.
+All checks support dbt's native `where` configuration to apply validations only to a subset of rows.
 
 This is useful when you want to validate specific business segments, statuses, partitions, or recent data.
 
@@ -83,6 +108,7 @@ models:
           - dbt_checks.greater_than:
               arguments:
                 value: 0
+              config:
                 where: "status = 'active'"
 ```
 
@@ -159,6 +185,12 @@ Checks may also expose:
 - `actual_diff_days`
 - `actual_day_of_week`
 
+### Example with scoped validation
+
+| failing_value | failed_check | applied_condition |
+| --- | --- | --- |
+| -5 | non_negative | status = 'active' |
+
 This makes dbt-checks outputs easier to:
 - debug in CI
 - inspect in stored failures
@@ -184,6 +216,20 @@ Use dedicated checks to validate null presence.
 Use:
 - null_ratio_below
 - null_ratio_between
+
+## Edge cases
+
+### Empty tables
+
+Aggregation checks support empty tables safely.
+
+### Division by zero
+
+Ratio checks use safe division helpers internally.
+
+### Invalid configurations
+
+Invalid arguments fail compilation early through validation guards.
 
 # Severity Configuration
 
@@ -298,6 +344,49 @@ Recommended rollout strategy:
 2. Monitor failures in CI or dbt artifacts
 3. Fix upstream data quality issues
 4. Promote stable checks to `severity: error`
+
+# Real-world Usage Patterns
+
+## Validate only active records
+
+```yaml
+- dbt_checks.not_blank:
+    config:
+      where: "is_active = true"
+```
+
+## Validate only recent partitions
+
+```yaml
+- dbt_checks.non_negative:
+    config:
+      where: "created_at >= current_date - interval '30 day'"
+```
+
+## Soft monitoring
+
+```yaml
+- dbt_checks.null_ratio_below:
+    arguments:
+      threshold: 0.05
+    config:
+      severity: warn
+```
+
+## Progressive severity rollout
+
+```yaml
+- dbt_checks.non_negative:
+    config:
+      warn_if: "> 0"
+      error_if: "> 100"
+```
+
+## Strict CI enforcement
+
+```bash
+dbt test --warn-error
+```
 
 # Available Checks
 
@@ -432,6 +521,15 @@ columns:
 
 `dbt-checks` validates test arguments during compilation to detect invalid configurations early.
 
+Example:
+
+```yaml
+- dbt_checks.between_values:
+    arguments:
+      min_value: 100
+      max_value: 0
+```
+
 Examples of invalid configurations detected automatically:
 
 - `min_value > max_value`
@@ -456,7 +554,17 @@ Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
 
 **Tested on DuckDB in CI.**
 
-**Aditional adapters are supported through dbt dispatch (best-efort compatibility).**
+**Additional adapters are supported through dbt dispatch (best-effort compatibility).**
+
+| Warehouse | Status |
+|---|---|
+| DuckDB | Fully tested in CI |
+| Snowflake | Supported via dispatch |
+| BigQuery | Supported via dispatch |
+| Databricks | Supported via dispatch |
+| Spark | Supported via dispatch |
+| Postgres | Supported via dispatch |
+| Redshift | Supported via dispatch |
 
 # Why dbt-checks?
 
@@ -477,6 +585,8 @@ Many dbt projects repeatedly implement the same validation logic.
 - centralized casting, predicates, ratios, and filtering logic
 - native dbt severity support
 - clear warn/error usage guidance
+- production-ready usage examples
+- progressive data quality adoption patterns
 
 # Internal Architecture
 
@@ -496,6 +606,18 @@ This improves:
 - adapter compatibility
 - consistency
 - future extensibility
+
+# Production Adoption Recommendations
+
+Recommended rollout strategy:
+
+1. Start new checks as `severity: warn`
+2. Monitor failures in CI
+3. Fix upstream quality issues
+4. Tighten thresholds progressively
+5. Promote stable checks to `severity: error`
+
+This approach allows safer incremental adoption in mature data platforms.
 
 # Contributing
 
