@@ -1,5 +1,7 @@
 {% test row_count_between(model, min_value, max_value, where=None) %}
 
+{{ dbt_checks.validate_min_max(min_value, max_value) }}
+
 with validation as (
     select
         count(*) as metric_value

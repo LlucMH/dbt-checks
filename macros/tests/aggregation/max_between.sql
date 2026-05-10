@@ -1,5 +1,7 @@
 {% test max_between(model, column_name, min_value, max_value, where=None) %}
 
+{{ dbt_checks.validate_min_max(min_value, max_value) }}
+
 with validation as (
     select
         max({{ dbt_checks.as_numeric(column_name) }}) as metric_value

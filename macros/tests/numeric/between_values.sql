@@ -1,5 +1,7 @@
 {% test between_values(model, column_name, min_value, max_value, inclusive=true, where=None) %}
 
+{{ dbt_checks.validate_min_max(min_value, max_value) }}
+
 with base as (
     select
         {{ dbt_checks.as_numeric(column_name) }} as check_value
