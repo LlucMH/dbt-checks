@@ -55,7 +55,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.5
+    revision: v0.3.6
 ```
 
 Then install dependencies:
