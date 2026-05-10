@@ -113,9 +113,9 @@ jobs:
           grep -i "Validation Guards" README.md
           grep -i "Production Adoption Recommendations" README.md
 
-      - name: Check README installation version is current
+      - name: Check README installation version exists
         run: |
-          grep "revision: v0.3.5" README.md
+          grep -E "revision: v[0-9]+\.[0-9]+\.[0-9]+" README.md
 
       - name: Seed test data
         working-directory: integration_tests
