@@ -30,6 +30,7 @@
   - [Temporal](#temporal)
   - [Aggregation](#aggregation)
   - [Ratio](#ratio)
+- [Grouped Checks](#grouped-checks)
 - [Validation Guards](#validation-guards)
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
@@ -55,7 +56,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.0
+    revision: v0.4.1
 ```
 
 Then install dependencies:
@@ -155,6 +156,30 @@ Used by:
 - min_between
 - max_between
 - row_count_between
+
+---
+
+## Grouped aggregation checks
+
+Grouped aggregation checks expose grouped context directly in the failure output.
+
+Example output:
+
+| grouped_by_1 | actual_value | expected_min_value |
+| --- | --- | --- |
+| electronics | 900 | 1000 |
+
+Used by grouped validations such as:
+
+- grouped row count checks
+- grouped aggregation checks
+- segmented business rule validation
+
+This makes grouped failures easier to:
+- debug in CI
+- identify problematic segments
+- inspect stored failures
+- consume programmatically
 
 ---
 
@@ -519,11 +544,13 @@ columns:
 
 # Grouped Checks
 
-Some checks support grouped validation using `group_by`.
+Some aggregation checks support grouped validation using `group_by`.
 
-Grouped checks validate conditions independently for each segment.
+Grouped checks validate conditions independently for each segment while reusing the same check names and APIs.
 
-Example:
+Grouped behavior is enabled through the optional `group_by` argument.
+
+## Basic grouped validation
 
 ```yaml
 models:
@@ -531,20 +558,61 @@ models:
     data_tests:
       - dbt_checks.row_count_greater_than:
           arguments:
-            group_by: status
             value: 100
+            group_by: status
+```
+This validates that each `status` group has more than 100 rows.
+
+## Grouped validation with `where`
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 100
+            group_by: status
+          config:
+            where: "created_at >= current_date - interval '30 days'"
+```
+This validates each `status` group only for rows matching the `where` condition.
+
+## Grouped Aggregation Checks
+
+Grouped aggregation checks allow aggregate validations to run independently per segment.
+
+Supported grouped aggregation checks include:
+
+- row_count_greater_than
+- row_count_less_than
+- row_count_between
+- avg_between
+- sum_between
+- min_between
+- max_between
+
+Example:
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - dbt_checks.avg_between:
+          arguments:
+            column_name: order_value
+            min_value: 10
+            max_value: 500
+            group_by: country
 ```
 
-This validates that each `status` has more than 100 rows.
+This validates that the average `order_value` is between 10 and 500 for each `country`.
 
-```yaml id="j95rt3"
-- dbt_checks.row_count_greater_than:
-    arguments:
-      value: 100
-      group_by: status
-    config:
-      where: "created_at >= current_date - interval '30 days'"
-```
+Grouped failure outputs expose grouped context fields such as:
+
+grouped_by_1
+
+Multi-column `group_by` is not documented as public API yet and is planned for a later `0.4.x` release.
 
 # Validation Guards
 
@@ -616,6 +684,9 @@ Many dbt projects repeatedly implement the same validation logic.
 - clear warn/error usage guidance
 - production-ready usage examples
 - progressive data quality adoption patterns
+- grouped validation support
+- segmented business rule validation
+- reusable grouped aggregation architecture
 
 # Internal Architecture
 

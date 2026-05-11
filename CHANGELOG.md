@@ -6,6 +6,26 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.1] - 2026-05-12
+
+### Added
+- Added grouped aggregation support to existing aggregation checks.
+- Added `group_by` support for `avg_between`, `sum_between`, `min_between`, `max_between`, `row_count_between`, and `row_count_less_than`.
+- Added integration coverage for grouped aggregation checks, including `where` support, null values, null groups, and failing grouped thresholds.
+
+### Changed
+- Reused existing check names and APIs for grouped aggregation behavior instead of introducing grouped-specific check names.
+- Introduced reusable internal aggregation helpers for consistent grouped and non-grouped aggregation SQL generation.
+- Expanded README documentation for grouped aggregation checks and `group_by` usage.
+
+### Fixed
+- Improved grouped aggregation output alias handling through centralized grouping helpers.
+
+### Breaking Changes
+- None.
+
+----
+
 ## [0.4.0] - 2026-05-12
 
 ### Added
