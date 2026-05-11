@@ -172,3 +172,24 @@
     {% endif %}
 
 {% endmacro %}
+
+
+{% macro validate_group_by(group_by) %}
+
+    {% if group_by is none %}
+        {{ return('') }}
+    {% endif %}
+
+    {% if group_by is string %}
+        {{ return('') }}
+    {% endif %}
+
+    {% if group_by is sequence and group_by is not string %}
+        {{ return('') }}
+    {% endif %}
+
+    {{ exceptions.raise_compiler_error(
+        "Invalid argument: group_by must be a string or list of strings"
+    ) }}
+
+{% endmacro %}

@@ -18,6 +18,7 @@
 
 {% endmacro %}
 
+
 {% macro apply_and_where(where) %}
 
     {% if where is not none %}
