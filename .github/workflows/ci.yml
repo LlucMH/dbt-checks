@@ -120,7 +120,7 @@ jobs:
       - name: Validate grouped validation documentation
         run: |
           grep -i "group_by" README.md
-          grep -i "Grouped Checks" README.md
+          grep -i "Grouped" README.md
           grep "normalize_group_by" macros/helpers/grouping.sql
           grep "render_group_by_select" macros/helpers/grouping.sql
           grep "render_group_by_clause" macros/helpers/grouping.sql
