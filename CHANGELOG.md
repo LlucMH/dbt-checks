@@ -6,6 +6,26 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.0] - 2026-05-12
+
+### Added
+- Added basic grouped validation support through `group_by`.
+- Added `group_by` support to the existing `row_count_greater_than` check.
+- Added grouped row count integration tests, including `where` support and null group values.
+
+### Changed
+- Introduced reusable internal grouping helpers for grouped validation patterns.
+- Existing checks can now be extended with grouped behavior without introducing separate check names.
+
+### Notes
+- No new grouped check name was introduced for `row_count_greater_than`; grouped validation is enabled through the existing check API using `group_by`.
+- Multi-column `group_by` is not documented as public API yet and is planned for a later `0.4.x` release.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.3.7] - 2026-05-11
 
 ### Added

@@ -55,7 +55,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.3.7
+    revision: v0.4.0
 ```
 
 Then install dependencies:
@@ -515,6 +515,35 @@ columns:
       - dbt_checks.null_ratio_below:
           arguments:
             threshold: 0.05
+```
+
+# Grouped Checks
+
+Some checks support grouped validation using `group_by`.
+
+Grouped checks validate conditions independently for each segment.
+
+Example:
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            group_by: status
+            value: 100
+```
+
+This validates that each `status` has more than 100 rows.
+
+```yaml id="j95rt3"
+- dbt_checks.row_count_greater_than:
+    arguments:
+      value: 100
+      group_by: status
+    config:
+      where: "created_at >= current_date - interval '30 days'"
 ```
 
 # Validation Guards

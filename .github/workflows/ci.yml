@@ -117,6 +117,15 @@ jobs:
         run: |
           grep -E "revision: v[0-9]+\.[0-9]+\.[0-9]+" README.md
 
+      - name: Validate grouped validation documentation
+        run: |
+          grep -i "group_by" README.md
+          grep -i "Grouped" README.md
+          grep "normalize_group_by" macros/helpers/grouping.sql
+          grep "render_group_by_select" macros/helpers/grouping.sql
+          grep "render_group_by_clause" macros/helpers/grouping.sql
+          grep "render_group_by_output" macros/helpers/grouping.sql
+
       - name: Seed test data
         working-directory: integration_tests
         run: dbt seed

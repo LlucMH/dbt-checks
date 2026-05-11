@@ -13,6 +13,7 @@ stats as (
     {{ dbt_checks.apply_where(where) }}
 ),
 
+
 ratio as (
     select
         total_rows,
