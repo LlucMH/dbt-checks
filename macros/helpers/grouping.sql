@@ -18,6 +18,15 @@
 {% endmacro %}
 
 
+{% macro render_group_by_output(group_by) %}
+    {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
+
+    {%- for group in groups -%}
+        grouped_by_{{ loop.index }}{% if not loop.last %}, {% endif %}
+    {%- endfor -%}
+{% endmacro %}
+
+
 {% macro render_group_by_clause(group_by) %}
     {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 

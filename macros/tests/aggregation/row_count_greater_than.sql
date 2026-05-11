@@ -28,7 +28,7 @@ with validation as (
 select
 
     {%- if groups | length > 0 %}
-        {{ dbt_checks.render_group_by_select(groups) }},
+        {{ dbt_checks.render_group_by_output(groups) }},
     {%- endif %}
 
     metric_value as actual_value,
