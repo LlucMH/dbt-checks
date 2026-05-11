@@ -22,9 +22,6 @@
     {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
     {%- if groups | length > 0 -%}
-        group by
-        {%- for group in groups -%}
-            {{ group }}{% if not loop.last %}, {% endif %}
-        {%- endfor -%}
+        {{ return("group by " ~ (groups | join(", "))) }}
     {%- endif -%}
 {% endmacro %}

@@ -6,7 +6,7 @@ The format follows semantic versioning.
 
 ---
 
-## [0.4.0] - 2026-05-11
+## [0.4.0] - 2026-05-12
 
 ### Added
 - Added basic grouped validation support through `group_by`.
