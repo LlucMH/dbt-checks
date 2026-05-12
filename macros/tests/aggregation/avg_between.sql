@@ -38,11 +38,7 @@ select
 from validation
 
 where
-    {{ dbt_checks.build_between_predicate(
-        'metric_value',
-        min_value,
-        max_value,
-        true
-    ) }}
+    metric_value is null
+    or {{ dbt_checks.build_between_predicate('metric_value', min_value, max_value) }}
 
 {% endtest %}
