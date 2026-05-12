@@ -242,3 +242,170 @@ models:
             group_by: category
           config:
             tags: ["should_fail"]
+
+  - name: grouped_ratio_valid
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.30
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.20
+                max_ratio: 0.30
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.0
+                max_ratio: 1.0
+                group_by:
+                  - country
+                  - status
+              config:
+                tags: ["should_pass"]
+
+      - name: amount
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+  - name: grouped_ratio_where_valid
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.01
+                group_by: country
+              config:
+                where: "is_active = true"
+                tags: ["should_pass"]
+
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.60
+                max_ratio: 0.70
+                group_by: country
+              config:
+                where: "is_active = true"
+                tags: ["should_pass"]
+
+      - name: amount
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.60
+                max_ratio: 0.70
+                group_by: country
+              config:
+                where: "is_active = true"
+                tags: ["should_pass"]
+
+  - name: grouped_ratio_null_group_valid
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.50
+                max_ratio: 0.50
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+      - name: amount
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.50
+                max_ratio: 0.50
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.50
+                max_ratio: 0.50
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+  - name: grouped_ratio_invalid
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.30
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.20
+                max_ratio: 0.30
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+      - name: amount
+        data_tests:
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.negative_ratio_between:
+              arguments:
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_fail"]

@@ -56,7 +56,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.1
+    revision: v0.4.2
 ```
 
 Then install dependencies:
@@ -614,6 +614,58 @@ grouped_by_1
 
 Multi-column `group_by` is not documented as public API yet and is planned for a later `0.4.x` release.
 
+## Grouped Ratio Checks
+
+Ratio checks also support grouped validation through `group_by`.
+
+Supported grouped ratio checks include:
+
+- `null_ratio_below`
+- `null_ratio_between`
+- `positive_ratio_between`
+- `negative_ratio_between`
+- `value_ratio_between`
+
+This allows ratio-based business rules to be validated independently for each segment.
+
+Example:
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: email
+        data_tests:
+          - dbt_checks.null_ratio_below:
+              arguments:
+                threshold: 0.05
+                group_by: country
+```
+This validates that each `country` has a null ratio below `5%`.
+
+Multiple grouping columns are also supported:
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.7
+                max_ratio: 1.0
+                group_by:
+                  - country
+                  - sales_channel
+```
+This validates the ratio independently for each `(country, sales_channel)` combination.
+
+Grouped ratio checks support both:
+- single-column grouping
+- multi-column grouping
+
 # Validation Guards
 
 `dbt-checks` validates test arguments during compilation to detect invalid configurations early.
@@ -699,6 +751,8 @@ Internal helpers include:
 - filter application helpers
 - date utilities
 - validation helpers
+- grouped aggregation helpers
+- grouped ratio helpers
 
 ### Date helper design
 

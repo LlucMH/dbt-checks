@@ -6,6 +6,26 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.2] - 2026-05-12
+
+### Added
+- Added grouped ratio validation support through `group_by`.
+- Added `group_by` support for ratio checks including `null_ratio_below`, `null_ratio_between`, `positive_ratio_between`, `negative_ratio_between`, and `value_ratio_between`.
+- Added grouped ratio integration coverage.
+
+### Changed
+- Reused existing ratio check names and APIs for grouped behavior.
+- Introduced reusable ratio validation CTE helpers.
+
+### Notes
+Existing ratio checks now support grouped validation through `group_by`.
+No new check names were introduced.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.4.1] - 2026-05-12
 
 ### Added
