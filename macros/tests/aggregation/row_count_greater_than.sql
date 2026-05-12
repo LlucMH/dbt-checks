@@ -8,7 +8,6 @@
 with validation as (
 
     select
-
         {%- if groups | length > 0 %}
             {{ dbt_checks.render_group_by_select(groups) }},
         {%- endif %}
@@ -26,7 +25,6 @@ with validation as (
 )
 
 select
-
     {%- if groups | length > 0 %}
         {{ dbt_checks.render_group_by_output(groups) }},
     {%- endif %}

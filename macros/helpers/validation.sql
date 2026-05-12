@@ -174,22 +174,46 @@
 {% endmacro %}
 
 
-{% macro validate_group_by(group_by) %}
+{% macro validate_group_by(group_by, arg_name='group_by') %}
 
     {% if group_by is none %}
         {{ return('') }}
     {% endif %}
 
     {% if group_by is string %}
+
+        {% if group_by | trim == '' %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid argument: " ~ arg_name ~ " cannot be empty"
+            ) }}
+        {% endif %}
+
         {{ return('') }}
+
     {% endif %}
 
-    {% if group_by is sequence and group_by is not string %}
+    {% if group_by is sequence %}
+
+        {% if group_by | length == 0 %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid argument: " ~ arg_name ~ " cannot be an empty list"
+            ) }}
+        {% endif %}
+
+        {% for item in group_by %}
+            {% if item is not string or item | trim == '' %}
+                {{ exceptions.raise_compiler_error(
+                    "Invalid argument: " ~ arg_name ~ " must be a string or a non-empty list of strings"
+                ) }}
+            {% endif %}
+        {% endfor %}
+
         {{ return('') }}
+
     {% endif %}
 
     {{ exceptions.raise_compiler_error(
-        "Invalid argument: group_by must be a string or list of strings"
+        "Invalid argument: " ~ arg_name ~ " must be a string or a non-empty list of strings"
     ) }}
 
 {% endmacro %}
