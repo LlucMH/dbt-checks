@@ -403,9 +403,9 @@ models:
                 tags: ["should_fail"]
 
           - dbt_checks.negative_ratio_between:
-            arguments:
-              min_ratio: 0.40
-              max_ratio: 0.60
-              group_by: country
-            config:
-              tags: ["should_fail"]
+              arguments:
+                min_ratio: 0.40
+                max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_fail"]
