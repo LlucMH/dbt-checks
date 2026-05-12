@@ -13,7 +13,7 @@
 {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
 {{
-    dbt_checks.build_grouped_aggregation_cte(
+    dbt_checks.build_aggregation_validation_cte(
         model=model,
         aggregation='avg',
         column_name=column_name,
