@@ -123,6 +123,11 @@ jobs:
           grep -i "Grouped" README.md
           grep -i "Grouped Aggregation Checks" README.md
           grep -i "grouped_by_1" README.md
+          grep -i "Grouped Ratio Checks" README.md
+
+      - name: Validate grouped validation helpers
+        run: |
+          grep "build_ratio_validation_cte" macros/helpers/ratio.sql
           grep "normalize_group_by" macros/helpers/grouping.sql
           grep "render_group_by_select" macros/helpers/grouping.sql
           grep "render_group_by_clause" macros/helpers/grouping.sql
