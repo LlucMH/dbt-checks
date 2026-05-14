@@ -6,6 +6,24 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.3] - 2026-05-15
+
+### Added
+- Added readable grouped failure output aliases for simple `group_by` columns.
+- Added fallback indexed grouped aliases for complex SQL expressions.
+
+### Changed
+- Improved grouped failure outputs from generic aliases such as `grouped_by_1` to more descriptive aliases such as `grouped_by_status`.
+- Updated README failure output documentation to include grouped aggregation and grouped ratio examples.
+
+### Fixed
+- Improved grouped validation debugging experience in CI and stored failure tables.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.4.2] - 2026-05-12
 
 ### Added
