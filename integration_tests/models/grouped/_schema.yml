@@ -409,3 +409,12 @@ models:
                 group_by: country
               config:
                 tags: ["should_fail"]
+
+  - name: grouped_output_alias_invalid
+    data_tests:
+      - dbt_checks.row_count_greater_than:
+          arguments:
+            value: 1
+            group_by: status
+          config:
+            tags: ["should_fail"]
