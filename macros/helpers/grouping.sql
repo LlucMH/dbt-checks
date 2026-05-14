@@ -13,7 +13,7 @@
     {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
     {%- for group in groups -%}
-        {{ group }} as grouped_by_{{ loop.index }}{% if not loop.last %}, {% endif %}
+        {{ group }} as {{ dbt_checks.group_by_alias(group, loop.index) }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}
 {% endmacro %}
 
@@ -22,7 +22,7 @@
     {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
     {%- for group in groups -%}
-        grouped_by_{{ loop.index }}{% if not loop.last %}, {% endif %}
+        {{ dbt_checks.group_by_alias(group, loop.index) }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}
 {% endmacro %}
 
@@ -33,4 +33,25 @@
     {%- if groups | length > 0 -%}
         {{ return("group by " ~ (groups | join(", "))) }}
     {%- endif -%}
+{% endmacro %}
+
+
+{% macro group_by_alias(group, index) %}
+    {%- set raw = group | string | trim -%}
+
+    {%- set clean = raw
+        | replace('"', '')
+        | replace('`', '')
+        | replace('[', '')
+        | replace(']', '')
+        | replace('.', '_')
+        | replace(' ', '_')
+        | replace('-', '_')
+    -%}
+
+    {%- if '(' in clean or ')' in clean or "'" in clean or ',' in clean -%}
+        {{ return('grouped_by_' ~ index) }}
+    {%- endif -%}
+
+    {{ return('grouped_by_' ~ clean) }}
 {% endmacro %}

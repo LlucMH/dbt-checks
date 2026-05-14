@@ -56,7 +56,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.2
+    revision: v0.4.3
 ```
 
 Then install dependencies:
@@ -165,9 +165,9 @@ Grouped aggregation checks expose grouped context directly in the failure output
 
 Example output:
 
-| grouped_by_1 | actual_value | expected_min_value |
+| grouped_by_status | actual_value | expected_min_value |
 | --- | --- | --- |
-| electronics | 900 | 1000 |
+| active | 900 | 1000 |
 
 Used by grouped validations such as:
 
@@ -209,6 +209,7 @@ Checks may also expose:
 - `actual_length`
 - `actual_diff_days`
 - `actual_day_of_week`
+- `grouped_by_*`
 
 ### Example with scoped validation
 
@@ -578,6 +579,10 @@ models:
 ```
 This validates each `status` group only for rows matching the `where` condition.
 
+For simple column-based grouping, dbt-checks exposes readable grouped context fields such as `grouped_by_status`.
+
+For complex SQL expressions, dbt-checks falls back to stable indexed aliases such as `grouped_by_1`.
+
 ## Grouped Aggregation Checks
 
 Grouped aggregation checks allow aggregate validations to run independently per segment.
@@ -610,7 +615,7 @@ This validates that the average `order_value` is between 10 and 500 for each `co
 
 Grouped failure outputs expose grouped context fields such as:
 
-grouped_by_1
+`grouped_by_status`
 
 Multi-column `group_by` is not documented as public API yet and is planned for a later `0.4.x` release.
 
@@ -665,6 +670,16 @@ This validates the ratio independently for each `(country, sales_channel)` combi
 Grouped ratio checks support both:
 - single-column grouping
 - multi-column grouping
+
+### Grouped ratio failure output
+
+Grouped ratio checks also expose grouped context directly in failure outputs.
+
+Example output:
+
+| grouped_by_country | actual_ratio | expected_max_ratio |
+| --- | --- | --- |
+| ES | 0.92 | 0.80 |
 
 # Validation Guards
 
