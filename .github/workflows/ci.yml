@@ -126,6 +126,8 @@ jobs:
           grep -i "Grouped Ratio Checks" README.md
           grep -i "multi-column grouping" README.md
           grep -i "grouped_by_country" README.md
+          grep -i "Grouped Freshness Checks" README.md
+          grep -i "recent_date" README.md
 
       - name: Validate grouped validation helpers
         run: |

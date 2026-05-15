@@ -56,7 +56,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.4
+    revision: v0.4.5
 ```
 
 Then install dependencies:
@@ -678,6 +678,27 @@ This validates the ratio independently for each `(country, sales_channel)` combi
 Grouped ratio checks support both:
 - single-column grouping
 - multi-column grouping
+
+## Grouped Freshness Checks
+
+`recent_date` supports grouped freshness validation using `group_by`.
+
+This is useful when each segment is expected to receive recent data independently.
+
+Example:
+
+```yaml
+models:
+  - name: events
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by: country
+```
+This validates that each `country` has at least one date within the last 7 days.
 
 ### Grouped ratio failure output
 

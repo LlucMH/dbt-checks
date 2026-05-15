@@ -6,6 +6,21 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.5] - 2026-05-15
+
+### Added
+- Added grouped freshness validation support for `recent_date`.
+- Added `group_by` support to `recent_date`.
+- Added integration coverage for grouped freshness checks, including `where` filters and multi-column grouping.
+
+### Changed
+- Extended grouped validation patterns to temporal freshness use cases.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.4.4] - 2026-05-15
 
 ### Added
