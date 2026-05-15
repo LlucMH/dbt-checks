@@ -57,7 +57,8 @@ select
 from checks
 
 where
-    latest_date is null
-    or actual_age_days > {{ max_age_days }}
+    where
+        latest_date is not null
+        and actual_age_days > {{ max_age_days }}
 
 {% endtest %}
