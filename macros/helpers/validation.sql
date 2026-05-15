@@ -217,3 +217,14 @@
     ) }}
 
 {% endmacro %}
+
+
+{% macro validate_required_column(value, arg_name='column') %}
+
+    {% if value is none or value | string | trim == '' %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " cannot be null or empty"
+        ) }}
+    {% endif %}
+
+{% endmacro %}
