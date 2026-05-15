@@ -30,6 +30,7 @@
   - [Temporal](#temporal)
   - [Aggregation](#aggregation)
   - [Ratio](#ratio)
+  - [Multi-column](#multi-column)
 - [Grouped Checks](#grouped-checks)
 - [Validation Guards](#validation-guards)
 - [Supported Warehouses](#supported-warehouses)
@@ -56,7 +57,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.5
+    revision: v0.5.0
 ```
 
 Then install dependencies:
@@ -543,6 +544,28 @@ columns:
             threshold: 0.05
 ```
 
+## Multi-column
+
+Multi-column checks validate relationships between columns in the same row.
+
+Check | Description
+----- | ----------
+`columns_equal` | Ensures two columns have equal values
+`column_greater_than_column` | Ensures one numeric column is greater than another
+`column_less_than_column` | Ensures one numeric column is less than another
+
+Example:
+
+```yaml
+models:
+  - name: orders
+    data_tests:
+      - dbt_checks.column_less_than_column:
+          arguments:
+            left_column: discount_amount
+            right_column: order_amount
+```
+
 # Grouped Checks
 
 Some aggregation checks support grouped validation using `group_by`.
@@ -831,6 +854,8 @@ Many dbt projects repeatedly implement the same validation logic.
 - segmented business rule validation
 - reusable grouped aggregation architecture
 - multi-column grouped validation
+- multi-column validation support
+- row-level validation across related fields
 
 # Internal Architecture
 
