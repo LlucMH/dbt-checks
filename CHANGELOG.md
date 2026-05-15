@@ -6,6 +6,25 @@ The format follows semantic versioning.
 
 ---
 
+## [0.4.4] - 2026-05-15
+
+### Added
+- Added official support for multi-column `group_by`.
+- Added multi-column grouped validation integration coverage.
+- Added multi-column grouped failure output documentation.
+
+### Changed
+- Stabilized grouped validation behavior for multiple grouping columns.
+- Improved grouped output readability for multi-column validation.
+
+### Fixed
+- Improved consistency of grouped SQL generation across aggregation and ratio checks.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.4.3] - 2026-05-15
 
 ### Added

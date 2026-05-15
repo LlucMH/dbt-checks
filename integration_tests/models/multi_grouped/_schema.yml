@@ -1,0 +1,44 @@
+version: 2
+
+models:
+
+  - name: multi_grouped_valid
+    columns:
+      - name: amount
+        data_tests:
+
+          - dbt_checks.avg_between:
+              arguments:
+                column_name: amount
+                min_value: 50
+                max_value: 200
+                group_by:
+                  - country
+                  - status
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 1.0
+                max_ratio: 1.0
+                group_by:
+                  - country
+                  - status
+              config:
+                tags: ["should_pass"]
+
+  - name: multi_grouped_invalid
+    columns:
+      - name: amount
+        data_tests:
+
+          - dbt_checks.positive_ratio_between:
+              arguments:
+                min_ratio: 1.0
+                max_ratio: 1.0
+                group_by:
+                  - country
+                  - status
+              config:
+                tags: ["should_fail"]
