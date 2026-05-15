@@ -418,3 +418,50 @@ models:
             group_by: status
           config:
             tags: ["should_fail"]
+
+  - name: grouped_recent_date_valid
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+  - name: grouped_recent_date_invalid
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+  - name: grouped_recent_date_where_valid
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by: country
+              config:
+                where: "is_active = true"
+                tags: ["should_pass"]
+
+  - name: grouped_recent_date_multi_column_valid
+    columns:
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by:
+                  - country
+                  - channel
+              config:
+                tags: ["should_pass"]
