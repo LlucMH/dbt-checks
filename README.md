@@ -56,7 +56,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.4.3
+    revision: v0.4.4
 ```
 
 Then install dependencies:
@@ -617,7 +617,15 @@ Grouped failure outputs expose grouped context fields such as:
 
 `grouped_by_status`
 
-Multi-column `group_by` is not documented as public API yet and is planned for a later `0.4.x` release.
+Grouped checks fully support multi-column grouping.
+
+Example:
+
+```yaml
+group_by:
+  - country
+  - status
+```
 
 ## Grouped Ratio Checks
 
@@ -674,6 +682,53 @@ Grouped ratio checks support both:
 ### Grouped ratio failure output
 
 Grouped ratio checks also expose grouped context directly in failure outputs.
+
+Example output:
+
+| grouped_by_country | actual_ratio | expected_max_ratio |
+| --- | --- | --- |
+| ES | 0.92 | 0.92 |
+
+## Multi-column grouping
+
+Grouped checks support multiple grouping columns.
+
+Example:
+
+```yaml
+group_by:
+  - country
+  - sales_channel
+```
+
+Failure outputs expose one grouped context field per grouping column:
+
+| grouped_by_country | grouped_by_sales_channel | actual_ratio |
+| --- | --- | --- |
+| ES | online | 0.80 |
+
+Example with a ratio check:
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: status
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "completed"
+                min_ratio: 0.7
+                max_ratio: 1.0
+                group_by:
+                  - country
+                  - sales_channel
+```
+This validates the ratio independently for each `(country, sales_channel)` combination.
+
+## Grouped ratio failure output
+
+Grouped ratio checks expose grouped context directly in failure outputs.
 
 Example output:
 
@@ -754,6 +809,7 @@ Many dbt projects repeatedly implement the same validation logic.
 - grouped validation support
 - segmented business rule validation
 - reusable grouped aggregation architecture
+- multi-column grouped validation
 
 # Internal Architecture
 
