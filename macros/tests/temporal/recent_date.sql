@@ -5,13 +5,35 @@
 
 {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
+{% if groups | length == 0 %}
+
+select
+    {{ dbt_checks.as_date(column_name) }} as failing_value,
+    {{ dbt_checks.datediff_days(
+        dbt_checks.as_date(column_name),
+        dbt_checks.current_date_sql()
+    ) }} as actual_age_days,
+    {{ max_age_days }} as expected_max_age_days,
+    'recent_date' as failed_check,
+    'Date must be within {{ max_age_days }} days' as failure_reason,
+    {{ dbt_checks.applied_condition(where) }} as applied_condition
+
+from {{ model }}
+
+where
+    {{ column_name }} is not null
+    {{ dbt_checks.apply_and_where(where) }}
+    and {{ dbt_checks.datediff_days(
+        dbt_checks.as_date(column_name),
+        dbt_checks.current_date_sql()
+    ) }} > {{ max_age_days }}
+
+{% else %}
+
 with validation as (
 
     select
-        {%- if groups | length > 0 %}
-            {{ dbt_checks.render_group_by_select(groups) }},
-        {%- endif %}
-
+        {{ dbt_checks.render_group_by_select(groups) }},
         max({{ dbt_checks.as_date(column_name) }}) as latest_date
 
     from {{ model }}
@@ -19,19 +41,14 @@ with validation as (
     where {{ column_name }} is not null
     {{ dbt_checks.apply_and_where(where) }}
 
-    {%- if groups | length > 0 %}
-        {{ dbt_checks.render_group_by_clause(groups) }}
-    {%- endif %}
+    {{ dbt_checks.render_group_by_clause(groups) }}
 
 ),
 
 checks as (
 
     select
-        {%- if groups | length > 0 %}
-            {{ dbt_checks.render_group_by_output(groups) }},
-        {%- endif %}
-
+        {{ dbt_checks.render_group_by_output(groups) }},
         latest_date,
         {{ dbt_checks.datediff_days(
             'latest_date',
@@ -43,10 +60,7 @@ checks as (
 )
 
 select
-    {%- if groups | length > 0 %}
-        {{ dbt_checks.render_group_by_output(groups) }},
-    {%- endif %}
-
+    {{ dbt_checks.render_group_by_output(groups) }},
     latest_date as failing_value,
     actual_age_days,
     {{ max_age_days }} as expected_max_age_days,
@@ -59,5 +73,7 @@ from checks
 where
     latest_date is not null
     and actual_age_days > {{ max_age_days }}
+
+{% endif %}
 
 {% endtest %}

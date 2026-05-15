@@ -6,7 +6,7 @@ The format follows semantic versioning.
 
 ---
 
-## [0.4.5] - 2026-05-15
+## [0.4.5] - 2026-05-16
 
 ### Added
 - Added grouped freshness validation support for `recent_date`.
