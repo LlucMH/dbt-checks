@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: multi_column_valid
+    data_tests:
+      - dbt_checks.columns_equal:
+          arguments:
+            left_column: amount
+            right_column: expected_amount
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.column_less_than_column:
+          arguments:
+            left_column: amount
+            right_column: max_amount
+          config:
+            tags: ["should_pass"]
+
+  - name: multi_column_invalid
+    data_tests:
+      - dbt_checks.columns_equal:
+          arguments:
+            left_column: amount
+            right_column: expected_amount
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.column_less_than_column:
+          arguments:
+            left_column: amount
+            right_column: max_amount
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.column_greater_than_column:
+          arguments:
+            left_column: amount
+            right_column: max_amount
+          config:
+            tags: ["should_pass"]
+
+  - name: multi_column_where_valid
+    data_tests:
+      - dbt_checks.columns_equal:
+          arguments:
+            left_column: amount
+            right_column: expected_amount
+          config:
+            where: "is_active = true"
+            tags: ["should_pass"]
+
+      - dbt_checks.column_less_than_column:
+          arguments:
+            left_column: amount
+            right_column: max_amount
+          config:
+            where: "is_active = true"
+            tags: ["should_pass"]
+
+  - name: multi_column_nulls_valid
+    data_tests:
+      - dbt_checks.columns_equal:
+          arguments:
+            left_column: amount
+            right_column: expected_amount
+          config:
+            tags: ["should_pass"]

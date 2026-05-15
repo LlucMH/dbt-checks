@@ -6,6 +6,23 @@ The format follows semantic versioning.
 
 ---
 
+## [0.5.0] - 2026-05-16
+
+### Added
+- Added first multi-column validation checks.
+- Added `columns_equal`.
+- Added `column_greater_than_column`.
+- Added `column_less_than_column`.
+- Added integration coverage for multi-column checks, including `where` filters and null handling.
+
+### Changed
+- Introduced a dedicated multi-column validation category.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.4.5] - 2026-05-16
 
 ### Added

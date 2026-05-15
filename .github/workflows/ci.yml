@@ -140,6 +140,14 @@ jobs:
           grep "build_aggregation_validation_cte" macros/helpers/aggregation.sql
           grep "render_aggregation_metric" macros/helpers/aggregation.sql
 
+      - name: Validate multi-column checks
+        run: |
+          grep -i "Multi-column" README.md
+          grep -R "column_greater_than_column" macros/tests/multi_column
+          grep -R "column_less_than_column" macros/tests/multi_column
+          grep -R "columns_equal" macros/tests/multi_column
+          grep -R "validate_required_column" macros/helpers/validation.sql
+
       - name: Seed test data
         working-directory: integration_tests
         run: dbt seed
