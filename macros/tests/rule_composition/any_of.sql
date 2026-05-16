@@ -4,6 +4,8 @@
 
 select
     *,
+    {{ dbt.string_literal(expressions | join(' or ')) }} as failed_expression,
+    'any_of' as failed_rule_type,
     'any_of' as failed_check,
     'At least one expression must evaluate to true' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition
