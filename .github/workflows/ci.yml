@@ -147,6 +147,11 @@ jobs:
           grep -R "column_less_than_column" macros/tests/multi_column
           grep -R "columns_equal" macros/tests/multi_column
           grep -R "validate_required_column" macros/helpers/validation.sql
+          grep -i "Rule Composition" README.md
+          grep -R "expression_is_true" macros/tests/rule_composition
+          grep -R "all_of" macros/tests/rule_composition
+          grep -R "any_of" macros/tests/rule_composition
+          grep -R "validate_expression_list" macros/helpers/validation.sql
 
       - name: Seed test data
         working-directory: integration_tests

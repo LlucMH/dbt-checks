@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: rule_composition_valid
+    data_tests:
+      - dbt_checks.expression_is_true:
+          arguments:
+            expression: "discount_amount <= total_amount"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.all_of:
+          arguments:
+            expressions:
+              - "discount_amount >= 0"
+              - "discount_amount <= total_amount"
+              - "status is not null"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.any_of:
+          arguments:
+            expressions:
+              - "email is not null"
+              - "phone is not null"
+          config:
+            tags: ["should_pass"]
+
+  - name: rule_composition_invalid
+    data_tests:
+      - dbt_checks.expression_is_true:
+          arguments:
+            expression: "discount_amount <= total_amount"
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.all_of:
+          arguments:
+            expressions:
+              - "discount_amount >= 0"
+              - "discount_amount <= total_amount"
+              - "status is not null"
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.any_of:
+          arguments:
+            expressions:
+              - "email is not null"
+              - "phone is not null"
+          config:
+            tags: ["should_fail"]

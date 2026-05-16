@@ -32,6 +32,7 @@
   - [Ratio](#ratio)
   - [Multi-column](#multi-column)
 - [Grouped Checks](#grouped-checks)
+- [Rule Composition](#rule-composition)
 - [Validation Guards](#validation-guards)
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
@@ -57,7 +58,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.5.0
+    revision: v0.5.1
 ```
 
 Then install dependencies:
@@ -779,6 +780,29 @@ Example output:
 | grouped_by_country | actual_ratio | expected_max_ratio |
 | --- | --- | --- |
 | ES | 0.92 | 0.80 |
+
+## Rule Composition
+
+Rule composition checks allow combining multiple validation expressions into reusable business rules.
+
+### Available checks
+
+Check | Description
+----- | ----------
+`expression_is_true` | Validates a SQL expression row by row
+`all_of` | Ensures all expressions evaluate to true
+`any_of` | Ensures at least one expression evaluates to true
+
+### Example
+
+```yaml
+- dbt_checks.all_of:
+    arguments:
+      expressions:
+        - "discount_amount >= 0"
+        - "discount_amount <= total_amount"
+        - "status is not null"
+```
 
 # Validation Guards
 

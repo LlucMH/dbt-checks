@@ -6,6 +6,24 @@ The format follows semantic versioning.
 
 ---
 
+## [0.5.1] - 2026-05-16
+
+### Added
+- Added rule composition checks.
+- Added `expression_is_true`.
+- Added `all_of`.
+- Added `any_of`.
+- Added reusable expression list validation helpers.
+- Added integration coverage for composed rule validation.
+
+### Changed
+- Introduced reusable rule composition architecture for complex business validations.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.5.0] - 2026-05-16
 
 ### Added
