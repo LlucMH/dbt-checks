@@ -153,6 +153,13 @@ jobs:
           grep -R "any_of" macros/tests/rule_composition
           grep -R "validate_expression_list" macros/helpers/validation.sql
 
+      - name: Validate conditional checks
+        run: |
+          grep -i "Conditional Checks" README.md
+          grep -R "require_when" macros/tests/conditional
+          grep -R "require_not_null_when" macros/tests/conditional
+          grep -R "require_value_when" macros/tests/conditional
+
       - name: Seed test data
         working-directory: integration_tests
         run: dbt seed

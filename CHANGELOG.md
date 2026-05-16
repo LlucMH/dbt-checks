@@ -6,6 +6,23 @@ The format follows semantic versioning.
 
 ---
 
+## [0.5.2] - 2026-05-1
+
+### Added
+- Added conditional validation checks.
+- Added `require_when`.
+- Added `require_not_null_when`.
+- Added `require_value_when`.
+- Added integration coverage for dependency-based business rules.
+
+### Changed
+- Introduced reusable conditional validation architecture.
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.5.1] - 2026-05-16
 
 ### Added
