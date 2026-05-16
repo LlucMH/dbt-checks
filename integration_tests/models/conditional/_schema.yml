@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: conditional_valid
+    data_tests:
+      - dbt_checks.require_when:
+          arguments:
+            when: "status = 'cancelled'"
+            require: "cancelled_at is not null"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.require_not_null_when:
+          arguments:
+            when: "status = 'cancelled'"
+            column_name: cancelled_at
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.require_value_when:
+          arguments:
+            when: "is_refunded = true"
+            column_name: refund_status
+            value: "processed"
+          config:
+            tags: ["should_pass"]
+
+  - name: conditional_invalid
+    data_tests:
+      - dbt_checks.require_when:
+          arguments:
+            when: "status = 'cancelled'"
+            require: "cancelled_at is not null"
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.require_not_null_when:
+          arguments:
+            when: "status = 'cancelled'"
+            column_name: cancelled_at
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.require_value_when:
+          arguments:
+            when: "is_refunded = true"
+            column_name: refund_status
+            value: "processed"
+          config:
+            tags: ["should_fail"]
+
+  - name: conditional_where_valid
+    data_tests:
+      - dbt_checks.require_not_null_when:
+          arguments:
+            when: "status = 'cancelled'"
+            column_name: cancelled_at
+          config:
+            where: "is_active = true"
+            tags: ["should_pass"]
+
+      - dbt_checks.require_value_when:
+          arguments:
+            when: "is_refunded = true"
+            column_name: refund_status
+            value: "processed"
+          config:
+            where: "is_active = true"
+            tags: ["should_pass"]
+
+  - name: conditional_not_triggered_valid
+    data_tests:
+      - dbt_checks.require_when:
+          arguments:
+            when: "status = 'cancelled'"
+            require: "cancelled_at is not null"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.require_not_null_when:
+          arguments:
+            when: "status = 'cancelled'"
+            column_name: cancelled_at
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.require_value_when:
+          arguments:
+            when: "is_refunded = true"
+            column_name: refund_status
+            value: "processed"
+          config:
+            tags: ["should_pass"]
