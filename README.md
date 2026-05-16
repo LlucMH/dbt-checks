@@ -18,6 +18,7 @@
 # Table of Contents
 
 - [Installation](#installation)
+- [Features](#features)
 - [Usage](#usage)
 - [Scoped Checks with `where`](#scoped-checks-with-where)
 - [Standardized Failure Output](#standardized-failure-output)
@@ -33,8 +34,8 @@
   - [Multi-column](#multi-column)
 - [Grouped Checks](#grouped-checks)
 - [Rule Composition](#rule-composition)
-- [Validation Guards](#validation-guards)
 - [Conditional Checks](#conditional-checks)
+- [Validation Guards](#validation-guards)
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
 - [Internal Architecture](#internal-architecture)
@@ -48,7 +49,7 @@
 
 It provides simple, expressive tests to validate business rules and data integrity directly in your models — without writing custom SQL every time.
 
-> ⚠️ Early-stage project — feedback and contributions are welcome.
+> ⚠️ Rapidly evolving project — feedback and contributions are welcome.
 
 ---
 
@@ -59,16 +60,31 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.5.2
+    revision: v0.5.3
 ```
 
 Then install dependencies:
 
-``` bash
+```bash
 dbt deps
 ```
 
 💡 Always pin a version in production projects.
+
+# Features
+
+`dbt-checks` provides:
+
+- reusable business-friendly dbt tests
+- scoped validations with native `where` support
+- grouped validations with `group_by`
+- multi-column validations
+- conditional business rules
+- rule composition checks
+- standardized failure outputs
+- CI-friendly debugging context
+- predictable null handling
+- cross-warehouse compatibility through dbt dispatch
 
 # Usage
 
@@ -76,7 +92,7 @@ Checks can be applied at both model-level and column-level in your schema files.
 
 Example:
 
-``` yaml
+```yaml
 models:
   - name: orders
     columns:
@@ -91,7 +107,7 @@ models:
 
 Run tests as usual:
 
-``` bash
+```bash
 dbt test
 ```
 
@@ -128,7 +144,7 @@ Instead of generic outputs like:
 Got 1 result, configured to fail if != 0
 ```
 
-checks now expose contextual failure information.
+checks expose contextual failure information.
 
 ## Row-level checks
 
@@ -139,9 +155,13 @@ Example output:
 | -5 | 0 | non_negative | Value must be greater than or equal to 0 |
 
 Used by:
+
 - numeric checks
 - string checks
-- most temporal checks
+- temporal checks
+- multi-column checks
+- rule composition checks
+- conditional checks
 
 ---
 
@@ -154,6 +174,7 @@ Example output:
 | 1500 | 0 | 1000 |
 
 Used by:
+
 - avg_between
 - sum_between
 - min_between
@@ -179,6 +200,7 @@ Used by grouped validations such as:
 - segmented business rule validation
 
 This makes grouped failures easier to:
+
 - debug in CI
 - identify problematic segments
 - inspect stored failures
@@ -195,10 +217,29 @@ Example output:
 | 0.92 | 0.0 | 0.80 |
 
 Used by:
+
 - null_ratio_between
 - positive_ratio_between
 - negative_ratio_between
 - value_ratio_between
+
+---
+
+## Advanced rule outputs
+
+Advanced checks expose rule-specific debugging context.
+
+Example output:
+
+| trigger_condition | required_condition | failed_check |
+| --- | --- | --- |
+| status = 'cancelled' | cancelled_at is not null | require_when |
+
+Used by:
+
+- rule composition checks
+- conditional checks
+- expression-based checks
 
 ---
 
@@ -213,6 +254,13 @@ Checks may also expose:
 - `actual_diff_days`
 - `actual_day_of_week`
 - `grouped_by_*`
+- `left_column`
+- `right_column`
+- `failed_expression`
+- `trigger_condition`
+- `required_condition`
+- `required_column`
+- `required_value`
 
 ### Example with scoped validation
 
@@ -221,6 +269,7 @@ Checks may also expose:
 | -5 | non_negative | status = 'active' |
 
 This makes dbt-checks outputs easier to:
+
 - debug in CI
 - inspect in stored failures
 - integrate with observability tooling
@@ -230,19 +279,21 @@ This makes dbt-checks outputs easier to:
 
 dbt-checks follows a consistent and explicit null-handling strategy.
 
-Most checks ignore null values by default.
-Use dedicated checks to validate null presence.
+Most checks ignore null values by default. Use dedicated checks to validate null presence.
 
-## Summary:
+## Summary
 
-- Numeric        → ignored  
-- String         → ignored  
-- Temporal       → ignored  
-- Aggregation    → ignored (SQL behavior)  
-- Row count      → includes nulls  
-- Ratio checks   → explicit handling  
+- Numeric → ignored
+- String → ignored
+- Temporal → ignored
+- Aggregation → ignored by SQL aggregation behavior
+- Row count → includes nulls
+- Ratio checks → explicit handling
+- Multi-column checks → ignored when either compared value is null
+- Conditional checks → depend on the condition being evaluated
 
 Use:
+
 - null_ratio_below
 - null_ratio_between
 
@@ -435,9 +486,9 @@ Check | Description
 `less_or_equal_than` | Ensures values are ≤ a threshold
 `between_values` | Ensures values fall within a numeric range
 
-Example
+Example:
 
-``` yaml
+```yaml
 columns:
   - name: value
     data_tests:
@@ -446,6 +497,7 @@ columns:
             min_value: 0
             max_value: 100
 ```
+
 ## String
 
 String checks validate textual fields such as identifiers or formatted values.
@@ -459,9 +511,9 @@ Check | Description
 `ends_with` | Ensures string ends with suffix
 `contains` | Ensures string contains substring
 
-Example
+Example:
 
-``` yaml
+```yaml
 columns:
   - name: email
     data_tests:
@@ -469,6 +521,7 @@ columns:
           arguments:
             pattern: "^[^@]+@[^@]+\\.[^@]+$"
 ```
+
 ## Temporal
 
 Temporal checks validate date and timestamp fields.
@@ -482,9 +535,9 @@ Check | Description
 `date_diff_less_than` | Ensures difference between two dates is within threshold
 `no_weekend_dates` | Ensures dates do not fall on weekends
 
-Example
+Example:
 
-``` yaml
+```yaml
 columns:
   - name: date
     data_tests:
@@ -492,10 +545,12 @@ columns:
           arguments:
             max_age_days: 7
 ```
+
 ## Aggregation
 
 Aggregation checks validate dataset-level metrics.
-Nulls follow SQL behavior (ignored in aggregation).
+
+Nulls follow SQL behavior and are ignored in aggregation functions.
 
 Check | Description
 ----- | ----------
@@ -509,9 +564,9 @@ Check | Description
 
 **If all values are null → test fails**
 
-Example
+Example:
 
-``` yaml
+```yaml
 models:
   - name: orders
     data_tests:
@@ -519,6 +574,7 @@ models:
           arguments:
             value: 100
 ```
+
 ## Ratio
 
 Ratio checks validate proportions of rows matching a condition.
@@ -532,12 +588,13 @@ Check | Description
 `value_ratio_between` | Ensures specific value ratio within range
 
 **Null handling:**
+
 - null_ratio_* explicitly evaluates nulls
 - others use total row count as denominator
 
-Example
+Example:
 
-``` yaml
+```yaml
 columns:
   - name: email
     data_tests:
@@ -553,6 +610,7 @@ Multi-column checks validate relationships between columns in the same row.
 Check | Description
 ----- | ----------
 `columns_equal` | Ensures two columns have equal values
+`columns_distinct` | Ensures two columns have distinct values
 `column_greater_than_column` | Ensures one numeric column is greater than another
 `column_less_than_column` | Ensures one numeric column is less than another
 
@@ -570,7 +628,7 @@ models:
 
 # Grouped Checks
 
-Some aggregation checks support grouped validation using `group_by`.
+Aggregation, ratio, and freshness checks support grouped validation using `group_by`.
 
 Grouped checks validate conditions independently for each segment while reusing the same check names and APIs.
 
@@ -587,6 +645,7 @@ models:
             value: 100
             group_by: status
 ```
+
 This validates that each `status` group has more than 100 rows.
 
 ## Grouped validation with `where`
@@ -602,6 +661,7 @@ models:
           config:
             where: "created_at >= current_date - interval '30 days'"
 ```
+
 This validates each `status` group only for rows matching the `where` condition.
 
 For simple column-based grouping, dbt-checks exposes readable grouped context fields such as `grouped_by_status`.
@@ -614,13 +674,13 @@ Grouped aggregation checks allow aggregate validations to run independently per 
 
 Supported grouped aggregation checks include:
 
-- row_count_greater_than
-- row_count_less_than
-- row_count_between
-- avg_between
-- sum_between
-- min_between
-- max_between
+- `row_count_greater_than`
+- `row_count_less_than`
+- `row_count_between`
+- `avg_between`
+- `sum_between`
+- `min_between`
+- `max_between`
 
 Example:
 
@@ -638,20 +698,6 @@ models:
 
 This validates that the average `order_value` is between 10 and 500 for each `country`.
 
-Grouped failure outputs expose grouped context fields such as:
-
-`grouped_by_status`
-
-Grouped checks fully support multi-column grouping.
-
-Example:
-
-```yaml
-group_by:
-  - country
-  - status
-```
-
 ## Grouped Ratio Checks
 
 Ratio checks also support grouped validation through `group_by`.
@@ -663,8 +709,6 @@ Supported grouped ratio checks include:
 - `positive_ratio_between`
 - `negative_ratio_between`
 - `value_ratio_between`
-
-This allows ratio-based business rules to be validated independently for each segment.
 
 Example:
 
@@ -679,30 +723,8 @@ models:
                 threshold: 0.05
                 group_by: country
 ```
+
 This validates that each `country` has a null ratio below `5%`.
-
-Multiple grouping columns are also supported:
-
-```yaml
-models:
-  - name: orders
-    columns:
-      - name: status
-        data_tests:
-          - dbt_checks.value_ratio_between:
-              arguments:
-                value: "completed"
-                min_ratio: 0.7
-                max_ratio: 1.0
-                group_by:
-                  - country
-                  - sales_channel
-```
-This validates the ratio independently for each `(country, sales_channel)` combination.
-
-Grouped ratio checks support both:
-- single-column grouping
-- multi-column grouping
 
 ## Grouped Freshness Checks
 
@@ -723,17 +745,8 @@ models:
                 max_age_days: 7
                 group_by: country
 ```
+
 This validates that each `country` has at least one date within the last 7 days.
-
-### Grouped ratio failure output
-
-Grouped ratio checks also expose grouped context directly in failure outputs.
-
-Example output:
-
-| grouped_by_country | actual_ratio | expected_max_ratio |
-| --- | --- | --- |
-| ES | 0.92 | 0.92 |
 
 ## Multi-column grouping
 
@@ -770,6 +783,7 @@ models:
                   - country
                   - sales_channel
 ```
+
 This validates the ratio independently for each `(country, sales_channel)` combination.
 
 ## Grouped ratio failure output
@@ -782,11 +796,11 @@ Example output:
 | --- | --- | --- |
 | ES | 0.92 | 0.80 |
 
-## Rule Composition
+# Rule Composition
 
 Rule composition checks allow combining multiple validation expressions into reusable business rules.
 
-### Available checks
+Rule composition checks reduce the need for custom SQL tests by enabling reusable declarative business logic directly in schema files.
 
 Check | Description
 ----- | ----------
@@ -794,7 +808,7 @@ Check | Description
 `all_of` | Ensures all expressions evaluate to true
 `any_of` | Ensures at least one expression evaluates to true
 
-### Example
+Example:
 
 ```yaml
 - dbt_checks.all_of:
@@ -803,6 +817,25 @@ Check | Description
         - "discount_amount >= 0"
         - "discount_amount <= total_amount"
         - "status is not null"
+```
+
+# Conditional Checks
+
+Conditional checks validate dependency-based business rules.
+
+Check | Description
+----- | ----------
+`require_when` | Ensures a requirement expression is true when another condition is met
+`require_not_null_when` | Ensures a column is not null when a condition is met
+`require_value_when` | Ensures a column contains a specific value when a condition is met
+
+Example:
+
+```yaml
+- dbt_checks.require_not_null_when:
+    arguments:
+      when: "country = 'ES'"
+      column_name: vat_number
 ```
 
 # Validation Guards
@@ -823,39 +856,23 @@ Examples of invalid configurations detected automatically:
 - `min_value > max_value`
 - ratios outside `0..1`
 - empty required strings
+- empty required columns
+- invalid expression lists
+- invalid `group_by` definitions
 - invalid integer arguments
 - invalid boolean values
 - invalid date ranges for ISO date literals
-
-## Conditional Checks
-
-Conditional checks validate dependency-based business rules.
-
-Check | Description
------ | ----------
-`require_when` | Ensures a requirement expression is true when another condition is met
-`require_not_null_when` | Ensures a column is not null when a condition is met
-`require_value_when` | Ensures a column contains a specific value when a condition is met
-
-Example:
-
-```yaml
-- dbt_checks.require_not_null_when:
-    arguments:
-      when: "country = 'ES'"
-      column_name: vat_number
-```
 
 # Supported Warehouses
 
 `dbt-checks` is designed to work across common dbt adapters:
 
--   Snowflake
--   BigQuery
--   Databricks
--   Spark
--   Redshift
--   Postgres
+- Snowflake
+- BigQuery
+- Databricks
+- Spark
+- Redshift
+- Postgres
 
 Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
 
@@ -900,12 +917,15 @@ Many dbt projects repeatedly implement the same validation logic.
 - multi-column grouped validation
 - multi-column validation support
 - row-level validation across related fields
+- rule composition checks
+- conditional business-rule validation
 
 # Internal Architecture
 
 `dbt-checks` uses reusable internal helper macros to standardize SQL generation across all checks.
 
 Internal helpers include:
+
 - casting helpers
 - reusable predicates
 - ratio utilities
@@ -914,10 +934,15 @@ Internal helpers include:
 - validation helpers
 - grouped aggregation helpers
 - grouped ratio helpers
+- grouped output helpers
+- multi-column validation helpers
+- rule composition helpers
+- conditional validation helpers
 
 ### Date helper design
 
 Temporal helpers intentionally support both:
+
 - static ISO date literals
 - SQL date expressions
 
@@ -930,6 +955,7 @@ current_date - interval '7 days'
 ```
 
 This allows temporal checks to work with:
+
 - static date boundaries
 - dynamic temporal windows
 - adapter-specific SQL date expressions
@@ -944,6 +970,7 @@ max_date: current_date
 Temporal checks consistently rely on centralized helper macros instead of implementing manual date casts individually.
 
 This includes:
+
 - `as_date()`
 - `cast_to_date()`
 - reusable temporal predicates
@@ -951,6 +978,7 @@ This includes:
 SQL expressions are safely rendered and escaped internally to preserve cross-warehouse compatibility and predictable SQL generation.
 
 This improves:
+
 - maintainability
 - adapter compatibility
 - consistency
@@ -974,10 +1002,10 @@ Contributions are welcome.
 
 To add a new check:
 
-1.  Implement it in `macros/tests`
-2.  Reuse helper macros when possible
-3.  Add documentation
-4.  Add integration tests (including null behavior)
+1. Implement it in `macros/tests`
+2. Reuse helper macros when possible
+3. Add documentation
+4. Add integration tests including null behavior
 
 # License
 
