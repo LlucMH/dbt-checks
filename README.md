@@ -34,6 +34,7 @@
 - [Grouped Checks](#grouped-checks)
 - [Rule Composition](#rule-composition)
 - [Validation Guards](#validation-guards)
+- [Conditional Checks](#conditional-checks)
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
 - [Internal Architecture](#internal-architecture)
@@ -58,7 +59,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.5.1
+    revision: v0.5.2
 ```
 
 Then install dependencies:
@@ -825,6 +826,25 @@ Examples of invalid configurations detected automatically:
 - invalid integer arguments
 - invalid boolean values
 - invalid date ranges for ISO date literals
+
+## Conditional Checks
+
+Conditional checks validate dependency-based business rules.
+
+Check | Description
+----- | ----------
+`require_when` | Ensures a requirement expression is true when another condition is met
+`require_not_null_when` | Ensures a column is not null when a condition is met
+`require_value_when` | Ensures a column contains a specific value when a condition is met
+
+Example:
+
+```yaml
+- dbt_checks.require_not_null_when:
+    arguments:
+      when: "country = 'ES'"
+      column_name: vat_number
+```
 
 # Supported Warehouses
 
