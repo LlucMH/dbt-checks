@@ -6,6 +6,8 @@
 select
     {{ left_column }} as left_value,
     {{ right_column }} as right_value,
+    {{ dbt.string_literal(left_column) }} as left_column,
+    {{ dbt.string_literal(right_column) }} as right_column,
     'column_greater_than_column' as failed_check,
     'Left column must be greater than right column' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition
