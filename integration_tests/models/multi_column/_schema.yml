@@ -71,7 +71,8 @@ models:
     data_tests:
       - dbt_checks.columns_distinct:
           arguments:
-            columns: [id, amount]
+            left_column: id
+            right_column: amount
           config:
             tags: ["should_pass"]
 
@@ -79,6 +80,7 @@ models:
     data_tests:
       - dbt_checks.columns_distinct:
           arguments:
-            columns: [id, amount]
+            left_column: id
+            right_column: amount
           config:
             tags: ["should_fail"]
