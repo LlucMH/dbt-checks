@@ -228,3 +228,28 @@
     {% endif %}
 
 {% endmacro %}
+
+
+{% macro validate_expression_list(expressions, arg_name='expressions') %}
+
+    {% if expressions is not sequence or expressions is string %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " must be a list of expressions"
+        ) }}
+    {% endif %}
+
+    {% if expressions | length == 0 %}
+        {{ exceptions.raise_compiler_error(
+            "Invalid argument: " ~ arg_name ~ " cannot be empty"
+        ) }}
+    {% endif %}
+
+    {% for expression in expressions %}
+        {% if expression is not string or expression | trim == '' %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid argument: all expressions must be non-empty strings"
+            ) }}
+        {% endif %}
+    {% endfor %}
+
+{% endmacro %}
