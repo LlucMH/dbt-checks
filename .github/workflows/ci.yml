@@ -146,12 +146,16 @@ jobs:
           grep -R "column_greater_than_column" macros/tests/multi_column
           grep -R "column_less_than_column" macros/tests/multi_column
           grep -R "columns_equal" macros/tests/multi_column
+          grep -R "columns_distinct" macros/tests/multi_column
+          grep -R "left_column" macros/tests/multi_column
+          grep -R "right_column" macros/tests/multi_column
           grep -R "validate_required_column" macros/helpers/validation.sql
           grep -i "Rule Composition" README.md
           grep -R "expression_is_true" macros/tests/rule_composition
           grep -R "all_of" macros/tests/rule_composition
           grep -R "any_of" macros/tests/rule_composition
           grep -R "validate_expression_list" macros/helpers/validation.sql
+          grep -R "failed_expression" macros/tests/rule_composition
 
       - name: Validate conditional checks
         run: |
@@ -159,6 +163,10 @@ jobs:
           grep -R "require_when" macros/tests/conditional
           grep -R "require_not_null_when" macros/tests/conditional
           grep -R "require_value_when" macros/tests/conditional
+          grep -R "trigger_condition" macros/tests/conditional
+          grep -R "required_condition" macros/tests/conditional
+          grep -R "required_column" macros/tests/conditional
+          grep -R "required_value" macros/tests/conditional
 
       - name: Seed test data
         working-directory: integration_tests

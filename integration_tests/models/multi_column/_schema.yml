@@ -66,3 +66,21 @@ models:
             right_column: expected_amount
           config:
             tags: ["should_pass"]
+
+  - name: multi_column_distinct_valid
+    data_tests:
+      - dbt_checks.columns_distinct:
+          arguments:
+            left_column: id
+            right_column: amount
+          config:
+            tags: ["should_pass"]
+
+  - name: multi_column_distinct_invalid
+    data_tests:
+      - dbt_checks.columns_distinct:
+          arguments:
+            left_column: id
+            right_column: amount
+          config:
+            tags: ["should_fail"]

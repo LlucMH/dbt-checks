@@ -6,10 +6,14 @@
 select
     {{ left_column }} as left_value,
     {{ right_column }} as right_value,
+    {{ dbt_checks.safe_sql_string_literal(left_column) }} as left_column,
+    {{ dbt_checks.safe_sql_string_literal(right_column) }} as right_column,
     'columns_equal' as failed_check,
     'Columns must be equal' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition
+
 from {{ model }}
+
 where
     {{ left_column }} is not null
     and {{ right_column }} is not null

@@ -5,6 +5,8 @@
 
 select
     *,
+    {{ dbt_checks.safe_sql_string_literal(when) }} as trigger_condition,
+    {{ dbt_checks.safe_sql_string_literal(column_name) }} as required_column,
     'require_not_null_when' as failed_check,
     'Column must not be null when condition is met' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition

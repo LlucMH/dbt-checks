@@ -6,7 +6,77 @@ The format follows semantic versioning.
 
 ---
 
-## [0.5.2] - 2026-05-1
+## [0.5.3] - 2026-05-17
+
+### Added
+
+#### Rule Composition Checks
+Added reusable expression-based validation checks:
+- `expression_is_true`
+- `all_of`
+- `any_of`
+These checks allow composing multiple business rules declaratively without writing custom SQL tests.
+
+#### Conditional Checks
+Added conditional dependency-based validation checks:
+- `require_when`
+- `require_not_null_when`
+- `require_value_when`
+These checks enable validations such as:
+- requiring fields when conditions are met
+- enforcing conditional business rules
+- validating dependent columns
+- conditional completeness enforcement
+
+#### Multi-column Validation Improvements
+Added:
+- `columns_distinct`
+This complements existing multi-column checks:
+- `columns_equal`
+- `column_greater_than_column`
+- `column_less_than_column`
+
+#### Advanced Failure Outputs
+Advanced checks now expose contextual debugging information such as:
+- failed expressions
+- trigger conditions
+- required conditions
+- compared column values
+- applied scoped conditions
+
+#### Documentation Improvements
+Updated README and dbt docs documentation for:
+- rule composition checks
+- conditional checks
+- multi-column checks
+- grouped validations
+- advanced failure outputs
+- validation semantics
+- null-handling behavior
+
+#### Integration Coverage
+Added integration tests for:
+- passing and failing conditional checks
+- rule composition checks
+- scoped validations with `where`
+- multi-column validations
+- null handling behavior
+- advanced debugging outputs
+
+#### Internal Improvements
+Extended reusable internal helper architecture with:
+- rule composition helpers
+- conditional validation helpers
+- advanced output helpers
+- reusable expression validation guards
+- Standardized safe SQL literal rendering for advanced failure outputs and expression-based checks
+
+### Breaking Changes
+- None.
+
+---
+
+## [0.5.2] - 2026-05-16
 
 ### Added
 - Added conditional validation checks.
