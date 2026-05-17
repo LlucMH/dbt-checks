@@ -6,6 +6,37 @@ The format follows semantic versioning.
 
 ---
 
+## [0.5.4] - 2026-05-17
+
+### Changed
+
+- Standardized macro argument documentation across all check categories
+- Improved dbt Docs compatibility and macro discoverability
+
+### Updated
+
+- Updated temporal macro argument names to match current APIs
+- Updated ratio macro argument names to match current APIs
+- Updated string macro argument names to match current APIs
+
+### Added
+
+- Added documentation coverage for:
+  - conditional checks
+  - multi-column checks
+  - rule composition checks
+- Added missing `where` arguments to documented macro APIs
+- Added grouped validation arguments (`group_by`) to supported checks
+
+### Fixed
+
+- Fixed inconsistencies between README examples and macro schema definitions
+
+### Breaking Changes
+- None.
+
+---
+
 ## [0.5.3] - 2026-05-17
 
 ### Added

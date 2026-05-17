@@ -1,0 +1,32 @@
+version: 2
+
+macros:
+
+  # =========================
+  # CONDITIONAL
+  # =========================
+
+  - name: test_require_when
+    description: "{{ doc('test_require_when') }}"
+    arguments:
+      - name: model
+      - name: when
+      - name: require
+      - name: where
+
+  - name: test_require_not_null_when
+    description: "{{ doc('test_require_not_null_when') }}"
+    arguments:
+      - name: model
+      - name: when
+      - name: column_name
+      - name: where
+
+  - name: test_require_value_when
+    description: "{{ doc('test_require_value_when') }}"
+    arguments:
+      - name: model
+      - name: when
+      - name: column_name
+      - name: value
+      - name: where

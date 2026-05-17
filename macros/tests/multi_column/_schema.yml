@@ -1,0 +1,39 @@
+version: 2
+
+macros:
+
+  # =========================
+  # MULTI COLUMN
+  # =========================
+
+  - name: test_columns_equal
+    description: "{{ doc('test_columns_equal') }}"
+    arguments:
+      - name: model
+      - name: left_column
+      - name: right_column
+      - name: where
+
+  - name: test_columns_distinct
+    description: "{{ doc('test_columns_distinct') }}"
+    arguments:
+      - name: model
+      - name: left_column
+      - name: right_column
+      - name: where
+
+  - name: test_column_greater_than_column
+    description: "{{ doc('test_column_greater_than_column') }}"
+    arguments:
+      - name: model
+      - name: left_column
+      - name: right_column
+      - name: where
+
+  - name: test_column_less_than_column
+    description: "{{ doc('test_column_less_than_column') }}"
+    arguments:
+      - name: model
+      - name: left_column
+      - name: right_column
+      - name: where

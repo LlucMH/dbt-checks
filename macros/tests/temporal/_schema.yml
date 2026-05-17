@@ -11,39 +11,46 @@ macros:
     arguments:
       - name: model
       - name: column_name
-      - name: start_date
-      - name: end_date
+      - name: min_date
+      - name: max_date
+      - name: where
 
   - name: test_not_before_date
     description: "{{ doc('test_not_before_date') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: date
+      - name: min_date
+      - name: where
 
   - name: test_not_future_date
     description: "{{ doc('test_not_future_date') }}"
     arguments:
       - name: model
       - name: column_name
+      - name: where
 
   - name: test_recent_date
     description: "{{ doc('test_recent_date') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: days
+      - name: max_age_days
+      - name: group_by
+      - name: where
 
   - name: test_no_weekend_dates
     description: "{{ doc('test_no_weekend_dates') }}"
     arguments:
       - name: model
       - name: column_name
+      - name: where
 
   - name: test_date_diff_less_than
     description: "{{ doc('test_date_diff_less_than') }}"
     arguments:
       - name: model
-      - name: start_date_column
-      - name: end_date_column
+      - name: start_column
+      - name: end_column
       - name: max_days
+      - name: where
