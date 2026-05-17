@@ -4,7 +4,7 @@
 
 select
     *,
-    {{ dbt.string_literal(expression) }} as failed_expression,
+    {{ dbt_checks.safe_sql_string_literal(expression) }} as failed_expression,
     'expression_is_true' as failed_check,
     'Expression must evaluate to true' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition

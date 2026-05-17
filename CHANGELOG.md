@@ -69,6 +69,7 @@ Extended reusable internal helper architecture with:
 - conditional validation helpers
 - advanced output helpers
 - reusable expression validation guards
+- Standardized safe SQL literal rendering for advanced failure outputs and expression-based checks
 
 ### Breaking Changes
 - None.

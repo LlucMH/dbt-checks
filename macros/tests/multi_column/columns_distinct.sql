@@ -6,8 +6,8 @@
 select
     {{ left_column }} as left_value,
     {{ right_column }} as right_value,
-    {{ dbt.string_literal(left_column) }} as left_column,
-    {{ dbt.string_literal(right_column) }} as right_column,
+    {{ dbt_checks.safe_sql_string_literal(left_column) }} as left_column,
+    {{ dbt_checks.safe_sql_string_literal(right_column) }} as right_column,
     'columns_distinct' as failed_check,
     'Columns must be different' as failure_reason,
     {{ dbt_checks.applied_condition(where) }} as applied_condition

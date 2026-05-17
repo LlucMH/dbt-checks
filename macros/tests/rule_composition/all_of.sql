@@ -4,7 +4,7 @@
 
 select
     *,
-    {{ dbt.string_literal(expressions | join(' and ')) }} as failed_expression,
+    {{ dbt_checks.safe_sql_string_literal(expressions | join(' and ')) }} as failed_expression,
     'all_of' as failed_rule_type,
     'all_of' as failed_check,
     'All expressions must evaluate to true' as failure_reason,
