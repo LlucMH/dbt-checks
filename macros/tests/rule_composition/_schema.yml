@@ -1,0 +1,28 @@
+version: 2
+
+macros:
+
+  # =========================
+  # RULE COMPOSITION
+  # =========================
+
+  - name: test_expression_is_true
+    description: "{{ doc('test_expression_is_true') }}"
+    arguments:
+      - name: model
+      - name: expression
+      - name: where
+
+  - name: test_all_of
+    description: "{{ doc('test_all_of') }}"
+    arguments:
+      - name: model
+      - name: expressions
+      - name: where
+
+  - name: test_any_of
+    description: "{{ doc('test_any_of') }}"
+    arguments:
+      - name: model
+      - name: expressions
+      - name: where

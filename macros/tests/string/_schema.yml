@@ -11,39 +11,45 @@ macros:
     arguments:
       - name: model
       - name: column_name
-      - name: value
+      - name: substring
+      - name: where
 
   - name: test_not_blank
     description: "{{ doc('test_not_blank') }}"
     arguments:
       - name: model
       - name: column_name
+      - name: where
 
   - name: test_starts_with
     description: "{{ doc('test_starts_with') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: value
+      - name: prefix
+      - name: where
 
   - name: test_ends_with
     description: "{{ doc('test_ends_with') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: value
+      - name: suffix
+      - name: where
 
   - name: test_length_between
     description: "{{ doc('test_length_between') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: min_value
-      - name: max_value
+      - name: min_length
+      - name: max_length
+      - name: where
 
   - name: test_matches_regex
     description: "{{ doc('test_matches_regex') }}"
     arguments:
       - name: model
       - name: column_name
-      - name: regex
+      - name: pattern
+      - name: where
