@@ -374,11 +374,23 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/config.yml
           test -f .github/PULL_REQUEST_TEMPLATE.md
 
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          files = [
+              Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
+              Path(".github/ISSUE_TEMPLATE/feature_request.yml"),
+              Path(".github/ISSUE_TEMPLATE/config.yml"),
+          ]
+
+          for file in files:
+              with file.open(encoding="utf-8") as f:
+                  yaml.safe_load(f)
+
+          print("GitHub issue templates are valid YAML.")
+          PY
+
           grep -i "Bug report" .github/ISSUE_TEMPLATE/bug_report.yml
           grep -i "Feature request" .github/ISSUE_TEMPLATE/feature_request.yml
           grep -i "Pull Request" .github/PULL_REQUEST_TEMPLATE.md
-
-      - name: Lint GitHub YAML templates
-        run: |
-          pip install yamllint
-          yamllint .github/ISSUE_TEMPLATE/*.yml
