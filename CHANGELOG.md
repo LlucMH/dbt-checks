@@ -6,6 +6,97 @@ The format follows semantic versioning.
 
 ---
 
+## [0.6.1] - 2026-05-28
+
+### Added
+
+#### GitHub Community Health
+
+Added structured GitHub collaboration templates:
+
+- issue templates
+- bug report template
+- feature request template
+- pull request template
+
+These additions improve:
+
+- contributor onboarding
+- issue standardization
+- PR consistency
+- maintainer workflows
+- OSS collaboration experience
+
+#### Repository Governance
+
+Added GitHub community health repository structure:
+
+- `.github/ISSUE_TEMPLATE`
+- `PULL_REQUEST_TEMPLATE.md`
+
+Added repository collaboration workflows for:
+
+- bug reporting
+- feature proposals
+- pull request guidance
+- contributor validation workflows
+
+#### CI Governance Validation
+
+Added CI validation for repository governance and collaboration templates.
+
+CI now validates:
+
+- issue templates
+- pull request templates
+- GitHub community health structure
+
+This improves:
+
+- repository consistency
+- governance reliability
+- OSS maintainability
+
+#### README Improvements
+
+Expanded README with:
+
+- OSS collaboration guidance
+- Community & Support section
+- GitHub workflow guidance
+- OSS maturity positioning
+- contributor resources
+- repository governance references
+
+Added new badges:
+
+- PRs welcome
+- issues
+- pull requests
+
+### Changed
+
+- Improved OSS contributor experience
+- Improved repository governance workflows
+- Improved collaboration tooling
+- Improved maintainer ergonomics
+- Improved issue triage consistency
+- Improved pull request onboarding workflows
+- Improved long-term OSS maintainability
+
+### Notes
+
+- No SQL generation changes
+- No macro behavior changes
+- No API changes
+- Fully compatible with previous `0.6.0` release
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.6.0] - 2026-05-27
 
 ### Added
