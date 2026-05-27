@@ -39,7 +39,9 @@
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
 - [Internal Architecture](#internal-architecture)
+- [OSS Maturity](#oss-maturity)
 - [Production Adoption Recommendations](#production-adoption-recommendations)
+- [Community & Support](#community--support)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -60,7 +62,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.5.4
+    revision: v0.6.0
 ```
 
 Then install dependencies:
@@ -71,7 +73,11 @@ dbt deps
 
 💡 Always pin a version in production projects.
 
+---
+
 # Features
+
+dbt-checks focuses on reusable, business-oriented validations with standardized outputs and cross-warehouse compatibility.
 
 `dbt-checks` provides:
 
@@ -85,6 +91,8 @@ dbt deps
 - CI-friendly debugging context
 - predictable null handling
 - cross-warehouse compatibility through dbt dispatch
+
+---
 
 # Usage
 
@@ -111,6 +119,8 @@ Run tests as usual:
 dbt test
 ```
 
+---
+
 # Scoped Checks with `where`
 
 All checks support dbt's native `where` configuration to apply validations only to a subset of rows.
@@ -133,6 +143,8 @@ models:
 ```
 
 The `where` expression is applied before the check runs.
+
+---
 
 # Standardized Failure Output
 
@@ -275,6 +287,8 @@ This makes dbt-checks outputs easier to:
 - integrate with observability tooling
 - consume programmatically
 
+---
+
 # NULL Handling
 
 dbt-checks follows a consistent and explicit null-handling strategy.
@@ -310,6 +324,8 @@ Ratio checks use safe division helpers internally.
 ### Invalid configurations
 
 Invalid arguments fail compilation early through validation guards.
+
+---
 
 # Severity Configuration
 
@@ -425,6 +441,8 @@ Recommended rollout strategy:
 3. Fix upstream data quality issues
 4. Promote stable checks to `severity: error`
 
+---
+
 # Real-world Usage Patterns
 
 ## Validate only active records
@@ -467,6 +485,8 @@ Recommended rollout strategy:
 ```bash
 dbt test --warn-error
 ```
+
+---
 
 # Available Checks
 
@@ -634,6 +654,15 @@ Grouped checks validate conditions independently for each segment while reusing 
 
 Grouped behavior is enabled through the optional `group_by` argument.
 
+Grouped checks support:
+
+- single-column grouping
+- multi-column grouping
+- grouped ratio checks
+- grouped aggregation checks
+- grouped freshness checks
+
+Example:
 ## Basic grouped validation
 
 ```yaml
@@ -890,6 +919,8 @@ Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
 | Postgres | Supported via dispatch |
 | Redshift | Supported via dispatch |
 
+---
+
 # Why dbt-checks?
 
 Many dbt projects repeatedly implement the same validation logic.
@@ -899,17 +930,16 @@ Many dbt projects repeatedly implement the same validation logic.
 - reusable checks
 - simple configuration
 - scoped checks with optional `where` filters
-- standardized failure outputs
-- CI-friendly debugging context
+- standardized outputs
+- scoped validations
+- grouped validations
 - predictable null handling
-- consistent validation patterns
+- CI-friendly debugging
+- business-oriented semantics
 - cross-warehouse compatibility
-- reusable internal helper architecture
-- consistent SQL generation across checks
-- centralized casting, predicates, ratios, and filtering logic
+- reusable internal architecture
 - native dbt severity support
 - clear warn/error usage guidance
-- production-ready usage examples
 - progressive data quality adoption patterns
 - grouped validation support
 - segmented business rule validation
@@ -919,6 +949,8 @@ Many dbt projects repeatedly implement the same validation logic.
 - row-level validation across related fields
 - rule composition checks
 - conditional business-rule validation
+
+---
 
 # Internal Architecture
 
@@ -944,7 +976,8 @@ Internal helpers include:
 Temporal helpers intentionally support both:
 
 - static ISO date literals
-- SQL date expressions
+- dynamic SQL date expressions
+- adapter-specific date rendering
 
 Examples:
 
@@ -984,6 +1017,21 @@ This improves:
 - consistency
 - future extensibility
 
+---
+
+# OSS Maturity
+
+`dbt-checks` is evolving toward a production-grade OSS package with:
+
+- multi-adapter CI
+- Fusion compatibility
+- repository governance
+- contributor tooling
+- release validation workflows
+- dbt Hub readiness
+
+---
+
 # Production Adoption Recommendations
 
 Recommended rollout strategy:
@@ -994,7 +1042,20 @@ Recommended rollout strategy:
 4. Tighten thresholds progressively
 5. Promote stable checks to `severity: error`
 
-This approach allows safer incremental adoption in mature data platforms.
+---
+
+# Community & Support
+
+`dbt-checks` is an open-source project and contributions are welcome.
+
+Repository guidelines and support resources:
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+- [Support Guidelines](SUPPORT.md)
+
+---
 
 # Contributing
 
@@ -1006,6 +1067,8 @@ To add a new check:
 2. Reuse helper macros when possible
 3. Add documentation
 4. Add integration tests including null behavior
+
+---
 
 # License
 

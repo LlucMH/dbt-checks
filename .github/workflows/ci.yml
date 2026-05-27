@@ -79,6 +79,25 @@ jobs:
           dbt ls --select tag:should_pass --resource-type test | grep .
           dbt ls --select tag:should_fail --resource-type test | grep .
 
+      - name: Check OSS governance files
+        run: |
+          test -f CONTRIBUTING.md
+          test -f CODE_OF_CONDUCT.md
+          test -f SECURITY.md
+          test -f SUPPORT.md
+          grep -i "contributing" CONTRIBUTING.md
+          grep -i "code of conduct" CODE_OF_CONDUCT.md
+          grep -i "security" SECURITY.md
+          grep -i "support" SUPPORT.md
+
+      - name: Check README community links
+        run: |
+          grep -i "Community & Support" README.md
+          grep -i "CONTRIBUTING.md" README.md
+          grep -i "CODE_OF_CONDUCT.md" README.md
+          grep -i "SECURITY.md" README.md
+          grep -i "SUPPORT.md" README.md
+
       - name: Check no select star in test macros
         run: |
           ! grep -R -i "select \*" macros/tests
@@ -102,6 +121,7 @@ jobs:
           grep -R '{% macro apply_where' macros
           grep -R '{% macro apply_and_where' macros
           grep -R '{% macro applied_condition' macros
+          grep -R '{% macro safe_sql_string_literal' macros
 
       - name: Check README documents core UX features
         run: |
@@ -112,6 +132,7 @@ jobs:
           grep -i "Real-world Usage Patterns" README.md
           grep -i "Validation Guards" README.md
           grep -i "Production Adoption Recommendations" README.md
+          grep -i "OSS Maturity" README.md
 
       - name: Check README installation version exists
         run: |

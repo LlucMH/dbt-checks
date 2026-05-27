@@ -6,6 +6,66 @@ The format follows semantic versioning.
 
 ---
 
+## [0.6.0] - 2026-05-27
+
+### Added
+
+#### OSS Repository Standards
+
+Added foundational OSS repository governance files:
+
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- `SUPPORT.md`
+
+These additions improve:
+
+- contributor onboarding
+- repository professionalism
+- OSS maintainability
+- security reporting workflows
+- community expectations
+
+#### Community & Governance
+
+Added:
+
+- contribution guidelines
+- security disclosure guidance
+- support expectations
+- contributor behavior standards
+
+#### README Improvements
+
+Expanded README with:
+
+- Features section
+- OSS maturity section
+- Community & Support section
+- improved repository navigation
+- improved package positioning
+
+### Changed
+
+- Improved repository structure for long-term OSS scalability
+- Improved contributor readiness
+- Improved project discoverability and professionalism
+- Improved onboarding experience for external contributors
+
+### Notes
+
+- No SQL generation changes
+- No macro behavior changes
+- No API changes
+- Fully compatible with previous `0.5.x` releases
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.5.4] - 2026-05-17
 
 ### Changed
