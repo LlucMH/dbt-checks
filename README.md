@@ -11,6 +11,9 @@
   <img src="https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey" />
   <img src="https://img.shields.io/github/license/LlucMH/dbt-checks" />
   <img src="https://img.shields.io/github/v/release/LlucMH/dbt-checks" />
+  <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" />
+  <img src="https://img.shields.io/github/issues/LlucMH/dbt-checks" />
+  <img src="https://img.shields.io/github/issues-pr/LlucMH/dbt-checks" />
 </p>
 
 ---
@@ -39,9 +42,9 @@
 - [Supported Warehouses](#supported-warehouses)
 - [Why dbt-checks?](#why-dbt-checks)
 - [Internal Architecture](#internal-architecture)
-- [OSS Maturity](#oss-maturity)
 - [Production Adoption Recommendations](#production-adoption-recommendations)
 - [Community & Support](#community--support)
+- [OSS Maturity](#oss-maturity)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -62,7 +65,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.6.0
+    revision: v0.6.1
 ```
 
 Then install dependencies:
@@ -1019,19 +1022,6 @@ This improves:
 
 ---
 
-# OSS Maturity
-
-`dbt-checks` is evolving toward a production-grade OSS package with:
-
-- multi-adapter CI
-- Fusion compatibility
-- repository governance
-- contributor tooling
-- release validation workflows
-- dbt Hub readiness
-
----
-
 # Production Adoption Recommendations
 
 Recommended rollout strategy:
@@ -1048,12 +1038,56 @@ Recommended rollout strategy:
 
 `dbt-checks` is an open-source project and contributions are welcome.
 
-Repository guidelines and support resources:
+## Community Resources
 
 - [Contributing Guide](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 - [Support Guidelines](SUPPORT.md)
+
+## GitHub Collaboration
+
+The repository includes:
+
+- issue templates
+- bug report templates
+- feature request templates
+- pull request templates
+- CI repository governance checks
+- protected main branch workflows
+
+These workflows help standardize:
+
+- issue reporting
+- contributor onboarding
+- PR quality
+- repository governance
+- OSS collaboration
+
+## Discussions
+
+Questions, ideas, and OSS discussions are welcome through GitHub Discussions.
+
+Use:
+
+- Issues → bugs and actionable features
+- Discussions → questions, ideas, roadmap, usage help
+
+---
+
+# OSS Maturity
+
+`dbt-checks` is evolving toward a production-grade OSS package with:
+
+- multi-adapter CI
+- Fusion compatibility
+- repository governance
+- contributor tooling
+- release validation workflows
+- dbt Hub readiness
+- community health workflows
+- GitHub governance automation
+- OSS contributor onboarding
 
 ---
 

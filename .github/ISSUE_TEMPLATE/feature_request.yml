@@ -1,0 +1,91 @@
+name: Feature request
+description: Suggest a new check, improvement, or package capability
+title: "[Feature]: "
+labels:
+  - enhancement
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement to dbt-checks.
+
+        Please describe the use case and expected behavior clearly.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What problem would this feature solve?
+      placeholder: |
+        I want to validate that each tenant has at least 95% unique order IDs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed solution
+      description: What behavior or API would you like?
+      placeholder: |
+        Add a distinct_ratio_between check with group_by support.
+    validations:
+      required: true
+
+  - type: textarea
+    id: example_usage
+    attributes:
+      label: Example usage
+      description: Show how you would like to configure this feature.
+      render: yaml
+      placeholder: |
+        models:
+          - name: orders
+            columns:
+              - name: order_id
+                data_tests:
+                  - dbt_checks.distinct_ratio_between:
+                      arguments:
+                        min_ratio: 0.95
+                        max_ratio: 1.0
+                        group_by: tenant_id
+    validations:
+      required: false
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which area does this feature relate to?
+      options:
+        - Numeric checks
+        - String checks
+        - Temporal checks
+        - Aggregation checks
+        - Ratio checks
+        - Grouped checks
+        - Multi-column checks
+        - Conditional checks
+        - Rule composition
+        - Documentation
+        - CI / Developer Experience
+        - Adapter compatibility
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered existing dbt tests, dbt-utils, dbt-expectations, or custom SQL?
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add any extra context, examples, or business reasoning.
+    validations:
+      required: false

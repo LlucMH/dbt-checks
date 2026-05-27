@@ -1,0 +1,113 @@
+name: Bug report
+description: Report a reproducible issue in dbt-checks
+title: "[Bug]: "
+labels:
+  - bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug in dbt-checks.
+
+        Please provide enough context to reproduce the issue.
+
+  - type: input
+    id: package_version
+    attributes:
+      label: dbt-checks version
+      description: Which version of dbt-checks are you using?
+      placeholder: "v0.6.1"
+    validations:
+      required: true
+
+  - type: input
+    id: dbt_version
+    attributes:
+      label: dbt version
+      description: Which dbt version are you using?
+      placeholder: "dbt-core 1.11.7"
+    validations:
+      required: true
+
+  - type: input
+    id: adapter
+    attributes:
+      label: Adapter
+      description: Which dbt adapter are you using?
+      placeholder: "dbt-duckdb, dbt-postgres, dbt-bigquery..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: check_used
+    attributes:
+      label: Check used
+      description: Which dbt-checks test caused the issue?
+      placeholder: |
+        dbt_checks.null_ratio_below
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema_config
+    attributes:
+      label: YAML configuration
+      description: Paste the relevant schema.yml configuration.
+      render: yaml
+      placeholder: |
+        models:
+          - name: orders
+            columns:
+              - name: email
+                data_tests:
+                  - dbt_checks.null_ratio_below:
+                      arguments:
+                        threshold: 0.05
+    validations:
+      required: true
+
+  - type: textarea
+    id: error_output
+    attributes:
+      label: Error output
+      description: Paste the relevant dbt error, compilation error, or failure output.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual behavior
+      description: What actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Reproduction steps
+      description: Provide minimal steps to reproduce the issue.
+      placeholder: |
+        1. Add this check to schema.yml
+        2. Run dbt test
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add any other context, logs, screenshots, or related information.
+    validations:
+      required: false
