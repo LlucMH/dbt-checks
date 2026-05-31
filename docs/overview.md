@@ -2,39 +2,43 @@
 
 **dbt-checks** is a lightweight library of reusable data quality checks for dbt projects.
 
-The goal of this package is to make common data validation rules easy to express and reuse across models without writing custom SQL.
+The package provides business-oriented validation checks that help teams express data quality rules declaratively inside dbt schema files.
 
-Instead of writing ad-hoc queries, users can define checks declaratively in their model schema files.
-
----
-
-## Philosophy
-
-`dbt-checks` focuses on:
-
-- Simple and readable checks
-- Business-friendly validation rules
-- Minimal configuration
-- Standardized failure outputs
-- CI-friendly debugging
-- Cross-warehouse compatibility
-- Reusable validation patterns
-- Declarative business-rule enforcement
-
-The package complements built-in dbt tests such as `not_null` and `unique` by providing additional reusable checks.
+Instead of writing custom SQL tests repeatedly, users can apply reusable checks with standardized outputs, validation guards, and cross-warehouse compatibility.
 
 ---
 
-## Example
+# Philosophy
 
-A simple validation using `dbt-checks`:
+`dbt-checks` is built around a few core principles:
+
+* Declarative validation
+* Reusable business rules
+* Standardized failure outputs
+* CI-friendly debugging
+* Cross-warehouse compatibility
+* Minimal configuration
+* Maintainable data quality enforcement
+
+The package complements built-in dbt tests such as:
+
+* `not_null`
+* `unique`
+* `relationships`
+* `accepted_values`
+
+by providing additional reusable validation patterns.
+
+---
+
+# Example
 
 ```yaml
 models:
   - name: orders
 
     columns:
-      - name: value
+      - name: amount
         data_tests:
           - dbt_checks.non_negative
 
@@ -42,311 +46,120 @@ models:
         data_tests:
           - dbt_checks.null_ratio_below:
               arguments:
-                threshold: 0.02
+                value: 0.02
 ```
 
-This allows expressing business rules such as:
-
-- values should never be negative
-- at most 2% of rows may have missing emails
+This allows business rules to be expressed directly in schema files without writing custom SQL.
 
 ---
 
-# Categories of Checks
+# Validation Categories
 
-`dbt-checks` organizes validations into several groups, each targeting a common type of data quality rule.
+The package currently provides several categories of validation checks.
 
----
+## Numeric Checks
 
-## Numeric checks
+Validate numeric ranges and thresholds.
 
-Numeric checks validate numeric ranges and thresholds.
+Examples:
 
-Typical use cases include ensuring metrics are positive, values remain within expected ranges, or numeric anomalies are detected.
-
-Available checks:
-
-- `non_negative`
-- `non_positive`
-- `greater_than`
-- `greater_or_equal_than`
-- `less_than`
-- `less_or_equal_than`
-- `between_values`
-
-Example:
-
-```yaml
-columns:
-  - name: value
-    data_tests:
-      - dbt_checks.between_values:
-          arguments:
-            min_value: 0
-            max_value: 100
-```
+* non-negative values
+* bounded metrics
+* threshold validation
 
 ---
 
-## String checks
+## String Checks
 
-String checks validate textual fields such as identifiers, codes, or free-text columns.
+Validate textual fields and formats.
 
-These checks ensure values follow expected formats or patterns.
+Examples:
 
-Available checks:
-
-- `not_blank`
-- `length_between`
-- `matches_regex`
-- `starts_with`
-- `ends_with`
-- `contains`
-
-Example:
-
-```yaml
-columns:
-  - name: email
-    data_tests:
-      - dbt_checks.matches_regex:
-          arguments:
-            pattern: "^[^@]+@[^@]+\\.[^@]+$"
-```
+* blank values
+* regex validation
+* prefixes and suffixes
+* string length validation
 
 ---
 
-## Temporal checks
+## Temporal Checks
 
-Temporal checks validate date and timestamp fields.
+Validate dates and timestamps.
 
-They help ensure events occur within valid time ranges and prevent issues such as future timestamps or inconsistent date intervals.
+Examples:
 
-Available checks:
-
-- `not_future_date`
-- `not_before_date`
-- `between_dates`
-- `recent_date`
-- `date_diff_less_than`
-- `no_weekend_dates`
-
-Example:
-
-```yaml
-columns:
-  - name: created_at
-    data_tests:
-      - dbt_checks.recent_date:
-          arguments:
-            max_age_days: 7
-```
-
-Grouped freshness validation is also supported:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.recent_date:
-          arguments:
-            max_age_days: 7
-            group_by: country
-```
-
-This validates freshness independently for each segment.
+* freshness validation
+* future date detection
+* date interval validation
 
 ---
 
-## Aggregation checks
+## Aggregation Checks
 
-Aggregation checks validate aggregated values across datasets.
+Validate dataset-level metrics.
 
-They help ensure datasets contain a reasonable number of rows or that aggregated metrics remain within expected limits.
+Examples:
 
-Available checks:
-
-- `row_count_greater_than`
-- `row_count_less_than`
-- `row_count_between`
-- `sum_between`
-- `avg_between`
-- `max_between`
-- `min_between`
-
-Example:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.row_count_between:
-          arguments:
-            min_value: 100
-            max_value: 1000000
-```
-
-Grouped aggregation validation is supported through `group_by`.
-
-Example:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.avg_between:
-          arguments:
-            column_name: order_value
-            min_value: 10
-            max_value: 500
-            group_by: country
-```
-
-This validates aggregated metrics independently for each segment.
+* row counts
+* sums
+* averages
+* minimum and maximum values
 
 ---
 
-## Ratio checks
+## Ratio Checks
 
-Ratio checks validate proportions of rows matching a condition.
+Validate proportions of rows matching a condition.
 
-They are useful for monitoring data completeness, detecting anomalies, or validating business rules that apply to a percentage of records.
+Examples:
 
-Available checks:
-
-- `negative_ratio_between`
-- `null_ratio_below`
-- `null_ratio_between`
-- `positive_ratio_between`
-- `value_ratio_between`
-
-Example:
-
-```yaml
-columns:
-  - name: status
-    data_tests:
-      - dbt_checks.value_ratio_between:
-          arguments:
-            value: "completed"
-            min_ratio: 0.8
-            max_ratio: 1.0
-```
-
-Grouped ratio validation is also supported:
-
-```yaml
-group_by:
-  - country
-  - sales_channel
-```
-
-This validates ratios independently for each segment combination.
+* null ratios
+* positive value ratios
+* business-event ratios
 
 ---
 
-## Multi-column checks
+## Multi-column Checks
 
-Multi-column checks validate relationships between columns within the same row.
+Validate relationships between columns.
 
-These checks are useful for enforcing row-level business consistency and validating relationships between related fields.
+Examples:
 
-Available checks:
-
-- `columns_equal`
-- `columns_distinct`
-- `column_greater_than_column`
-- `column_less_than_column`
-
-Example:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.column_less_than_column:
-          arguments:
-            left_column: discount_amount
-            right_column: total_amount
-```
-
-Typical use cases include:
-
-- validating discounts do not exceed totals
-- ensuring two related fields are different
-- validating start/end relationships
-- validating expected vs actual values
+* equality validation
+* comparison validation
+* consistency validation
 
 ---
 
-## Rule composition checks
+## Conditional Checks
 
-Rule composition checks allow reusable SQL expressions to be combined into business-rule validations.
+Validate dependency-based business rules.
 
-Available checks:
+Examples:
 
-- `expression_is_true`
-- `all_of`
-- `any_of`
-
-Example:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.all_of:
-          arguments:
-            expressions:
-              - "discount_amount >= 0"
-              - "discount_amount <= total_amount"
-              - "status is not null"
-```
-
-These checks make it possible to express custom business rules directly in schema files without writing bespoke SQL tests.
+* required fields when a condition is met
+* workflow consistency checks
+* conditional completeness validation
 
 ---
 
-## Conditional checks
+## Rule Composition Checks
 
-Conditional checks validate dependency-based business rules.
+Compose custom business rules using SQL expressions.
 
-They allow validations of the form:
+Examples:
 
-> if condition A is true, then condition B must also be true
-
-Available checks:
-
-- `require_when`
-- `require_not_null_when`
-- `require_value_when`
-
-Example:
-
-```yaml
-models:
-  - name: orders
-    data_tests:
-      - dbt_checks.require_not_null_when:
-          arguments:
-            when: "status = 'cancelled'"
-            column_name: cancelled_at
-```
-
-Typical use cases include:
-
-- cancelled orders requiring cancellation timestamps
-- VAT requirements for specific countries
-- workflow/state consistency validation
-- conditional completeness validation
+* financial consistency rules
+* contactability rules
+* workflow validation
 
 ---
 
-# Grouped Validation
+# Key Features
 
-Several checks support grouped validation through `group_by`.
+## Grouped Validation
 
-Grouped validation allows rules to be evaluated independently for each segment.
+Several checks support segmented validation through `group_by`.
 
 Examples:
 
@@ -360,102 +173,94 @@ group_by:
   - sales_channel
 ```
 
-Supported grouped validation areas include:
-
-- aggregation checks
-- ratio checks
-- freshness checks
-
-Grouped failure outputs expose contextual fields such as:
-
-- `grouped_by_country`
-- `grouped_by_status`
-
-This makes failures easier to debug in CI and stored failure tables.
+This allows validations to run independently for each segment.
 
 ---
 
-# Standardized Failure Outputs
+## Standardized Failure Outputs
 
-`dbt-checks` provides standardized and contextual failure outputs.
-
-Instead of generic outputs such as:
-
-```text
-Got 1 result, configured to fail if != 0
-```
-
-checks expose business-oriented debugging information.
+Checks expose contextual debugging information.
 
 Examples include:
 
-| left_value | right_value | failed_check |
-| --- | --- | --- |
-| 150 | 100 | column_less_than_column |
+* failing values
+* actual vs expected metrics
+* grouped context
+* trigger conditions
+* failed expressions
 
-| trigger_condition | required_condition | failed_check |
-| --- | --- | --- |
-| status = 'cancelled' | cancelled_at is not null | require_when |
-
-| grouped_by_country | actual_ratio | expected_max_ratio |
-| --- | --- | --- |
-| ES | 0.92 | 0.80 |
-
-These outputs are designed to improve:
-
-- CI debugging
-- stored failure inspection
-- observability integrations
-- developer experience
+The goal is to make failures easier to debug in CI and stored failure tables.
 
 ---
 
-# Validation Guards
+## Validation Guards
 
-`dbt-checks` validates arguments during compilation to detect invalid configurations early.
+Argument validation is performed during compilation whenever possible.
 
-Examples of invalid configurations detected automatically include:
+Examples:
 
-- invalid ranges
-- invalid ratios
-- empty required strings
-- invalid grouping definitions
-- invalid expression lists
-- invalid conditional rules
+* invalid ranges
+* invalid ratios
+* invalid dates
+* invalid grouped configurations
+* invalid expression lists
 
-This prevents invalid checks from silently generating incorrect SQL.
-
----
-
-# Supported warehouses
-
-The package is designed to work across common dbt adapters, including:
-
-- Snowflake
-- BigQuery
-- Databricks
-- Spark
-- Redshift
-- Postgres
-
-Adapter-specific behavior is handled through dbt's `dispatch` mechanism.
-
-DuckDB is used as the primary CI validation adapter.
+This helps catch configuration errors before SQL execution.
 
 ---
 
-# Project goals
+## Adapter Compatibility
 
-`dbt-checks` aims to provide:
+Warehouse-specific behavior is isolated through reusable helper macros and dbt dispatch.
 
-- reusable validation patterns
-- expressive business-rule validations
-- CI-friendly debugging outputs
-- declarative schema-driven validation
-- cross-warehouse compatibility
-- reusable validation architecture
-- grouped validation support
-- standardized failure semantics
-- maintainable data quality enforcement
+Current compatibility targets include:
 
-The package is intentionally lightweight and focused on practical real-world validation scenarios.
+* DuckDB
+* Postgres
+* BigQuery
+* Snowflake
+* Databricks
+* Spark
+* Redshift
+
+---
+
+# Documentation
+
+Detailed documentation is available in:
+
+* `checks.md`
+* `grouped-checks.md`
+* `conditional-checks.md`
+* `rule-composition.md`
+* `architecture.md`
+* `ci.md`
+* `examples.md`
+
+---
+
+# Project Goals
+
+The long-term goals of `dbt-checks` are:
+
+* reusable validation patterns
+* expressive business-rule validation
+* warehouse portability
+* maintainable data quality enforcement
+* CI-friendly observability
+* contributor-friendly OSS development
+* dbt ecosystem compatibility
+
+The package aims to remain lightweight while supporting practical real-world data quality use cases.
+
+---
+
+## Related Documentation
+
+* [Checks](checks.md)
+* [Grouped Checks](grouped-checks.md)
+* [Conditional Checks](conditional-checks.md)
+* [Rule Composition](rule-composition.md)
+* [Architecture](architecture.md)
+* [Examples](examples.md)
+* [CI](ci.md)

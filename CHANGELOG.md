@@ -6,6 +6,92 @@ The format follows semantic versioning.
 
 ---
 
+## [0.6.2] - 2026-06-01
+
+### Added
+
+#### Documentation Structure
+
+Added a dedicated documentation directory:
+
+- `docs/README.md`
+- `docs/overview.md`
+- `docs/checks.md`
+- `docs/grouped-checks.md`
+- `docs/conditional-checks.md`
+- `docs/rule-composition.md`
+- `docs/architecture.md`
+- `docs/ci.md`
+- `docs/examples.md`
+
+#### Documentation Navigation
+
+Added cross-links between documentation pages to improve navigation and discoverability.
+
+Documentation pages now include related documentation sections.
+
+#### Technical Documentation
+
+Added dedicated documentation covering:
+
+- package architecture
+- grouped validation
+- conditional validation
+- rule composition
+- CI workflows
+- practical usage examples
+
+#### Documentation Index
+
+Added a centralized documentation index under:
+
+```text
+docs/README.md
+```
+
+to improve documentation discoverability.
+
+### Changed
+
+#### README Simplification
+
+Refactored README to act as a project landing page.
+
+Moved detailed documentation into the dedicated `/docs` directory.
+
+README now focuses on:
+
+- installation
+- package overview
+- validation categories
+- supported warehouses
+- community resources
+- documentation navigation
+
+#### Documentation Organization
+
+Reorganized package documentation into topic-specific documents.
+
+This improves:
+
+- scalability
+- maintainability
+- contributor onboarding
+- long-term project growth
+
+### Notes
+
+- No SQL generation changes
+- No macro behavior changes
+- No API changes
+- No test behavior changes
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.6.1] - 2026-05-28
 
 ### Added
