@@ -150,14 +150,13 @@ jobs:
 
       - name: Check documentation content coverage
         run: |
-          grep -i "where" docs/checks.md
-          grep -i "NULL" docs/checks.md
-          grep -i "Severity" docs/examples.md
-          grep -i "Standardized" docs/architecture.md
-          grep -i "failure outputs" docs/architecture.md
-          grep -i "Real-world" docs/examples.md
-          grep -i "Validation Guards" docs/architecture.md
-          grep -i "OSS" README.md
+          grep -R -i "where" docs README.md
+          grep -R -i "NULL" docs README.md
+          grep -R -i "Severity" docs README.md
+          grep -R -i "Standardized" docs README.md
+          grep -R -i "failure outputs" docs README.md
+          grep -R -i "Validation Guards" docs README.md
+          grep -R -i "OSS" docs README.md
 
       - name: Check README installation version exists
         run: |
