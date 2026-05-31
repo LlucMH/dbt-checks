@@ -221,7 +221,10 @@ When opening a PR:
 
 - keep changes focused
 - include tests
-- update documentation if needed
+- Update documentation if needed:
+  - docs/
+  - docs blocks
+  - schema.yml metadata
 - ensure CI passes
 
 Small, incremental improvements are preferred over very large PRs.

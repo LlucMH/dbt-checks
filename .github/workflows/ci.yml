@@ -394,3 +394,14 @@ jobs:
           grep -i "Bug report" .github/ISSUE_TEMPLATE/bug_report.yml
           grep -i "Feature request" .github/ISSUE_TEMPLATE/feature_request.yml
           grep -i "Pull Request" .github/PULL_REQUEST_TEMPLATE.md
+
+      - name: Check docs directory
+        run: |
+          test -f docs/overview.md
+          test -f docs/checks.md
+          test -f docs/grouped-checks.md
+          test -f docs/conditional-checks.md
+          test -f docs/rule-composition.md
+          test -f docs/architecture.md
+          test -f docs/ci.md
+          test -f docs/examples.md
