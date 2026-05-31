@@ -123,16 +123,41 @@ jobs:
           grep -R '{% macro applied_condition' macros
           grep -R '{% macro safe_sql_string_literal' macros
 
-      - name: Check README documents core UX features
+      - name: Check documentation structure
         run: |
-          grep -i "where" README.md
-          grep -i "NULL Handling" README.md
-          grep -i "Severity Configuration" README.md
-          grep -i "Standardized Failure Output" README.md
-          grep -i "Real-world Usage Patterns" README.md
-          grep -i "Validation Guards" README.md
-          grep -i "Production Adoption Recommendations" README.md
-          grep -i "OSS Maturity" README.md
+          test -f docs/README.md
+          test -f docs/overview.md
+          test -f docs/checks.md
+          test -f docs/grouped-checks.md
+          test -f docs/conditional-checks.md
+          test -f docs/rule-composition.md
+          test -f docs/architecture.md
+          test -f docs/ci.md
+          test -f docs/examples.md
+
+      - name: Check README links to documentation
+        run: |
+          grep -i "Documentation" README.md
+          grep -i "docs/README.md" README.md
+          grep -i "docs/overview.md" README.md
+          grep -i "docs/checks.md" README.md
+          grep -i "docs/grouped-checks.md" README.md
+          grep -i "docs/conditional-checks.md" README.md
+          grep -i "docs/rule-composition.md" README.md
+          grep -i "docs/architecture.md" README.md
+          grep -i "docs/ci.md" README.md
+          grep -i "docs/examples.md" README.md
+
+      - name: Check documentation content coverage
+        run: |
+          grep -i "where" docs/checks.md
+          grep -i "NULL" docs/checks.md
+          grep -i "Severity" docs/examples.md
+          grep -i "Standardized" docs/architecture.md
+          grep -i "failure outputs" docs/architecture.md
+          grep -i "Real-world" docs/examples.md
+          grep -i "Validation Guards" docs/architecture.md
+          grep -i "OSS" README.md
 
       - name: Check README installation version exists
         run: |
@@ -140,15 +165,15 @@ jobs:
 
       - name: Validate grouped validation documentation
         run: |
-          grep -i "group_by" README.md
-          grep -i "Grouped" README.md
-          grep -i "Grouped Aggregation Checks" README.md
-          grep -i "grouped_by_status" README.md
-          grep -i "Grouped Ratio Checks" README.md
-          grep -i "multi-column grouping" README.md
-          grep -i "grouped_by_country" README.md
-          grep -i "Grouped Freshness Checks" README.md
-          grep -i "recent_date" README.md
+          grep -i "group_by" docs/grouped-checks.md
+          grep -i "Grouped" docs/grouped-checks.md
+          grep -i "Grouped Aggregation Checks" docs/grouped-checks.md
+          grep -i "grouped_by_status" docs/grouped-checks.md
+          grep -i "Grouped Ratio Checks" docs/grouped-checks.md
+          grep -i "Multi-column Grouping" docs/grouped-checks.md
+          grep -i "grouped_by_country" docs/grouped-checks.md
+          grep -i "Grouped Freshness Checks" docs/grouped-checks.md
+          grep -i "recent_date" docs/grouped-checks.md
 
       - name: Validate grouped validation helpers
         run: |
@@ -163,7 +188,7 @@ jobs:
 
       - name: Validate multi-column checks
         run: |
-          grep -i "Multi-column" README.md
+          grep -i "Multi-column" docs/checks.md
           grep -R "column_greater_than_column" macros/tests/multi_column
           grep -R "column_less_than_column" macros/tests/multi_column
           grep -R "columns_equal" macros/tests/multi_column
@@ -171,7 +196,7 @@ jobs:
           grep -R "left_column" macros/tests/multi_column
           grep -R "right_column" macros/tests/multi_column
           grep -R "validate_required_column" macros/helpers/validation.sql
-          grep -i "Rule Composition" README.md
+          grep -i "Rule Composition" docs/rule-composition.md
           grep -R "expression_is_true" macros/tests/rule_composition
           grep -R "all_of" macros/tests/rule_composition
           grep -R "any_of" macros/tests/rule_composition
@@ -180,7 +205,7 @@ jobs:
 
       - name: Validate conditional checks
         run: |
-          grep -i "Conditional Checks" README.md
+          grep -i "Conditional Checks" docs/conditional-checks.md
           grep -R "require_when" macros/tests/conditional
           grep -R "require_not_null_when" macros/tests/conditional
           grep -R "require_value_when" macros/tests/conditional
@@ -394,14 +419,3 @@ jobs:
           grep -i "Bug report" .github/ISSUE_TEMPLATE/bug_report.yml
           grep -i "Feature request" .github/ISSUE_TEMPLATE/feature_request.yml
           grep -i "Pull Request" .github/PULL_REQUEST_TEMPLATE.md
-
-      - name: Check docs directory
-        run: |
-          test -f docs/overview.md
-          test -f docs/checks.md
-          test -f docs/grouped-checks.md
-          test -f docs/conditional-checks.md
-          test -f docs/rule-composition.md
-          test -f docs/architecture.md
-          test -f docs/ci.md
-          test -f docs/examples.md
