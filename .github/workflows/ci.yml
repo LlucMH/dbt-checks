@@ -161,17 +161,17 @@ jobs:
       - name: Check README installation version exists
         run: |
           grep -E "revision: v[0-9]+\.[0-9]+\.[0-9]+" README.md
-
+  
       - name: Validate grouped validation documentation
         run: |
           grep -i "group_by" docs/grouped-checks.md
-          grep -i "Grouped" docs/grouped-checks.md
+          grep -i "Grouped Checks" docs/grouped-checks.md
           grep -i "Grouped Aggregation Checks" docs/grouped-checks.md
-          grep -i "grouped_by_status" docs/grouped-checks.md
           grep -i "Grouped Ratio Checks" docs/grouped-checks.md
-          grep -i "Multi-column Grouping" docs/grouped-checks.md
-          grep -i "grouped_by_country" docs/grouped-checks.md
           grep -i "Grouped Freshness Checks" docs/grouped-checks.md
+          grep -i "Multi-column Grouping" docs/grouped-checks.md
+          grep -i "Grouped Failure Outputs" docs/grouped-checks.md
+          grep -i "grouped_by_" docs/grouped-checks.md
           grep -i "recent_date" docs/grouped-checks.md
 
       - name: Validate grouped validation helpers
