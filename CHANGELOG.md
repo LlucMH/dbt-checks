@@ -6,6 +6,32 @@ The format follows semantic versioning.
 
 ---
 
+## [0.6.3] - 2026-06-11
+
+### Added
+
+#### Visual Documentation
+
+Added visual documentation assets under `docs/assets`:
+
+- validation flow diagrams
+- medallion quality strategy diagrams
+- CI rollout strategy diagrams
+- stored failures examples
+- grouped validation examples
+- dbt docs screenshots
+- CI failure screenshots
+
+These additions improve:
+
+- onboarding
+- discoverability
+- OSS maturity
+- contributor understanding
+- recruiter readability
+
+---
+
 ## [0.6.2] - 2026-06-01
 
 ### Added

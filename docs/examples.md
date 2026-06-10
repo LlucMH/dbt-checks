@@ -182,6 +182,10 @@ columns:
 
 # Medallion Architecture Example
 
+![Medallion Quality Strategy](assets/medallion-quality-strategy.png)
+
+This example demonstrates how different validation strategies can be applied across medallion layers.
+
 ## Bronze Layer
 
 Validate ingestion freshness.
@@ -279,6 +283,10 @@ data_tests:
 
 # Grouped Validation Example
 
+![Grouped Checks Example](assets/grouped-checks-example.png)
+
+Grouped checks validate each segment independently instead of validating the whole dataset globally.
+
 ## Revenue by Country
 
 ```yaml
@@ -307,6 +315,36 @@ columns:
 
 ---
 
+# Stored Failures Example
+
+![Stored Failures Example](assets/stored-failures-example.png)
+
+`dbt-checks` integrates well with dbt stored failures workflows.
+
+This allows failing rows to be persisted for:
+
+* debugging
+* monitoring
+* alerting
+* operational visibility
+
+---
+
+# Validation Flow
+
+![Validation Flow](assets/validation-flow.png)
+
+The validation lifecycle typically follows:
+
+1. define checks
+2. execute tests
+3. evaluate results
+4. store failures
+5. expose failures
+6. take action
+
+---
+
 # Scoped Validation Example
 
 Validate only active records.
@@ -323,6 +361,8 @@ columns:
 ---
 
 # CI-Friendly Validation Example
+
+![CI Rollout Strategy](assets/ci-rollout-strategy.png)
 
 Use warnings during rollout.
 
@@ -363,6 +403,22 @@ For existing projects:
 5. Promote critical checks to errors
 
 This approach minimizes disruption while improving data quality over time.
+
+---
+
+# dbt Docs Example
+
+![dbt Docs Example](assets/dbt-docs-example.png)
+
+`dbt-checks` integrates naturally with dbt documentation workflows and exposes test metadata directly through dbt docs.
+
+---
+
+# CI Failure Example
+
+![CI Failure Example](assets/ci-failure-example.png)
+
+CI integration helps teams detect issues early before invalid data reaches downstream consumers.
 
 ---
 

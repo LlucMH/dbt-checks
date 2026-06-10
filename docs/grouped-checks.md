@@ -20,6 +20,8 @@ Grouped validation is enabled through the `group_by` argument.
 
 A global check can hide segment-level problems.
 
+![Grouped Checks Example](assets/grouped-checks-example.png)
+
 For example, this check:
 
 ```yaml
@@ -178,6 +180,8 @@ models:
 # Grouped Failure Outputs
 
 Grouped checks expose grouped context in failure outputs.
+
+![Grouped Checks Example](assets/grouped-checks-example.png)
 
 Example:
 
