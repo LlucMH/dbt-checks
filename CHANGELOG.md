@@ -6,7 +6,7 @@ The format follows semantic versioning.
 
 ---
 
-## [0.6.3] - 2026-06-10
+## [0.6.3] - 2026-06-11
 
 ### Added
 
