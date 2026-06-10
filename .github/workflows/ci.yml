@@ -391,6 +391,17 @@ jobs:
             integration_tests_invalid_configs/target
             integration_tests_invalid_configs/invalid_config_output.log
 
+      - name: Validate documentation assets
+        run: |
+          test -f docs/assets/grouped-checks-example.png
+          test -f docs/assets/medallion-quality-strategy.png
+          test -f docs/assets/ci-rollout-strategy.png
+          test -f docs/assets/failure-output-example.png
+          test -f docs/assets/stored-failures-example.png
+          test -f docs/assets/validation-flow.png
+          test -f docs/assets/dbt-docs-example.png
+          test -f docs/assets/ci-failure-example.png
+
       - name: Check GitHub community templates
         run: |
           test -f .github/ISSUE_TEMPLATE/bug_report.yml

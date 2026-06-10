@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/dbt-checks banner.png" alt="dbt-checks banner" width="600"/>
+  <img src="docs/assets/dbt-checks banner.png" alt="dbt-checks banner" width="600"/>
 </p>
 
 ---
@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.6.2
+    revision: v0.6.3
 ```
 
 Install dependencies:
@@ -90,6 +90,16 @@ Run validations using:
 ```bash
 dbt test
 ```
+
+---
+
+# Validation Flow
+
+<p align="center">
+  <img src="docs/assets/validation-flow.png" alt="Validation Flow" width="1100"/>
+</p>
+
+dbt-checks supports a CI-friendly validation lifecycle with standardized outputs, stored failures support, and progressive rollout strategies.
 
 ---
 
@@ -172,6 +182,110 @@ For detailed arguments, examples, and metadata, use dbt Docs:
 dbt docs generate
 dbt docs serve
 ```
+
+---
+
+# Examples
+
+The project includes practical usage examples for common analytics engineering and data quality scenarios.
+
+## Included Scenarios
+
+* ecommerce validations
+* finance validations
+* customer data quality
+* SaaS multi-tenant validation
+* medallion architecture strategies
+* grouped validation
+* conditional business rules
+* CI rollout strategies
+
+---
+
+## Grouped Validation Example
+
+<p align="center">
+  <img src="docs/assets/grouped-checks-example.png" alt="Grouped Checks Example" width="1100"/>
+</p>
+
+Grouped validation allows checks to run independently for each segment of a dataset.
+
+This is especially useful for:
+
+* multi-tenant SaaS platforms
+* country-level KPIs
+* regional analytics
+* source-system monitoring
+* partition validation
+
+---
+
+## Medallion Quality Strategy
+
+<p align="center">
+  <img src="docs/assets/medallion-quality-strategy.png" alt="Medallion Quality Strategy" width="1100"/>
+</p>
+
+dbt-checks supports different validation strategies across:
+
+* bronze ingestion layers
+* silver transformation layers
+* gold KPI layers
+
+This helps teams apply data quality intentionally across the analytics lifecycle.
+
+---
+
+## Stored Failures Workflows
+
+<p align="center">
+  <img src="docs/assets/stored-failures-example.png" alt="Stored Failures Example" width="1100"/>
+</p>
+
+Stored failures allow teams to:
+
+* debug failing rows
+* monitor quality trends
+* build alerts
+* improve operational observability
+
+---
+
+## CI Rollout Strategies
+
+<p align="center">
+  <img src="docs/assets/ci-rollout-strategy.png" alt="CI Rollout Strategy" width="1100"/>
+</p>
+
+dbt-checks supports progressive rollout strategies using:
+
+* `severity: warn`
+* `severity: error`
+* `warn_if`
+* `error_if`
+* `--warn-error`
+
+This enables safer adoption in existing projects.
+
+---
+
+## dbt Docs Integration
+
+<p align="center">
+  <img src="docs/assets/dbt-docs-example.png" alt="dbt Docs Example" width="1100"/>
+</p>
+
+dbt-checks integrates naturally with dbt documentation workflows and exposes metadata directly through dbt docs.
+
+---
+
+## CI Integration
+
+<p align="center">
+  <img src="docs/assets/ci-failure-example.png" alt="CI Failure Example" width="1100"/>
+</p>
+
+CI integration helps teams detect issues early before invalid data reaches downstream consumers.
 
 ---
 
