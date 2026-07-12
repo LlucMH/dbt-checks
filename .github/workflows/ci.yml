@@ -183,6 +183,8 @@ jobs:
           test -f .github/ISSUE_TEMPLATE/config.yml
           test -f .github/PULL_REQUEST_TEMPLATE.md
 
+          pip install --quiet pyyaml
+
           python - <<'PY'
           import yaml
           from pathlib import Path
