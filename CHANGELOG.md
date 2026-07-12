@@ -6,6 +6,37 @@ The format follows semantic versioning.
 
 ---
  
+ 
+## [0.6.5] - 2026-07-12
+ 
+### Changed
+ 
+#### Release Automation
+ 
+Changed `.github/workflows/release.yml` trigger from `push` (on
+`dbt_project.yml` changes) to `workflow_run`, gated on the `CI` workflow
+completing with `conclusion == 'success'` on `main`.
+ 
+This ensures a release is never tagged or published unless the full CI
+suite — integration tests, invalid-config guard rails, governance and
+documentation checks — has passed on that exact commit.
+ 
+Both jobs now check out `github.event.workflow_run.head_sha` explicitly,
+so the release always corresponds to the commit CI actually validated,
+not whatever `main` happens to point to when the workflow runs.
+ 
+### Notes
+ 
+- No SQL generation changes
+- No macro behavior changes
+- No API changes
+- No test behavior changes
+### Breaking Changes
+ 
+- None.
+
+---
+
 ## [0.6.4] - 2026-07-12
  
 ### Added
