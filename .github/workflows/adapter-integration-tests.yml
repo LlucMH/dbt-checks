@@ -111,7 +111,7 @@ jobs:
 
       - name: Seed test data
         working-directory: integration_tests
-        run: dbt seed
+        run: dbt seed --full-refresh
 
       - name: Run test models
         working-directory: integration_tests
