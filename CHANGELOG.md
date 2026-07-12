@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format follows semantic versioning.
 
 ---
+ 
+## [0.6.4] - 2026-07-12
+ 
+### Added
+ 
+#### Versioning Policy
+ 
+Added `VERSIONING.md` defining:
+ 
+- what qualifies as a MAJOR, MINOR, or PATCH change
+- how compile-time validation guards are treated under semver
+- the deprecation process for breaking changes
+- the release process
+#### Release Automation
+ 
+Added `.github/workflows/release.yml`:
+ 
+- detects version changes in `dbt_project.yml` on push to `main`
+- creates the matching `vX.Y.Z` tag
+- publishes a GitHub Release generated from the corresponding `CHANGELOG.md` section
+#### CI Governance
+ 
+Added CI validation ensuring the version in `dbt_project.yml` has a matching
+`CHANGELOG.md` entry before merging to `main`.
+ 
+### Changed
+ 
+- Linked `VERSIONING.md` from `README.md` (Community & Support) and
+  `CONTRIBUTING.md` (Pull requests)
+### Notes
+ 
+- No SQL generation changes
+- No macro behavior changes
+- No API changes
+- No test behavior changes
+### Breaking Changes
+ 
+- None.
+
+---
 
 ## [0.6.3] - 2026-06-11
 

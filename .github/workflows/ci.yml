@@ -161,6 +161,18 @@ jobs:
       - name: Check README installation version exists
         run: |
           grep -E "revision: v[0-9]+\.[0-9]+\.[0-9]+" README.md
+
+      - name: Check version has matching CHANGELOG entry
+        run: |
+          version=$(grep -E '^version:' dbt_project.yml | sed -E 's/version:\s*"?([0-9]+\.[0-9]+\.[0-9]+)"?/\1/')
+          echo "dbt_project.yml version: $version"
+
+          if ! grep -qE "^## \[$version\]" CHANGELOG.md; then
+            echo "No CHANGELOG.md entry found for version $version"
+            exit 1
+          fi
+
+          echo "CHANGELOG.md entry found for version $version"
   
       - name: Validate grouped validation documentation
         run: |

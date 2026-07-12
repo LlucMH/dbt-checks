@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - dbt_project.yml
+
+jobs:
+  detect-version-bump:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      should_release: ${{ steps.check.outputs.should_release }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect version change
+        id: check
+        run: |
+          current_version=$(grep -E '^version:' dbt_project.yml | sed -E 's/version:\s*"?([0-9]+\.[0-9]+\.[0-9]+)"?/\1/')
+
+          if [ -z "$current_version" ]; then
+            echo "Could not parse version from dbt_project.yml"
+            exit 1
+          fi
+
+          echo "Current version: $current_version"
+
+          if git rev-parse "v$current_version" >/dev/null 2>&1; then
+            echo "Tag v$current_version already exists. Skipping release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tag v$current_version does not exist yet. Will release."
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "version=$current_version" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: detect-version-bump
+    if: needs.detect-version-bump.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          version="${{ needs.detect-version-bump.outputs.version }}"
+
+          python - <<PY
+          import re
+          import sys
+
+          version = "$version"
+
+          with open("CHANGELOG.md", encoding="utf-8") as f:
+              content = f.read()
+
+          pattern = rf"## \[{re.escape(version)}\].*?(?=\n## \[|\Z)"
+          match = re.search(pattern, content, re.DOTALL)
+
+          if not match:
+              print(f"No CHANGELOG.md section found for version {version}")
+              sys.exit(1)
+
+          section = match.group(0).strip()
+
+          with open("release_notes.md", "w", encoding="utf-8") as f:
+              f.write(section)
+          PY
+
+      - name: Validate changelog section was found
+        run: |
+          test -s release_notes.md
+          echo "Release notes:"
+          cat release_notes.md
+
+      - name: Create tag
+        run: |
+          version="${{ needs.detect-version-bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$version"
+          git push origin "v$version"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.detect-version-bump.outputs.version }}
+          name: v${{ needs.detect-version-bump.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
