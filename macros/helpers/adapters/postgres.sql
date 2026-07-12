@@ -23,9 +23,31 @@
 {% endmacro %}
 
 {% macro postgres__try_cast_to_date(expr) %}
-  cast({{ expr }} as date)
+  {#-
+    Postgres has no native TRY_CAST: cast(x as date) raises an error on
+    invalid input instead of returning NULL, unlike DuckDB's try_cast or
+    Snowflake's try_to_date. This guards with a regex before casting, so
+    only strict ISO 8601 (YYYY-MM-DD) strings are accepted — anything else
+    returns NULL rather than raising. This is narrower than DuckDB/
+    Snowflake's try-cast, which parse a wider range of date formats.
+  -#}
+  case
+    when cast({{ expr }} as text) ~ '^\d{4}-\d{2}-\d{2}$'
+      then cast({{ expr }} as date)
+    else null
+  end
 {% endmacro %}
 
 {% macro postgres__try_cast_to_timestamp(expr) %}
-  cast({{ expr }} as timestamp)
+  {#-
+    Same TRY_CAST limitation as postgres__try_cast_to_date. Accepts
+    'YYYY-MM-DD' optionally followed by a 'HH:MI:SS' time component
+    (space- or 'T'-separated); anything else returns NULL instead of
+    raising.
+  -#}
+  case
+    when cast({{ expr }} as text) ~ '^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}:\d{2})?$'
+      then cast({{ expr }} as timestamp)
+    else null
+  end
 {% endmacro %}

@@ -7,7 +7,7 @@
 <p align="center">
   <img src="https://img.shields.io/github/actions/workflow/status/LlucMH/dbt-checks/ci.yml?branch=main" />
   <img src="https://img.shields.io/badge/dbt-1.5%2B-orange" />
-  <img src="https://img.shields.io/badge/tested%20on-duckdb-blue" />
+  <img src="https://img.shields.io/badge/tested%20on-duckdb%20%7C%20postgres-blue" />
   <img src="https://img.shields.io/badge/cross--db-dbt%20dispatch-lightgrey" />
   <img src="https://img.shields.io/github/license/LlucMH/dbt-checks" />
   <img src="https://img.shields.io/github/v/release/LlucMH/dbt-checks" />
@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.6.5
+    revision: v0.7.0
 ```
 
 Install dependencies:
@@ -141,7 +141,7 @@ Adapter-specific behavior is handled through dbt dispatch.
 | Warehouse  | Status             |
 | ---------- | ------------------ |
 | DuckDB     | Fully tested in CI |
-| Postgres   | Planned validation |
+| Postgres   | Fully tested in CI |
 | BigQuery   | Planned validation |
 | Snowflake  | Planned validation |
 | Databricks | Planned validation |

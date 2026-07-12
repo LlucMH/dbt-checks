@@ -1,8 +1,17 @@
 integration_tests_invalid_configs:
-  target: dev
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
 
   outputs:
     dev:
       type: duckdb
       path: integration_tests_invalid_configs.duckdb
+      threads: 1
+    postgres:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | as_number }}"
+      user: "{{ env_var('POSTGRES_USER', 'dbt_checks') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'dbt_checks') }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'dbt_checks') }}"
+      schema: "{{ env_var('POSTGRES_SCHEMA', 'public') }}"
       threads: 1

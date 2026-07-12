@@ -35,6 +35,13 @@ The main workflow runs on:
 - pull requests
 - pushes to `main`
 
+It is split into two jobs:
+
+- `repo-governance` — adapter-independent checks (documentation, macro
+  structure, community health files). Runs once.
+- `integration-tests` — a matrix over supported adapters, each leg calling
+  the `adapter-integration-tests.yml` reusable workflow.
+
 The workflow validates the package using the integration test project under:
 
 ```text
@@ -43,16 +50,49 @@ integration_tests/
 
 ---
 
+# Adapter Matrix
+
+`integration-tests` runs as a matrix (`.github/workflows/ci.yml`) over:
+
+```text
+duckdb
+postgres
+```
+
+Each matrix leg calls the reusable workflow
+`.github/workflows/adapter-integration-tests.yml` with the adapter name as
+input. The reusable workflow:
+
+- installs `dbt-core` plus the adapter-specific package (`dbt-duckdb` or
+  `dbt-postgres`)
+- selects the matching dbt target via the `DBT_TARGET` env var, resolved
+  against `integration_tests/profiles.yml` and
+  `integration_tests_invalid_configs/profiles.yml` (both define a `dev`
+  DuckDB target and a `postgres` target)
+- for the Postgres leg, starts a `postgres:16` service container for the
+  job to connect to
+- runs the full integration + invalid-config suite identically against
+  whichever adapter it was called with
+- prints stored failure rows to the job summary using an adapter-specific
+  script (direct DuckDB file query, or `psycopg2` against
+  `information_schema` for Postgres)
+
+This keeps the adapter-dependent steps in one place, so adding another
+adapter to the matrix means adding a matrix entry plus install/target
+wiring, not duplicating the whole pipeline.
+
+---
+
 # Validation Steps
 
-The CI pipeline typically performs the following steps:
+Each adapter leg of the integration-tests job performs the following steps:
 
 ```text
 Checkout repository
       ↓
 Set up Python
       ↓
-Install dbt dependencies
+Install dbt + adapter package
       ↓
 Run dbt deps
       ↓
@@ -76,6 +116,9 @@ Run dbt docs generate
       ↓
 Upload artifacts
 ```
+
+The `repo-governance` job runs its documentation, macro, and community
+health checks independently of the adapter matrix.
 
 ---
 
@@ -227,8 +270,6 @@ These artifacts help inspect failures after CI runs.
 
 Planned future improvements include:
 
-- multi-adapter CI
-- Postgres validation
 - BigQuery validation
 - Snowflake validation
 - Databricks validation
