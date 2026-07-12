@@ -225,6 +225,8 @@ When opening a PR:
   - docs/
   - docs blocks
   - schema.yml metadata
+- Follow [VERSIONING.md](VERSIONING.md) for the appropriate version bump and, if
+  the change is breaking, its deprecation process
 - ensure CI passes
 
 Small, incremental improvements are preferred over very large PRs.

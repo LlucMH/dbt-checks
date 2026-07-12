@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.6.3
+    revision: v0.6.4
 ```
 
 Install dependencies:
@@ -315,6 +315,7 @@ dbt-checks is an open-source project and contributions are welcome.
 ## Resources
 
 * [Contributing Guide](CONTRIBUTING.md)
+* [Versioning Policy](VERSIONING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
 * [Security Policy](SECURITY.md)
 * [Support Guidelines](SUPPORT.md)
