@@ -117,42 +117,6 @@ jobs:
         working-directory: integration_tests
         run: dbt run
 
-      - name: Inspect not_blank fixture
-        if: inputs.adapter == 'postgres'
-        working-directory: integration_tests
-        run: |
-          dbt show --target postgres --inline "
-          select
-              id,
-              value,
-              quote_nullable(value) as quoted_value,
-              length(value) as value_length,
-              octet_length(value) as byte_length,
-              trim(value) as trimmed_value,
-              length(trim(value)) as trimmed_length,
-              trim(value) = '' as is_blank
-          from {{ ref('seed_not_blank_invalid') }}
-          order by id
-          "
-
-      - name: Inspect not_blank invalid model
-        if: inputs.adapter == 'postgres'
-        working-directory: integration_tests
-        run: |
-          dbt show --target postgres --inline "
-          select
-              id,
-              value,
-              quote_nullable(value) as quoted_value,
-              length(value) as value_length,
-              octet_length(value) as byte_length,
-              trim(value) as trimmed_value,
-              length(trim(value)) as trimmed_length,
-              trim(value) = '' as is_blank
-          from {{ ref('not_blank_invalid') }}
-          order by id
-          "
-
       - name: Run severity warn tests
         working-directory: integration_tests
         run: dbt test --select tag:severity_warn
