@@ -5,8 +5,7 @@ All notable changes to this project will be documented in this file.
 The format follows semantic versioning.
 
 ---
- 
- 
+
 ## [0.7.0] - 2026-07-12
  
 ### Added
