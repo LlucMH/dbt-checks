@@ -1,4 +1,3 @@
-```yaml
 name: CI
 
 on:
@@ -264,4 +263,3 @@ jobs:
       adapter: bigquery
 
     secrets: inherit
-```
