@@ -29,13 +29,17 @@ jobs:
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests
       DBT_PACKAGES_INSTALL_PATH: /tmp/dbt-checks-packages
-      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || 'dev' }}
+      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || (inputs.adapter == 'bigquery' && 'bigquery' || 'dev') }}
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: dbt_checks
       POSTGRES_PASSWORD: dbt_checks
       POSTGRES_DB: dbt_checks
       POSTGRES_SCHEMA: public
+      BIGQUERY_PROJECT: ${{ vars.BIGQUERY_PROJECT }}
+      BIGQUERY_DATASET: ${{ vars.BIGQUERY_DATASET || 'dbt_checks' }}
+      BIGQUERY_LOCATION: ${{ vars.BIGQUERY_LOCATION || 'US' }}
+      BIGQUERY_KEYFILE: ${{ github.workspace }}/bq-key.json
 
     steps:
       - name: Checkout repository
@@ -57,6 +61,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install dbt-core==1.11.7 dbt-postgres==1.10.2 psycopg2-binary
+
+      - name: Install dbt (bigquery)
+        if: inputs.adapter == 'bigquery'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-bigquery==1.11.3 google-cloud-bigquery
+
+      - name: Write BigQuery service account keyfile
+        if: inputs.adapter == 'bigquery'
+        run: echo "$GCP_SA_KEY" > "$BIGQUERY_KEYFILE"
+        env:
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install package dependencies
         working-directory: integration_tests
@@ -321,6 +337,75 @@ jobs:
 
               headers = [col.name for col in cur.description]
               rows = cur.fetchall()
+
+              if not rows:
+                  continue
+
+              output.append(f"## `{table}`")
+              output.append("")
+              output.append(to_markdown(headers, rows))
+              output.append("")
+
+          final_output = "\n".join(output)
+
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Print enriched failure outputs (bigquery)
+        if: always() && inputs.adapter == 'bigquery'
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import os
+          from google.cloud import bigquery
+
+          client = bigquery.Client.from_service_account_json(
+              os.environ["BIGQUERY_KEYFILE"],
+              project=os.environ["BIGQUERY_PROJECT"],
+          )
+
+          tables = list(client.query(f"""
+              select table_name
+              from `{os.environ['BIGQUERY_PROJECT']}.{os.environ['BIGQUERY_DATASET']}`.INFORMATION_SCHEMA.TABLES
+              where table_name like '%dbt_test__audit%'
+              order by table_name
+          """).result())
+
+          if not tables:
+              print("No stored failure tables found.")
+              raise SystemExit(0)
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+
+          def to_markdown(headers, rows):
+              lines = []
+              lines.append("| " + " | ".join(headers) + " |")
+              lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+
+              for row in rows:
+                  safe_values = [
+                      "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
+                      for v in row
+                  ]
+                  lines.append("| " + " | ".join(safe_values) + " |")
+
+              return "\n".join(lines)
+
+          output = ["# dbt-checks failure output", ""]
+
+          for row in tables:
+              table = row["table_name"]
+              result = client.query(
+                  f"select * from `{os.environ['BIGQUERY_PROJECT']}.{os.environ['BIGQUERY_DATASET']}.{table}` limit 20"
+              ).result()
+
+              headers = [field.name for field in result.schema]
+              rows = [[value for value in record.values()] for record in result]
 
               if not rows:
                   continue

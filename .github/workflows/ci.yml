@@ -210,7 +210,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        adapter: [duckdb, postgres]
+        adapter: [duckdb, postgres, bigquery]
+    # The bigquery leg needs a real GCP project + service account and is
+    # skipped (not failed) until BIGQUERY_PROJECT and GCP_SA_KEY are
+    # configured — see docs/ci.md.
+    if: matrix.adapter != 'bigquery' || (vars.BIGQUERY_PROJECT != '' && secrets.GCP_SA_KEY != '')
     uses: ./.github/workflows/adapter-integration-tests.yml
     with:
       adapter: ${{ matrix.adapter }}
+    secrets: inherit
