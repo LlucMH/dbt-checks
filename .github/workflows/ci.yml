@@ -1,3 +1,4 @@
+```yaml
 name: CI
 
 on:
@@ -8,6 +9,7 @@ on:
 
 jobs:
   repo-governance:
+    name: repo-governance
     runs-on: ubuntu-latest
 
     steps:
@@ -25,6 +27,7 @@ jobs:
           test -f CODE_OF_CONDUCT.md
           test -f SECURITY.md
           test -f SUPPORT.md
+
           grep -i "contributing" CONTRIBUTING.md
           grep -i "code of conduct" CODE_OF_CONDUCT.md
           grep -i "security" SECURITY.md
@@ -147,6 +150,7 @@ jobs:
           grep -R "left_column" macros/tests/multi_column
           grep -R "right_column" macros/tests/multi_column
           grep -R "validate_required_column" macros/helpers/validation.sql
+
           grep -i "Rule Composition" docs/rule-composition.md
           grep -R "expression_is_true" macros/tests/rule_composition
           grep -R "all_of" macros/tests/rule_composition
@@ -196,8 +200,8 @@ jobs:
           ]
 
           for file in files:
-              with file.open(encoding="utf-8") as f:
-                  yaml.safe_load(f)
+              with file.open(encoding="utf-8") as stream:
+                  yaml.safe_load(stream)
 
           print("GitHub issue templates are valid YAML.")
           PY
@@ -207,15 +211,57 @@ jobs:
           grep -i "Pull Request" .github/PULL_REQUEST_TEMPLATE.md
 
   integration-tests:
+    name: integration-tests (${{ matrix.adapter }})
+
     strategy:
       fail-fast: false
       matrix:
-        adapter: [duckdb, postgres, bigquery]
-    # The bigquery leg needs a real GCP project + service account and is
-    # skipped (not failed) until BIGQUERY_PROJECT and GCP_SA_KEY are
-    # configured — see docs/ci.md.
-    if: matrix.adapter != 'bigquery' || (vars.BIGQUERY_PROJECT != '' && secrets.GCP_SA_KEY != '')
+        adapter:
+          - duckdb
+          - postgres
+
     uses: ./.github/workflows/adapter-integration-tests.yml
+
     with:
       adapter: ${{ matrix.adapter }}
+
     secrets: inherit
+
+  check-bigquery-configuration:
+    name: check-bigquery-configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      enabled: ${{ steps.configuration.outputs.enabled }}
+
+    steps:
+      - name: Check BigQuery configuration
+        id: configuration
+        shell: bash
+        env:
+          BIGQUERY_PROJECT: ${{ vars.BIGQUERY_PROJECT }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          if [[ -n "$BIGQUERY_PROJECT" && -n "$GCP_SA_KEY" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "BigQuery integration tests are enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "BigQuery integration tests are skipped because credentials are not configured."
+          fi
+
+  bigquery-integration-tests:
+    name: integration-tests (bigquery)
+
+    needs:
+      - check-bigquery-configuration
+
+    if: needs.check-bigquery-configuration.outputs.enabled == 'true'
+
+    uses: ./.github/workflows/adapter-integration-tests.yml
+
+    with:
+      adapter: bigquery
+
+    secrets: inherit
+```

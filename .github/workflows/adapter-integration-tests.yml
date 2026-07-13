@@ -4,8 +4,12 @@ on:
   workflow_call:
     inputs:
       adapter:
+        description: Adapter to validate
         required: true
         type: string
+    secrets:
+      GCP_SA_KEY:
+        required: false
 
 jobs:
   integration-tests:
