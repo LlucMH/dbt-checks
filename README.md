@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.7.0
+    revision: v0.7.1
 ```
 
 Install dependencies:
@@ -138,15 +138,15 @@ Current compatibility targets include:
 
 Adapter-specific behavior is handled through dbt dispatch.
 
-| Warehouse  | Status             |
-| ---------- | ------------------ |
-| DuckDB     | Fully tested in CI |
-| Postgres   | Fully tested in CI |
-| BigQuery   | Planned validation |
-| Snowflake  | Planned validation |
-| Databricks | Planned validation |
-| Spark      | Planned validation |
-| Redshift   | Planned validation |
+| Warehouse  | Status                                             |
+| ---------- | --------------------------------------------------- |
+| DuckDB     | Fully tested in CI                                   |
+| Postgres   | Fully tested in CI                                   |
+| BigQuery   | Dialect-audited; CI wired, pending GCP credentials   |
+| Snowflake  | Planned validation                                   |
+| Databricks | Planned validation                                   |
+| Spark      | Planned validation                                   |
+| Redshift   | Planned validation                                   |
 
 ---
 

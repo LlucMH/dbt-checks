@@ -57,29 +57,51 @@ integration_tests/
 ```text
 duckdb
 postgres
+bigquery
 ```
 
 Each matrix leg calls the reusable workflow
 `.github/workflows/adapter-integration-tests.yml` with the adapter name as
 input. The reusable workflow:
 
-- installs `dbt-core` plus the adapter-specific package (`dbt-duckdb` or
-  `dbt-postgres`)
+- installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
+  `dbt-postgres`, or `dbt-bigquery`)
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
-  `integration_tests_invalid_configs/profiles.yml` (both define a `dev`
-  DuckDB target and a `postgres` target)
+  `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
+  DuckDB target, a `postgres` target, and a `bigquery` target)
 - for the Postgres leg, starts a `postgres:16` service container for the
   job to connect to
 - runs the full integration + invalid-config suite identically against
   whichever adapter it was called with
 - prints stored failure rows to the job summary using an adapter-specific
-  script (direct DuckDB file query, or `psycopg2` against
-  `information_schema` for Postgres)
+  script (direct DuckDB file query, `psycopg2` against
+  `information_schema` for Postgres, or the `google-cloud-bigquery` client
+  against `INFORMATION_SCHEMA.TABLES` for BigQuery)
 
 This keeps the adapter-dependent steps in one place, so adding another
 adapter to the matrix means adding a matrix entry plus install/target
 wiring, not duplicating the whole pipeline.
+
+## BigQuery CI
+
+Unlike DuckDB (local) and Postgres (service container), BigQuery requires a
+real Google Cloud project and a service account with BigQuery permissions.
+
+The BigQuery CI leg is gated and only runs when the required repository
+configuration is available.
+
+Required configuration:
+
+- Repository variable: `BIGQUERY_PROJECT`
+- Repository secret: `GCP_SA_KEY`
+
+The service account JSON key is written to a temporary key file during the
+workflow and used to authenticate the BigQuery adapter.
+
+When these values are not configured, the BigQuery CI leg is skipped rather
+than failed. This allows the remaining CI suite to succeed while keeping the
+workflow ready for future BigQuery validation.
 
 ---
 
@@ -270,7 +292,8 @@ These artifacts help inspect failures after CI runs.
 
 Planned future improvements include:
 
-- BigQuery validation
+- BigQuery CI leg fully exercised once GCP credentials are configured
+  (currently wired but gated — see "BigQuery Leg Gating" above)
 - Snowflake validation
 - Databricks validation
 - Spark validation
