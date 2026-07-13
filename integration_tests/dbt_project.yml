@@ -15,3 +15,12 @@ target-path: "target"
 clean-targets:
   - "target"
   - "{{ env_var('DBT_PACKAGES_INSTALL_PATH', 'dbt_packages') }}"
+
+seeds:
+  integration_tests:
+    null_handling:
+      seed_temporal_all_null:
+        +column_types:
+          date: date
+          start_date: date
+          end_date: date

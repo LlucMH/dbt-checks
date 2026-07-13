@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format follows semantic versioning.
 
 ---
+
+## [0.7.0] - 2026-07-12
+ 
+### Added
+ 
+#### Multi-Adapter CI
+ 
+Added a DuckDB/Postgres adapter matrix to the `integration-tests` job in
+`.github/workflows/ci.yml`, with the adapter-dependent steps extracted into a
+new reusable workflow at `.github/workflows/adapter-integration-tests.yml`
+(`workflow_call`, parameterized by `adapter`).
+ 
+Each matrix leg installs `dbt-core` plus the matching adapter package
+(`dbt-duckdb` or `dbt-postgres`), runs the full integration and
+invalid-config suite against either the existing DuckDB file target or a
+`postgres:16` service container, and prints stored failure rows to the job
+summary via an adapter-specific script (a direct DuckDB query, or
+`psycopg2` against `information_schema` for Postgres).
+ 
+`integration_tests/profiles.yml` and
+`integration_tests_invalid_configs/profiles.yml` now define a `postgres`
+target alongside the existing DuckDB `dev` target, selected at runtime via
+the `DBT_TARGET` env var.
+ 
+The former single `integration-tests` job is now split into
+`repo-governance` (adapter-independent documentation, macro, and community
+health checks, run once) and `integration-tests` (the adapter matrix), so
+governance checks aren't duplicated per adapter.
+ 
+### Changed
+ 
+#### Postgres try_cast Fixes
+ 
+Fixed `postgres__try_cast_to_date` and `postgres__try_cast_to_timestamp` in
+`macros/helpers/adapters/postgres.sql`. Postgres has no native `TRY_CAST`:
+`cast(x as date)` raises on invalid input instead of returning `NULL`, unlike
+DuckDB's `try_cast`. Both macros now guard with a regex before casting, so
+unparseable input returns `NULL` rather than raising — required for
+`should_fail`-tagged tests to behave the same way on Postgres as on DuckDB.
+This is narrower than DuckDB's try-cast, which accepts a wider range of date
+formats; only strict ISO 8601 (`YYYY-MM-DD`, optionally with a time
+component) is accepted.
+ 
+Also switched `redshift__try_cast_to_date`/`_timestamp` in
+`macros/helpers/adapters/redshift.sql` to use Redshift's native `try_cast`
+instead of a raising `cast`.
+ 
+#### Documentation
+ 
+Updated `docs/ci.md` to describe the adapter matrix and reusable workflow
+split, and moved Postgres validation out of "Future CI Improvements".
+Updated `README.md`'s adapter compatibility table to mark Postgres "Fully
+tested in CI".
+ 
+### Notes
+ 
+- No macro API changes. `postgres__try_cast_to_date`/`_timestamp` now return
+  `NULL` on unparseable input instead of raising, matching DuckDB's
+  try-cast semantics.
+- No test behavior changes beyond the Postgres/Redshift try_cast fixes
+  above.
+ 
+### Breaking Changes
+ 
+- None.
+ 
+---
  
  
 ## [0.6.5] - 2026-07-12

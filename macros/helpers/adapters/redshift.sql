@@ -23,9 +23,9 @@
 {% endmacro %}
 
 {% macro redshift__try_cast_to_date(expr) %}
-  cast({{ expr }} as date)
+  try_cast({{ expr }} as date)
 {% endmacro %}
 
 {% macro redshift__try_cast_to_timestamp(expr) %}
-  cast({{ expr }} as timestamp)
+  try_cast({{ expr }} as timestamp)
 {% endmacro %}
