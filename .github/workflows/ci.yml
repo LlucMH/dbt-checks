@@ -226,6 +226,21 @@ jobs:
 
     secrets: inherit
 
+  performance-smoke-tests:
+    name: performance-smoke-tests (${{ matrix.adapter }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        adapter:
+          - duckdb
+          - postgres
+
+    uses: ./.github/workflows/performance-smoke-tests.yml
+
+    with:
+      adapter: ${{ matrix.adapter }}
+
   check-bigquery-configuration:
     name: check-bigquery-configuration
     runs-on: ubuntu-latest

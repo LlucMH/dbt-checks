@@ -35,12 +35,15 @@ The main workflow runs on:
 - pull requests
 - pushes to `main`
 
-It is split into two jobs:
+It is split into three jobs:
 
 - `repo-governance` — adapter-independent checks (documentation, macro
   structure, community health files). Runs once.
 - `integration-tests` — a matrix over supported adapters, each leg calling
   the `adapter-integration-tests.yml` reusable workflow.
+- `performance-smoke-tests` — a DuckDB/Postgres-only matrix calling the
+  `performance-smoke-tests.yml` reusable workflow (see "Performance Smoke
+  Tests" below).
 
 The workflow validates the package using the integration test project under:
 
@@ -204,6 +207,91 @@ above.
 
 ---
 
+# Performance Smoke Tests
+
+`performance-smoke-tests` runs as a matrix (`.github/workflows/ci.yml`) over:
+
+```text
+duckdb
+postgres
+```
+
+calling the reusable workflow `.github/workflows/performance-smoke-tests.yml`.
+It is unconditional (no credential gating) since both targets are always
+available in CI.
+
+**These are smoke tests, not a warehouse benchmark.** CI only has a local
+DuckDB file and a disposable Postgres service container available, so results
+say nothing about behavior on a production-sized cloud warehouse. The goal is
+narrower: catch pathological SQL generation and confirm the grouped
+validation architecture still behaves at larger row volumes and higher
+`group_by` cardinality before it ships, not to produce comparable timing
+numbers across releases or adapters.
+
+## Scenarios
+
+Synthetic data is generated with `generate_series` (no seed files, so this
+doesn't bloat the repo) under `integration_tests/models/performance/`, tagged
+`performance_smoke`:
+
+- 100k rows, ungrouped (`perf_volume_100k`)
+- 1M rows, ungrouped (`perf_volume_1m`)
+- 100 groups (`perf_cardinality_100_groups`)
+- 1,000 groups (`perf_cardinality_1k_groups`)
+- a two-column `group_by` across 200 combinations
+  (`perf_multi_column_group_by`)
+
+Each scenario is an exact, deterministic grid (a `generate_series` cross
+join, not modular-arithmetic tricks), so the checks below use tight bounds
+instead of loose tolerances.
+
+## Checks
+
+The scenarios prioritize the check families most exercised by grouped and
+aggregate validation: `row_count_between`, `sum_between`, `avg_between`,
+`null_ratio_between`, `value_ratio_between`, and `recent_date` with
+`group_by` (including multi-column `group_by`).
+
+All performance tests are tagged `performance_smoke` only — deliberately
+**not** `should_pass` — so they never run as part of the adapter matrix.
+`adapter-integration-tests.yml`'s "Run test models" step explicitly excludes
+`tag:performance_smoke`, so the cloud adapter legs (BigQuery, Snowflake,
+Databricks, Spark, Redshift) never build these tables.
+
+## What the job reports
+
+For each of `dbt compile`, `dbt run`, and `dbt test` (all `--select
+tag:performance_smoke`):
+
+- wall-clock time and per-node `execution_time` from `run_results.json`
+
+Then, for the compiled SQL of the performance models and their tests:
+
+- **generated SQL size** — line and byte counts per compiled file
+- **repeated scan detection** — how many times the source model name appears
+  in its own compiled test SQL (the helper macros in `macros/helpers/` build
+  a single `with validation as (...)` CTE per check, so this is expected to
+  be exactly 1)
+- **CTE count** — how many CTEs each compiled test defines
+
+And, where available, an `EXPLAIN` plan for one representative ungrouped
+aggregation test and one representative grouped aggregation test.
+
+All of this is written to the GitHub Actions job summary, the same way
+enriched failure outputs are for the adapter matrix.
+
+## Review finding
+
+As part of adding this tooling, `macros/helpers/aggregation.sql`,
+`macros/helpers/ratio.sql`, and the generated SQL for `row_count_between`,
+`avg_between`, `value_ratio_between`, and `recent_date` were reviewed
+directly: every check already compiles to a single scan of the source model
+through one CTE chain, with no redundant CTEs or repeated scans. No macro
+changes were needed — this release adds the CI tooling to keep it that way
+going forward.
+
+---
+
 # Validation Steps
 
 Each adapter leg of the integration-tests job performs the following steps:
@@ -259,6 +347,7 @@ They cover:
 - multi-column checks
 - `where` filters
 - validation guards
+- performance smoke scenarios (see "Performance Smoke Tests" below)
 
 ---
 

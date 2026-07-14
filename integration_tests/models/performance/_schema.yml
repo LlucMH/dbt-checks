@@ -1,0 +1,221 @@
+version: 2
+
+models:
+  - name: perf_volume_100k
+    description: 100k-row ungrouped performance smoke scenario.
+    data_tests:
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 100000
+            max_value: 100000
+          config:
+            tags: ["performance_smoke"]
+
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.sum_between:
+              arguments:
+                column_name: amount
+                min_value: 50000000
+                max_value: 50100000
+              config:
+                tags: ["performance_smoke"]
+
+          - dbt_checks.avg_between:
+              arguments:
+                column_name: amount
+                min_value: 500
+                max_value: 501
+              config:
+                tags: ["performance_smoke"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.04
+                max_ratio: 0.06
+              config:
+                tags: ["performance_smoke"]
+
+      - name: tier
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "gold"
+                min_ratio: 0.15
+                max_ratio: 0.25
+              config:
+                tags: ["performance_smoke"]
+
+  - name: perf_volume_1m
+    description: 1M-row ungrouped performance smoke scenario (heavier volume, fewer checks).
+    data_tests:
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 1000000
+            max_value: 1000000
+          config:
+            tags: ["performance_smoke"]
+
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.sum_between:
+              arguments:
+                column_name: amount
+                min_value: 500000000
+                max_value: 501000000
+              config:
+                tags: ["performance_smoke"]
+
+          - dbt_checks.avg_between:
+              arguments:
+                column_name: amount
+                min_value: 500
+                max_value: 501
+              config:
+                tags: ["performance_smoke"]
+
+  - name: perf_cardinality_100_groups
+    description: 100k rows spread evenly across 100 groups (high-cardinality group_by scenario).
+    data_tests:
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 1000
+            max_value: 1000
+            group_by: group_key
+          config:
+            tags: ["performance_smoke"]
+
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.sum_between:
+              arguments:
+                column_name: amount
+                min_value: 500500
+                max_value: 500500
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+          - dbt_checks.avg_between:
+              arguments:
+                column_name: amount
+                min_value: 500.5
+                max_value: 500.5
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.05
+                max_ratio: 0.05
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+      - name: tier
+        data_tests:
+          - dbt_checks.value_ratio_between:
+              arguments:
+                value: "gold"
+                min_ratio: 0.2
+                max_ratio: 0.2
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+  - name: perf_cardinality_1k_groups
+    description: 200k rows spread evenly across 1,000 groups (higher-cardinality group_by scenario).
+    data_tests:
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 200
+            max_value: 200
+            group_by: group_key
+          config:
+            tags: ["performance_smoke"]
+
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.sum_between:
+              arguments:
+                column_name: amount
+                min_value: 20100
+                max_value: 20100
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+          - dbt_checks.avg_between:
+              arguments:
+                column_name: amount
+                min_value: 100.5
+                max_value: 100.5
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+      - name: status
+        data_tests:
+          - dbt_checks.null_ratio_between:
+              arguments:
+                min_ratio: 0.05
+                max_ratio: 0.05
+                group_by: group_key
+              config:
+                tags: ["performance_smoke"]
+
+  - name: perf_multi_column_group_by
+    description: 100k rows grouped by a two-column [region, category] group_by (200 combinations).
+    data_tests:
+      - dbt_checks.row_count_between:
+          arguments:
+            min_value: 500
+            max_value: 500
+            group_by:
+              - region
+              - category
+          config:
+            tags: ["performance_smoke"]
+
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_checks.sum_between:
+              arguments:
+                column_name: amount
+                min_value: 125250
+                max_value: 125250
+                group_by:
+                  - region
+                  - category
+              config:
+                tags: ["performance_smoke"]
+
+      - name: event_date
+        data_tests:
+          - dbt_checks.recent_date:
+              arguments:
+                max_age_days: 7
+                group_by:
+                  - region
+                  - category
+              config:
+                tags: ["performance_smoke"]

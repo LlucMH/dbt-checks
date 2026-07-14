@@ -1,0 +1,372 @@
+name: Performance Smoke Tests
+
+on:
+  workflow_call:
+    inputs:
+      adapter:
+        description: Adapter to validate (duckdb or postgres only)
+        required: true
+        type: string
+
+jobs:
+  performance-smoke-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: dbt_checks
+          POSTGRES_PASSWORD: dbt_checks
+          POSTGRES_DB: dbt_checks
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests
+      DBT_PACKAGES_INSTALL_PATH: /tmp/dbt-checks-packages
+      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || 'dev' }}
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: dbt_checks
+      POSTGRES_PASSWORD: dbt_checks
+      POSTGRES_DB: dbt_checks
+      POSTGRES_SCHEMA: public
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt (duckdb)
+        if: inputs.adapter == 'duckdb'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-duckdb==1.10.1 duckdb
+
+      - name: Install dbt (postgres)
+        if: inputs.adapter == 'postgres'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-postgres==1.10.2 psycopg2-binary
+
+      - name: Install package dependencies
+        working-directory: integration_tests
+        run: dbt deps
+
+      - name: Compile performance smoke tests (timed)
+        working-directory: integration_tests
+        run: |
+          start=$(date +%s%N)
+          dbt compile --select tag:performance_smoke
+          end=$(date +%s%N)
+          echo "PERF_COMPILE_MS=$(( (end-start)/1000000 ))" >> "$GITHUB_ENV"
+          cp target/run_results.json compile_run_results.json
+          cp target/manifest.json compile_manifest.json
+
+      - name: Build performance smoke models (timed)
+        working-directory: integration_tests
+        run: |
+          start=$(date +%s%N)
+          dbt run --select tag:performance_smoke
+          end=$(date +%s%N)
+          echo "PERF_RUN_MS=$(( (end-start)/1000000 ))" >> "$GITHUB_ENV"
+          cp target/run_results.json run_run_results.json
+
+      - name: Run performance smoke tests (timed)
+        working-directory: integration_tests
+        run: |
+          start=$(date +%s%N)
+          dbt test --select tag:performance_smoke --store-failures
+          end=$(date +%s%N)
+          echo "PERF_TEST_MS=$(( (end-start)/1000000 ))" >> "$GITHUB_ENV"
+          cp target/run_results.json test_run_results.json
+
+      - name: Generated SQL size / CTE / repeated-scan report
+        if: always()
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import re
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          lines = ["# Performance smoke test report", ""]
+
+          timings = [
+              (label, os.environ[env_var])
+              for label, env_var in [
+                  ("dbt compile", "PERF_COMPILE_MS"),
+                  ("dbt run", "PERF_RUN_MS"),
+                  ("dbt test", "PERF_TEST_MS"),
+              ]
+              if env_var in os.environ
+          ]
+
+          if timings:
+              lines.append("## Timing (wall clock)")
+              lines.append("")
+              lines.append("| Step | Time |")
+              lines.append("| --- | --- |")
+              for label, ms in timings:
+                  lines.append(f"| {label} | {ms} ms |")
+              lines.append("")
+
+          # Node identity (name, resource_type, compiled_path, source model) comes
+          # from the manifest written by the `dbt compile` step above, rather than
+          # guessing from compiled filenames — dbt truncates+hashes long compiled
+          # test filenames, so filename substring matching silently misses nodes.
+          if not os.path.exists("compile_manifest.json"):
+              lines.append("_compile_manifest.json not found — skipping SQL review._")
+              print("\n".join(lines))
+              raise SystemExit(0)
+
+          with open("compile_manifest.json", encoding="utf-8") as f:
+              manifest = json.load(f)
+
+          all_nodes = manifest["nodes"]
+          perf_nodes = {
+              uid: n for uid, n in all_nodes.items()
+              if "performance_smoke" in n.get("tags", [])
+          }
+
+          lines.append("## Per-node execution time")
+          lines.append("")
+          lines.append("| Phase | Node | Execution time (s) |")
+          lines.append("| --- | --- | --- |")
+
+          found_timing = False
+          for phase, path in [
+              ("compile", "compile_run_results.json"),
+              ("run", "run_run_results.json"),
+              ("test", "test_run_results.json"),
+          ]:
+              if not os.path.exists(path):
+                  continue
+              with open(path, encoding="utf-8") as f:
+                  results = json.load(f)["results"]
+              for r in results:
+                  if r["unique_id"] not in perf_nodes:
+                      continue
+                  found_timing = True
+                  lines.append(f"| {phase} | {r['unique_id']} | {r.get('execution_time', 0):.3f} |")
+
+          if not found_timing:
+              lines.append("| _no performance_smoke node timing found_ | | |")
+
+          lines.append("")
+
+          lines.append("## Generated SQL review")
+          lines.append("")
+          lines.append("| Node | Lines | Bytes | CTE count | Source scan count |")
+          lines.append("| --- | --- | --- | --- | --- |")
+
+          cte_pattern = re.compile(r"^\s*(?:with\s+)?(\w+)\s+as\s+\($", re.MULTILINE)
+
+          reviewed = 0
+          for uid, node in sorted(perf_nodes.items()):
+              compiled_path = node.get("compiled_path")
+              if not compiled_path or not os.path.exists(compiled_path):
+                  continue
+
+              with open(compiled_path, encoding="utf-8") as f:
+                  sql = f.read()
+
+              lines_count = sql.count("\n") + 1
+              size_bytes = len(sql.encode("utf-8"))
+              cte_count = len(cte_pattern.findall(sql))
+
+              scan_count = "—"
+              if node["resource_type"] == "test":
+                  depends_on = node.get("depends_on", {}).get("nodes", [])
+                  if depends_on:
+                      model_name = all_nodes.get(depends_on[0], {}).get("name")
+                      if model_name:
+                          scan_count = sql.count(model_name)
+
+              reviewed += 1
+              lines.append(f"| `{uid}` | {lines_count} | {size_bytes} | {cte_count} | {scan_count} |")
+
+          if reviewed == 0:
+              lines.append("| _no compiled performance_smoke SQL found_ | | | | |")
+
+          final_output = "\n".join(lines)
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Aggregation query plan review (duckdb)
+        if: always() && inputs.adapter == 'duckdb'
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import glob
+          import json
+          import os
+          import duckdb
+
+          def find_compiled(test_name, model_name):
+              if not os.path.exists("compile_manifest.json"):
+                  return None
+              with open("compile_manifest.json", encoding="utf-8") as f:
+                  nodes = json.load(f)["nodes"]
+              for node in nodes.values():
+                  if node.get("resource_type") != "test":
+                      continue
+                  if node.get("test_metadata", {}).get("name") != test_name:
+                      continue
+                  depends_on = node.get("depends_on", {}).get("nodes", [])
+                  if not depends_on or nodes.get(depends_on[0], {}).get("name") != model_name:
+                      continue
+                  return node.get("compiled_path")
+              return None
+
+          targets = [
+              ("Ungrouped aggregation (avg_between on perf_volume_1m)",
+               find_compiled("avg_between", "perf_volume_1m")),
+              ("Grouped aggregation (row_count_between on perf_cardinality_1k_groups)",
+               find_compiled("row_count_between", "perf_cardinality_1k_groups")),
+          ]
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          output = ["## Aggregation query plan review (duckdb)", ""]
+
+          db_files = glob.glob("**/*.duckdb", recursive=True)
+
+          if not db_files:
+              output.append("No DuckDB database found.")
+          else:
+              con = duckdb.connect(max(db_files, key=os.path.getmtime), read_only=True)
+
+              for label, path in targets:
+                  output.append(f"### {label}")
+                  output.append("")
+
+                  if not path:
+                      output.append("_compiled SQL not found — skipped._")
+                      output.append("")
+                      continue
+
+                  with open(path, encoding="utf-8") as f:
+                      sql = f.read()
+
+                  try:
+                      plan_rows = con.execute(f"EXPLAIN {sql}").fetchall()
+                      plan_text = "\n".join(str(row[-1]) for row in plan_rows)
+                  except Exception as exc:
+                      plan_text = f"EXPLAIN unavailable: {exc}"
+
+                  output.append("```text")
+                  output.append(plan_text)
+                  output.append("```")
+                  output.append("")
+
+          final_output = "\n".join(output)
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Aggregation query plan review (postgres)
+        if: always() && inputs.adapter == 'postgres'
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import psycopg2
+
+          def find_compiled(test_name, model_name):
+              if not os.path.exists("compile_manifest.json"):
+                  return None
+              with open("compile_manifest.json", encoding="utf-8") as f:
+                  nodes = json.load(f)["nodes"]
+              for node in nodes.values():
+                  if node.get("resource_type") != "test":
+                      continue
+                  if node.get("test_metadata", {}).get("name") != test_name:
+                      continue
+                  depends_on = node.get("depends_on", {}).get("nodes", [])
+                  if not depends_on or nodes.get(depends_on[0], {}).get("name") != model_name:
+                      continue
+                  return node.get("compiled_path")
+              return None
+
+          targets = [
+              ("Ungrouped aggregation (avg_between on perf_volume_1m)",
+               find_compiled("avg_between", "perf_volume_1m")),
+              ("Grouped aggregation (row_count_between on perf_cardinality_1k_groups)",
+               find_compiled("row_count_between", "perf_cardinality_1k_groups")),
+          ]
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          output = ["## Aggregation query plan review (postgres)", ""]
+
+          con = psycopg2.connect(
+              host=os.environ["POSTGRES_HOST"],
+              port=os.environ["POSTGRES_PORT"],
+              user=os.environ["POSTGRES_USER"],
+              password=os.environ["POSTGRES_PASSWORD"],
+              dbname=os.environ["POSTGRES_DB"],
+          )
+          con.autocommit = True
+          cur = con.cursor()
+
+          for label, path in targets:
+              output.append(f"### {label}")
+              output.append("")
+
+              if not path:
+                  output.append("_compiled SQL not found — skipped._")
+                  output.append("")
+                  continue
+
+              with open(path, encoding="utf-8") as f:
+                  sql = f.read()
+
+              try:
+                  cur.execute(f"EXPLAIN {sql}")
+                  plan_text = "\n".join(row[0] for row in cur.fetchall())
+              except Exception as exc:
+                  con.rollback()
+                  plan_text = f"EXPLAIN unavailable: {exc}"
+
+              output.append("```text")
+              output.append(plan_text)
+              output.append("```")
+              output.append("")
+
+          final_output = "\n".join(output)
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Upload performance smoke test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-artifacts-${{ inputs.adapter }}
+          path: |
+            integration_tests/target
+            integration_tests/logs
