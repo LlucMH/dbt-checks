@@ -60,6 +60,7 @@ postgres
 bigquery
 snowflake
 databricks
+spark
 ```
 
 Each matrix leg calls the reusable workflow
@@ -67,12 +68,13 @@ Each matrix leg calls the reusable workflow
 input. The reusable workflow:
 
 - installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
-  `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, or `dbt-databricks`)
+  `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, `dbt-databricks`, or
+  `dbt-spark[PyHive]`)
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
   `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
   DuckDB target, a `postgres` target, a `bigquery` target, a `snowflake`
-  target, and a `databricks` target)
+  target, a `databricks` target, and a `spark` target)
 - for the Postgres leg, starts a `postgres:16` service container for the
   job to connect to
 - runs the full integration + invalid-config suite identically against
@@ -82,8 +84,9 @@ input. The reusable workflow:
   `information_schema` for Postgres, the `google-cloud-bigquery` client
   against `INFORMATION_SCHEMA.TABLES` for BigQuery,
   `snowflake-connector-python` against `information_schema.tables` for
-  Snowflake, or `databricks-sql-connector` against `information_schema.tables`
-  for Databricks)
+  Snowflake, `databricks-sql-connector` against `information_schema.tables`
+  for Databricks, or `PyHive` against a Thrift server's `SHOW TABLES` for
+  Spark)
 
 This keeps the adapter-dependent steps in one place, so adding another
 adapter to the matrix means adding a matrix entry plus install/target
@@ -149,6 +152,29 @@ Optional configuration (repository variables): `DATABRICKS_HTTP_PATH`,
 When these values are not configured, the Databricks CI leg is skipped
 rather than failed, the same way the BigQuery and Snowflake legs are gated
 above.
+
+## Spark CI
+
+Unlike the DuckDB and Postgres legs, the Spark leg targets a standalone
+Spark cluster over its Thrift server (the common non-Databricks production
+deployment for `dbt-spark`), so it requires a reachable cluster rather than
+a disposable service container.
+
+The Spark CI leg is gated and only runs when the required repository
+configuration is available.
+
+Required configuration:
+
+- Repository variable: `SPARK_HOST`
+- Repository secret: `SPARK_PASSWORD`
+
+Optional configuration (repository variables): `SPARK_PORT` (defaults to
+`10000`), `SPARK_USER` (defaults to `dbt_checks`), `SPARK_SCHEMA` (defaults
+to `default`).
+
+When these values are not configured, the Spark CI leg is skipped rather
+than failed, the same way the BigQuery, Snowflake, and Databricks legs are
+gated above.
 
 ---
 
@@ -345,7 +371,8 @@ Planned future improvements include:
   (currently wired but gated — see "Snowflake CI" above)
 - Databricks CI leg fully exercised once Databricks credentials are
   configured (currently wired but gated — see "Databricks CI" above)
-- Spark validation
+- Spark CI leg fully exercised once a reachable Spark cluster is configured
+  (currently wired but gated — see "Spark CI" above)
 - Redshift validation
 - dbt version matrix
 - package installation validation

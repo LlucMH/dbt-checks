@@ -40,3 +40,14 @@ dbt_checks:
       catalog: "{{ env_var('DATABRICKS_CATALOG', '') }}"
       schema: "{{ env_var('DATABRICKS_SCHEMA', 'default') }}"
       threads: 2
+    spark:
+      type: spark
+      method: thrift
+      host: "{{ env_var('SPARK_HOST', '') }}"
+      port: "{{ env_var('SPARK_PORT', '10000') | as_number }}"
+      user: "{{ env_var('SPARK_USER', 'dbt_checks') }}"
+      password: "{{ env_var('SPARK_PASSWORD', '') }}"
+      auth: "LDAP"
+      connect_timeout: 30
+      schema: "{{ env_var('SPARK_SCHEMA', 'default') }}"
+      threads: 2
