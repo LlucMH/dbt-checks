@@ -339,3 +339,41 @@ jobs:
       adapter: databricks
 
     secrets: inherit
+
+  check-spark-configuration:
+    name: check-spark-configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      enabled: ${{ steps.configuration.outputs.enabled }}
+
+    steps:
+      - name: Check Spark configuration
+        id: configuration
+        shell: bash
+        env:
+          SPARK_HOST: ${{ vars.SPARK_HOST }}
+          SPARK_PASSWORD: ${{ secrets.SPARK_PASSWORD }}
+        run: |
+          if [[ -n "$SPARK_HOST" && -n "$SPARK_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Spark integration tests are enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Spark integration tests are skipped because credentials are not configured."
+          fi
+
+  spark-integration-tests:
+    name: integration-tests (spark)
+
+    needs:
+      - check-spark-configuration
+
+    if: needs.check-spark-configuration.outputs.enabled == 'true'
+
+    uses: ./.github/workflows/adapter-integration-tests.yml
+
+    with:
+      adapter: spark
+
+    secrets: inherit

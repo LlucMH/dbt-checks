@@ -6,6 +6,103 @@ The format follows semantic versioning.
 
 ---
 
+## [0.7.4] - 2026-07-14
+
+### Changed
+
+#### Spark Adapter Audit
+
+Reviewed `macros/helpers/adapters/spark.sql` and the shared grouping,
+dispatch, casting, and predicate helpers for Apache Spark SQL dialect
+correctness. Unlike `dbt-databricks`, which always talks to Databricks
+Runtime, `dbt-spark` can also reach plain Apache Spark clusters over the
+Thrift, HTTP, ODBC, or (local) session connection methods, so functions
+outside core Spark SQL cannot be assumed available:
+
+- `spark__day_of_week_sun0` already correctly shifted Spark's
+  1 (Sunday) - 7 (Saturday) `dayofweek()` result to the shared 0-indexed
+  Sunday convention — no fix needed.
+- `spark__dateadd_days`/`datediff_days` already used core Spark SQL's
+  `date_add`/`datediff` functions in the same `(start, end) -> end - start`
+  convention as the other adapters — no changes needed.
+- `group_by_alias` already strips backticks alongside double quotes, so
+  Spark-quoted `group_by` columns (`` `col` ``) alias correctly.
+- Grouped checks (aggregation, ratio, freshness) rely only on `GROUP BY`
+  over `SELECT`-list expressions/aliases, which Spark SQL supports
+  natively — no changes needed to `macros/helpers/grouping.sql`,
+  `aggregation.sql`, or `ratio.sql` for Spark compatibility.
+
+#### Gated Spark CI Leg
+
+Added a `spark` entry to the `integration-tests` matrix in
+`.github/workflows/ci.yml`, reusing the same
+`adapter-integration-tests.yml` workflow as the other adapters. The leg
+targets a standalone Spark cluster over its Thrift server — the common
+non-Databricks production deployment — rather than a disposable service
+container, since there is no lightweight way to stand up a full Spark
+Thrift server in CI.
+
+The matrix job is gated on the `SPARK_HOST` repository variable and
+`SPARK_PASSWORD` repository secret both being set; until they're
+configured, the leg is **skipped** (not failed), so CI stays green. Once
+configured, the reusable workflow installs `dbt-spark[PyHive]`, connects
+over Thrift with LDAP auth, runs the identical integration + invalid-config
+suite, and prints stored failure rows via `PyHive`'s `SHOW TABLES ... LIKE`
+against the configured schema.
+
+`integration_tests/profiles.yml` and
+`integration_tests_invalid_configs/profiles.yml` now define a `spark`
+target alongside the existing DuckDB, Postgres, BigQuery, Snowflake, and
+Databricks targets.
+
+### Fixed
+
+#### Spark regex_match Escaping
+
+Fixed `spark__regex_match` in `macros/helpers/adapters/spark.sql`. Spark
+SQL string literals share Databricks SQL's escaping rules (a fixed set of
+recognized escapes; unrecognized sequences like `\d` pass through
+verbatim), so the same bug applied here as `databricks__regex_match`
+before 0.7.3: an unescaped `'` in `pattern` terminated the literal early,
+and a pattern ending in a bare `\` would consume the closing quote. The
+macro now backslash-escapes `\` and `'` before interpolation, the same
+transform applied to `bigquery__regex_match` (0.7.1), `snowflake__regex_match`
+(0.7.2), and `databricks__regex_match` (0.7.3).
+
+#### Spark try_cast Portability
+
+Fixed `spark__try_cast_to_date` and `spark__try_cast_to_timestamp` in
+`macros/helpers/adapters/spark.sql`. Both previously called
+`try_to_date()`/`try_to_timestamp()`, which are Databricks Runtime SQL
+functions, not core Apache Spark SQL — they're unavailable on a plain
+Spark cluster reached via the Thrift/ODBC/Livy connection methods
+`dbt-spark` also supports. Both macros now use `try_cast(expr as date)`/
+`try_cast(expr as timestamp)` instead, added in Spark 3.2 and portable
+across `dbt-spark`'s supported connection methods, preserving the same
+NULL-on-unparseable-input contract as before.
+
+### Notes
+
+- Macro behavior changes: `spark__regex_match` now escapes `pattern`
+  before interpolation (previously-compiling patterns containing an
+  unescaped `'` or a trailing bare `\` will now compile to different,
+  correct SQL); `spark__try_cast_to_date`/`_timestamp` now use `try_cast`
+  instead of `try_to_date`/`try_to_timestamp` (behaviorally equivalent —
+  both return `NULL` on unparseable input — but `try_cast` is portable to
+  non-Databricks Spark clusters that lack the Databricks-specific
+  functions).
+- No other macro API or SQL generation changes.
+- `README.md`'s Spark compatibility status is "Dialect-audited; CI wired,
+  pending Spark cluster credentials", not "Fully tested in CI" — the CI
+  leg is not yet exercised against a real Spark cluster in this
+  repository.
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.3] - 2026-07-14
 
 ### Changed
