@@ -263,3 +263,41 @@ jobs:
       adapter: bigquery
 
     secrets: inherit
+
+  check-snowflake-configuration:
+    name: check-snowflake-configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      enabled: ${{ steps.configuration.outputs.enabled }}
+
+    steps:
+      - name: Check Snowflake configuration
+        id: configuration
+        shell: bash
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+        run: |
+          if [[ -n "$SNOWFLAKE_ACCOUNT" && -n "$SNOWFLAKE_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Snowflake integration tests are enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Snowflake integration tests are skipped because credentials are not configured."
+          fi
+
+  snowflake-integration-tests:
+    name: integration-tests (snowflake)
+
+    needs:
+      - check-snowflake-configuration
+
+    if: needs.check-snowflake-configuration.outputs.enabled == 'true'
+
+    uses: ./.github/workflows/adapter-integration-tests.yml
+
+    with:
+      adapter: snowflake
+
+    secrets: inherit

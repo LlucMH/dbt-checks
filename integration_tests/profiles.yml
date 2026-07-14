@@ -22,3 +22,13 @@ dbt_checks:
       keyfile: "{{ env_var('BIGQUERY_KEYFILE', '') }}"
       location: "{{ env_var('BIGQUERY_LOCATION', 'US') }}"
       threads: 2
+    snowflake:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT', '') }}"
+      user: "{{ env_var('SNOWFLAKE_USER', '') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD', '') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', '') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'dbt_checks') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', '') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'public') }}"
+      threads: 2

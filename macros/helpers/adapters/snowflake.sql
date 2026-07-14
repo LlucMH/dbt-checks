@@ -15,7 +15,19 @@
 {% endmacro %}
 
 {% macro snowflake__regex_match(expr, pattern) %}
-  regexp_like({{ expr }}, '{{ pattern }}')
+  {#-
+    Snowflake single-quoted string literals interpret backslash escape
+    sequences by default, so a pattern containing `\d`, `\s`, etc. would
+    have its backslashes consumed by literal parsing before regexp_like
+    ever sees them, and a literal `'` would break out of the string
+    literal entirely. Backslash-escaping both `\` and `'` first produces
+    an equivalent literal that Snowflake parses unambiguously, matching
+    the same fix applied to bigquery__regex_match.
+  -#}
+  regexp_like(
+    {{ expr }},
+    '{{ pattern | replace('\\', '\\\\') | replace("'", "\\'") }}'
+  )
 {% endmacro %}
 
 {% macro snowflake__day_of_week_sun0(expr) %}

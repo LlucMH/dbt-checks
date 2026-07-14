@@ -58,6 +58,7 @@ integration_tests/
 duckdb
 postgres
 bigquery
+snowflake
 ```
 
 Each matrix leg calls the reusable workflow
@@ -65,19 +66,22 @@ Each matrix leg calls the reusable workflow
 input. The reusable workflow:
 
 - installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
-  `dbt-postgres`, or `dbt-bigquery`)
+  `dbt-postgres`, `dbt-bigquery`, or `dbt-snowflake`)
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
   `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
-  DuckDB target, a `postgres` target, and a `bigquery` target)
+  DuckDB target, a `postgres` target, a `bigquery` target, and a
+  `snowflake` target)
 - for the Postgres leg, starts a `postgres:16` service container for the
   job to connect to
 - runs the full integration + invalid-config suite identically against
   whichever adapter it was called with
 - prints stored failure rows to the job summary using an adapter-specific
   script (direct DuckDB file query, `psycopg2` against
-  `information_schema` for Postgres, or the `google-cloud-bigquery` client
-  against `INFORMATION_SCHEMA.TABLES` for BigQuery)
+  `information_schema` for Postgres, the `google-cloud-bigquery` client
+  against `INFORMATION_SCHEMA.TABLES` for BigQuery, or
+  `snowflake-connector-python` against `information_schema.tables` for
+  Snowflake)
 
 This keeps the adapter-dependent steps in one place, so adding another
 adapter to the matrix means adding a matrix entry plus install/target
@@ -102,6 +106,26 @@ workflow and used to authenticate the BigQuery adapter.
 When these values are not configured, the BigQuery CI leg is skipped rather
 than failed. This allows the remaining CI suite to succeed while keeping the
 workflow ready for future BigQuery validation.
+
+## Snowflake CI
+
+Like BigQuery, Snowflake has no free local equivalent, so the leg requires a
+real Snowflake account.
+
+The Snowflake CI leg is gated and only runs when the required repository
+configuration is available.
+
+Required configuration:
+
+- Repository variable: `SNOWFLAKE_ACCOUNT`
+- Repository secret: `SNOWFLAKE_PASSWORD`
+
+Optional configuration (repository variables): `SNOWFLAKE_USER`,
+`SNOWFLAKE_ROLE`, `SNOWFLAKE_DATABASE` (defaults to `dbt_checks`),
+`SNOWFLAKE_WAREHOUSE`, `SNOWFLAKE_SCHEMA` (defaults to `public`).
+
+When these values are not configured, the Snowflake CI leg is skipped rather
+than failed, the same way the BigQuery leg is gated above.
 
 ---
 
@@ -293,8 +317,9 @@ These artifacts help inspect failures after CI runs.
 Planned future improvements include:
 
 - BigQuery CI leg fully exercised once GCP credentials are configured
-  (currently wired but gated — see "BigQuery Leg Gating" above)
-- Snowflake validation
+  (currently wired but gated — see "BigQuery CI" above)
+- Snowflake CI leg fully exercised once Snowflake credentials are configured
+  (currently wired but gated — see "Snowflake CI" above)
 - Databricks validation
 - Spark validation
 - Redshift validation
