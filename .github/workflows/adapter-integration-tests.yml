@@ -12,6 +12,8 @@ on:
         required: false
       SNOWFLAKE_PASSWORD:
         required: false
+      DATABRICKS_TOKEN:
+        required: false
 
 jobs:
   integration-tests:
@@ -35,7 +37,7 @@ jobs:
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests
       DBT_PACKAGES_INSTALL_PATH: /tmp/dbt-checks-packages
-      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || (inputs.adapter == 'bigquery' && 'bigquery' || (inputs.adapter == 'snowflake' && 'snowflake' || 'dev')) }}
+      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || (inputs.adapter == 'bigquery' && 'bigquery' || (inputs.adapter == 'snowflake' && 'snowflake' || (inputs.adapter == 'databricks' && 'databricks' || 'dev'))) }}
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: dbt_checks
@@ -53,6 +55,11 @@ jobs:
       SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE || 'dbt_checks' }}
       SNOWFLAKE_WAREHOUSE: ${{ vars.SNOWFLAKE_WAREHOUSE }}
       SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA || 'public' }}
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_HTTP_PATH: ${{ vars.DATABRICKS_HTTP_PATH }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_CATALOG: ${{ vars.DATABRICKS_CATALOG }}
+      DATABRICKS_SCHEMA: ${{ vars.DATABRICKS_SCHEMA || 'default' }}
 
     steps:
       - name: Checkout repository
@@ -86,6 +93,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install dbt-core==1.11.7 dbt-snowflake==1.11.1 snowflake-connector-python
+
+      - name: Install dbt (databricks)
+        if: inputs.adapter == 'databricks'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-databricks==1.11.2 databricks-sql-connector
 
       - name: Write BigQuery service account keyfile
         if: inputs.adapter == 'bigquery'
@@ -495,6 +508,77 @@ jobs:
 
           for schema, table in tables:
               cur.execute(f'select * from "{schema}"."{table}" limit 20')
+
+              headers = [col[0] for col in cur.description]
+              rows = cur.fetchall()
+
+              if not rows:
+                  continue
+
+              output.append(f"## `{table}`")
+              output.append("")
+              output.append(to_markdown(headers, rows))
+              output.append("")
+
+          final_output = "\n".join(output)
+
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Print enriched failure outputs (databricks)
+        if: always() && inputs.adapter == 'databricks'
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import os
+          from databricks import sql
+
+          con = sql.connect(
+              server_hostname=os.environ["DATABRICKS_HOST"],
+              http_path=os.environ["DATABRICKS_HTTP_PATH"],
+              access_token=os.environ["DATABRICKS_TOKEN"],
+              catalog=os.environ.get("DATABRICKS_CATALOG") or None,
+              schema=os.environ["DATABRICKS_SCHEMA"],
+          )
+          cur = con.cursor()
+
+          cur.execute("""
+              select table_schema, table_name
+              from information_schema.tables
+              where table_schema ilike '%dbt_test__audit%'
+              order by table_name
+          """)
+          tables = cur.fetchall()
+
+          if not tables:
+              print("No stored failure tables found.")
+              raise SystemExit(0)
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+
+          def to_markdown(headers, rows):
+              lines = []
+              lines.append("| " + " | ".join(headers) + " |")
+              lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+
+              for row in rows:
+                  safe_values = [
+                      "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
+                      for v in row
+                  ]
+                  lines.append("| " + " | ".join(safe_values) + " |")
+
+              return "\n".join(lines)
+
+          output = ["# dbt-checks failure output", ""]
+
+          for schema, table in tables:
+              cur.execute(f"select * from `{schema}`.`{table}` limit 20")
 
               headers = [col[0] for col in cur.description]
               rows = cur.fetchall()

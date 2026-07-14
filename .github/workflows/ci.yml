@@ -301,3 +301,41 @@ jobs:
       adapter: snowflake
 
     secrets: inherit
+
+  check-databricks-configuration:
+    name: check-databricks-configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      enabled: ${{ steps.configuration.outputs.enabled }}
+
+    steps:
+      - name: Check Databricks configuration
+        id: configuration
+        shell: bash
+        env:
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          if [[ -n "$DATABRICKS_HOST" && -n "$DATABRICKS_TOKEN" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Databricks integration tests are enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Databricks integration tests are skipped because credentials are not configured."
+          fi
+
+  databricks-integration-tests:
+    name: integration-tests (databricks)
+
+    needs:
+      - check-databricks-configuration
+
+    if: needs.check-databricks-configuration.outputs.enabled == 'true'
+
+    uses: ./.github/workflows/adapter-integration-tests.yml
+
+    with:
+      adapter: databricks
+
+    secrets: inherit

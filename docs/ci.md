@@ -59,6 +59,7 @@ duckdb
 postgres
 bigquery
 snowflake
+databricks
 ```
 
 Each matrix leg calls the reusable workflow
@@ -66,12 +67,12 @@ Each matrix leg calls the reusable workflow
 input. The reusable workflow:
 
 - installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
-  `dbt-postgres`, `dbt-bigquery`, or `dbt-snowflake`)
+  `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, or `dbt-databricks`)
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
   `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
-  DuckDB target, a `postgres` target, a `bigquery` target, and a
-  `snowflake` target)
+  DuckDB target, a `postgres` target, a `bigquery` target, a `snowflake`
+  target, and a `databricks` target)
 - for the Postgres leg, starts a `postgres:16` service container for the
   job to connect to
 - runs the full integration + invalid-config suite identically against
@@ -79,9 +80,10 @@ input. The reusable workflow:
 - prints stored failure rows to the job summary using an adapter-specific
   script (direct DuckDB file query, `psycopg2` against
   `information_schema` for Postgres, the `google-cloud-bigquery` client
-  against `INFORMATION_SCHEMA.TABLES` for BigQuery, or
+  against `INFORMATION_SCHEMA.TABLES` for BigQuery,
   `snowflake-connector-python` against `information_schema.tables` for
-  Snowflake)
+  Snowflake, or `databricks-sql-connector` against `information_schema.tables`
+  for Databricks)
 
 This keeps the adapter-dependent steps in one place, so adding another
 adapter to the matrix means adding a matrix entry plus install/target
@@ -126,6 +128,27 @@ Optional configuration (repository variables): `SNOWFLAKE_USER`,
 
 When these values are not configured, the Snowflake CI leg is skipped rather
 than failed, the same way the BigQuery leg is gated above.
+
+## Databricks CI
+
+Like BigQuery and Snowflake, Databricks has no free local equivalent, so the
+leg requires a real Databricks workspace with a SQL warehouse or
+all-purpose cluster.
+
+The Databricks CI leg is gated and only runs when the required repository
+configuration is available.
+
+Required configuration:
+
+- Repository variable: `DATABRICKS_HOST`
+- Repository secret: `DATABRICKS_TOKEN`
+
+Optional configuration (repository variables): `DATABRICKS_HTTP_PATH`,
+`DATABRICKS_CATALOG`, `DATABRICKS_SCHEMA` (defaults to `default`).
+
+When these values are not configured, the Databricks CI leg is skipped
+rather than failed, the same way the BigQuery and Snowflake legs are gated
+above.
 
 ---
 
@@ -320,7 +343,8 @@ Planned future improvements include:
   (currently wired but gated — see "BigQuery CI" above)
 - Snowflake CI leg fully exercised once Snowflake credentials are configured
   (currently wired but gated — see "Snowflake CI" above)
-- Databricks validation
+- Databricks CI leg fully exercised once Databricks credentials are
+  configured (currently wired but gated — see "Databricks CI" above)
 - Spark validation
 - Redshift validation
 - dbt version matrix

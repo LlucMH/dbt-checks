@@ -6,6 +6,91 @@ The format follows semantic versioning.
 
 ---
 
+## [0.7.3] - 2026-07-14
+
+### Changed
+
+#### Databricks Adapter Audit
+
+Reviewed `macros/helpers/adapters/databricks.sql` and the shared grouping,
+dispatch, casting, and predicate helpers for Databricks SQL dialect
+correctness:
+
+- `databricks__try_cast_to_date`/`_timestamp` already used native
+  `try_cast`, so unparseable input already returned `NULL` rather than
+  raising — no fix needed here.
+- `databricks__day_of_week_sun0` already correctly shifted Databricks'
+  1 (Sunday) - 7 (Saturday) `dayofweek()` result to the shared 0-indexed
+  Sunday convention.
+- `databricks__dateadd_days`/`datediff_days` already used Databricks'
+  native `date_add`/`date_diff` functions with day-granularity arguments
+  in the same `(start, end) -> end - start` convention as the other
+  adapters — no changes needed.
+- `group_by_alias` already strips backticks alongside double quotes, so
+  Databricks-quoted `group_by` columns (`` `col` ``) alias correctly.
+- Grouped checks (aggregation, ratio, freshness) rely only on `GROUP BY`
+  over `SELECT`-list expressions/aliases, which Databricks SQL supports
+  natively — no changes needed to `macros/helpers/grouping.sql`,
+  `aggregation.sql`, or `ratio.sql` for Databricks compatibility.
+
+#### Gated Databricks CI Leg
+
+Added a `databricks` entry to the `integration-tests` matrix in
+`.github/workflows/ci.yml`, reusing the same
+`adapter-integration-tests.yml` workflow as the other adapters. Like
+BigQuery and Snowflake, Databricks has no free local equivalent, so the
+leg requires a real Databricks workspace with a SQL warehouse or cluster.
+
+The matrix job is gated on the `DATABRICKS_HOST` repository variable and
+`DATABRICKS_TOKEN` repository secret both being set; until they're
+configured, the leg is **skipped** (not failed), so CI stays green. Once
+configured, the reusable workflow installs `dbt-databricks`, runs the
+identical integration + invalid-config suite, and prints stored failure
+rows via the `databricks-sql-connector` client against
+`information_schema.tables`.
+
+`integration_tests/profiles.yml` and
+`integration_tests_invalid_configs/profiles.yml` now define a `databricks`
+target alongside the existing DuckDB, Postgres, BigQuery, and Snowflake
+targets.
+
+### Fixed
+
+#### Databricks regex_match Escaping
+
+Fixed `databricks__regex_match` in `macros/helpers/adapters/databricks.sql`.
+The macro previously interpolated `pattern` directly into a single-quoted
+string literal. Databricks SQL string literals only interpret a fixed set
+of recognized escapes (leaving sequences like `\d` or `\s` verbatim), but
+an unescaped `'` in `pattern` still terminated the literal early, and a
+pattern ending in a bare `\` would consume the closing quote as an
+(incorrectly) recognized `\'` escape. The macro now backslash-escapes `\`
+and `'` before interpolation — the same transform applied to
+`bigquery__regex_match` (0.7.1) and `snowflake__regex_match` (0.7.2) —
+which round-trips ordinary regex escapes like `\d` correctly while closing
+both holes.
+
+### Notes
+
+- Macro behavior change: `databricks__regex_match` now escapes `pattern`
+  before interpolation; previously-compiling patterns containing an
+  unescaped `'` or a trailing bare `\` will now compile to different
+  (correct) SQL. Patterns without those characters are unaffected.
+- No other macro API or SQL generation changes.
+- `README.md`'s Databricks compatibility status is "Dialect-audited; CI
+  wired, pending Databricks credentials", not "Fully tested in CI" — the CI
+  leg is not yet exercised against a real Databricks workspace in this
+  repository.
+- Spark (`macros/helpers/adapters/spark.sql`) has the same unaudited
+  `regex_match` escaping gap as Databricks did before this release, but is
+  out of scope for this release; it remains "Planned validation".
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.2] - 2026-07-14
 
 ### Changed
