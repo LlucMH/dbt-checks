@@ -52,3 +52,12 @@ integration_tests_invalid_configs:
       connect_timeout: 30
       schema: "{{ env_var('SPARK_SCHEMA', 'default') }}"
       threads: 1
+    redshift:
+      type: redshift
+      host: "{{ env_var('REDSHIFT_HOST', '') }}"
+      port: "{{ env_var('REDSHIFT_PORT', '5439') | as_number }}"
+      user: "{{ env_var('REDSHIFT_USER', 'dbt_checks') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD', '') }}"
+      dbname: "{{ env_var('REDSHIFT_DB', 'dbt_checks') }}"
+      schema: "{{ env_var('REDSHIFT_SCHEMA', 'public') }}"
+      threads: 1

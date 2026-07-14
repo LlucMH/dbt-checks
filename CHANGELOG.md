@@ -6,6 +6,94 @@ The format follows semantic versioning.
 
 ---
 
+## [0.7.5] - 2026-07-14
+
+### Changed
+
+#### Redshift Adapter Audit
+
+Reviewed `macros/helpers/adapters/redshift.sql` and the shared grouping,
+dispatch, casting, and predicate helpers for Redshift SQL dialect
+correctness:
+
+- `redshift__try_cast_to_date`/`_timestamp` already used Redshift's native
+  `try_cast`, so unparseable input already returned `NULL` rather than
+  raising — this was already fixed in 0.7.0 alongside the Postgres
+  `try_cast` gap, no further changes needed here.
+- `redshift__current_date_sql`/`current_timestamp_sql`/`dateadd_days`/
+  `datediff_days` already used correct native syntax in the shared
+  `(start, end) -> end - start` convention — no changes needed.
+- `redshift__day_of_week_sun0` already correctly used Redshift's
+  `date_part(dow, expr)` with an unquoted `dow` keyword — Redshift's
+  `DATE_PART` diverges from Postgres's (which requires the datepart as a
+  quoted string literal, e.g. `date_part('dow', ...)`) but returns the
+  same 0-indexed Sunday convention; no changes needed.
+- `group_by_alias` already strips double quotes, so Redshift-quoted
+  `group_by` columns (`"col"`) alias correctly.
+- Grouped checks (aggregation, ratio, freshness) rely only on `GROUP BY`
+  over `SELECT`-list expressions/aliases, which Redshift supports
+  natively — no changes needed to `macros/helpers/grouping.sql`,
+  `aggregation.sql`, or `ratio.sql` for Redshift compatibility.
+
+#### Gated Redshift CI Leg
+
+Added a `redshift` entry to the `integration-tests` matrix in
+`.github/workflows/ci.yml`, reusing the same
+`adapter-integration-tests.yml` workflow as the other adapters. Like the
+other cloud warehouses, Redshift has no free local equivalent, so the leg
+requires a real Redshift cluster or Redshift Serverless workgroup.
+
+The matrix job is gated on the `REDSHIFT_HOST` repository variable and
+`REDSHIFT_PASSWORD` repository secret both being set; until they're
+configured, the leg is **skipped** (not failed), so CI stays green. Once
+configured, the reusable workflow installs `dbt-redshift`, runs the
+identical integration + invalid-config suite, and prints stored failure
+rows via `psycopg2` against `information_schema` — reusing the same
+script as the Postgres leg, since Redshift is Postgres-wire-compatible.
+
+`integration_tests/profiles.yml` and
+`integration_tests_invalid_configs/profiles.yml` now define a `redshift`
+target alongside the existing DuckDB, Postgres, BigQuery, Snowflake,
+Databricks, and Spark targets.
+
+### Fixed
+
+#### Redshift regex_match Escaping
+
+Fixed `redshift__regex_match` in `macros/helpers/adapters/redshift.sql`.
+The macro previously interpolated `pattern` directly into a single-quoted
+string literal; an unescaped `'` in `pattern` would terminate the literal
+early. Unlike Snowflake/BigQuery/Databricks/Spark, Redshift is
+Postgres-derived and runs with `standard_conforming_strings` on by
+default, so backslash is not a special character in a regular string
+literal — doubling any existing backslashes (as those other adapters
+require) would have corrupted patterns like `\d`. The macro now only
+doubles embedded `'` characters (standard SQL quote-escaping), leaving
+backslashes untouched.
+
+### Notes
+
+- Macro behavior change: `redshift__regex_match` now escapes embedded `'`
+  characters in `pattern` before interpolation; previously-compiling
+  patterns containing `'` will now compile to different (correct) SQL.
+  Patterns without a `'` are unaffected.
+- No other macro API or SQL generation changes.
+- `README.md`'s Redshift compatibility status is "Dialect-audited; CI
+  wired, pending Redshift credentials", not "Fully tested in CI" — the CI
+  leg is not yet exercised against a real Redshift cluster in this
+  repository.
+- All seven adapters listed in `README.md`'s compatibility matrix
+  (DuckDB, Postgres, BigQuery, Snowflake, Databricks, Spark, Redshift)
+  have now been dialect-audited; DuckDB and Postgres are fully tested in
+  CI, and the remaining five are wired but gated pending real warehouse
+  credentials.
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.4] - 2026-07-14
 
 ### Changed
