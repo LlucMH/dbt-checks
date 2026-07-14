@@ -6,6 +6,92 @@ The format follows semantic versioning.
 
 ---
 
+## [0.7.6] - 2026-07-15
+
+### Added
+
+#### Performance Smoke Tests
+
+Added `integration_tests/models/performance/`: five synthetic data models
+generated with `generate_series` (no seed files, so this doesn't bloat the
+repo), each an exact deterministic grid rather than a randomized or
+modular-arithmetic dataset:
+
+- `perf_volume_100k` / `perf_volume_1m` — 100k and 1M ungrouped rows
+- `perf_cardinality_100_groups` / `perf_cardinality_1k_groups` — 100k rows
+  across 100 groups and 200k rows across 1,000 groups
+- `perf_multi_column_group_by` — 100k rows grouped by a two-column
+  `[region, category]` `group_by` (200 combinations)
+
+`integration_tests/models/performance/_schema.yml` applies the check
+families most exercised by grouped and aggregate validation against these
+scenarios: `row_count_between`, `sum_between`, `avg_between`,
+`null_ratio_between`, `value_ratio_between`, and `recent_date` with
+`group_by` (single- and multi-column). All 21 checks pass against exact,
+hand-derived bounds rather than loose tolerances.
+
+Every model and check is tagged `performance_smoke` only (deliberately not
+`should_pass`), so it never runs as part of the existing adapter matrix.
+
+#### Performance Smoke CI Job
+
+Added `.github/workflows/performance-smoke-tests.yml`, a new reusable
+workflow following the same matrix + `workflow_call` pattern as
+`adapter-integration-tests.yml`, wired into `.github/workflows/ci.yml` as a
+new `performance-smoke-tests` job running unconditionally over `duckdb` and
+`postgres` (no credential gating needed — both targets are always available
+in CI).
+
+The job runs `dbt compile`, `dbt run`, and `dbt test` against
+`tag:performance_smoke`, each timed, then reports to the job summary:
+
+- per-node execution time (from `run_results.json`)
+- generated SQL size (lines/bytes), CTE count, and a repeated-scan count per
+  compiled node (identified via `manifest.json`, not filename matching —
+  dbt truncates and hashes long compiled test filenames, which would
+  otherwise silently miss nodes)
+- an `EXPLAIN` plan, where available, for one representative ungrouped
+  aggregation test and one representative grouped aggregation test
+
+### Changed
+
+#### Adapter Matrix Exclusion
+
+Changed the "Run test models" step in
+`.github/workflows/adapter-integration-tests.yml` from `dbt run` to `dbt run
+--exclude tag:performance_smoke`, so the cloud adapter legs (BigQuery,
+Snowflake, Databricks, Spark, Redshift) never build the 1M-row table. Every
+`dbt test` invocation in that workflow was already tag-selected, so no
+further change was needed to keep performance tests off those legs.
+
+### Notes
+
+- **These are performance smoke tests, not a warehouse benchmark.** CI only
+  has a local DuckDB file and a disposable Postgres service container
+  available, so results say nothing about behavior on a production-sized
+  cloud warehouse. The goal is to catch pathological SQL generation and
+  confirm the grouped validation architecture holds up at larger row volumes
+  and higher `group_by` cardinality before release — not to produce
+  comparable timing numbers across releases or adapters.
+- As part of adding this tooling, `macros/helpers/aggregation.sql`,
+  `macros/helpers/ratio.sql`, and the generated SQL for `row_count_between`,
+  `avg_between`, `value_ratio_between`, and `recent_date` were reviewed
+  directly: every check already compiles to a single scan of the source
+  model through one CTE chain, with no redundant CTEs or repeated scans. No
+  macro changes were needed.
+- No SQL generation changes.
+- No macro behavior changes.
+- No API changes.
+- No existing test behavior changes — `dbt_checks_row_count_between_perf_*`
+  and friends are new tests in `integration_tests` only, not part of the
+  package's public macro surface.
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.5] - 2026-07-14
 
 ### Changed

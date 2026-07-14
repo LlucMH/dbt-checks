@@ -190,7 +190,7 @@ jobs:
 
       - name: Run test models
         working-directory: integration_tests
-        run: dbt run
+        run: dbt run --exclude tag:performance_smoke
 
       - name: Run severity warn tests
         working-directory: integration_tests
