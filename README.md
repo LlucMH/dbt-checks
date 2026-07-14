@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.7.4
+    revision: v0.7.5
 ```
 
 Install dependencies:
@@ -146,7 +146,7 @@ Adapter-specific behavior is handled through dbt dispatch.
 | Snowflake  | Dialect-audited; CI wired, pending Snowflake credentials |
 | Databricks | Dialect-audited; CI wired, pending Databricks credentials |
 | Spark      | Dialect-audited; CI wired, pending Spark cluster credentials |
-| Redshift   | Planned validation                                   |
+| Redshift   | Dialect-audited; CI wired, pending Redshift credentials |
 
 ---
 

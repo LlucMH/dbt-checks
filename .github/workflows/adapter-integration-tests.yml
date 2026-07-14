@@ -16,6 +16,8 @@ on:
         required: false
       SPARK_PASSWORD:
         required: false
+      REDSHIFT_PASSWORD:
+        required: false
 
 jobs:
   integration-tests:
@@ -39,7 +41,7 @@ jobs:
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}/integration_tests
       DBT_PACKAGES_INSTALL_PATH: /tmp/dbt-checks-packages
-      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || (inputs.adapter == 'bigquery' && 'bigquery' || (inputs.adapter == 'snowflake' && 'snowflake' || (inputs.adapter == 'databricks' && 'databricks' || (inputs.adapter == 'spark' && 'spark' || 'dev')))) }}
+      DBT_TARGET: ${{ inputs.adapter == 'postgres' && 'postgres' || (inputs.adapter == 'bigquery' && 'bigquery' || (inputs.adapter == 'snowflake' && 'snowflake' || (inputs.adapter == 'databricks' && 'databricks' || (inputs.adapter == 'spark' && 'spark' || (inputs.adapter == 'redshift' && 'redshift' || 'dev'))))) }}
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: dbt_checks
@@ -67,6 +69,12 @@ jobs:
       SPARK_USER: ${{ vars.SPARK_USER || 'dbt_checks' }}
       SPARK_PASSWORD: ${{ secrets.SPARK_PASSWORD }}
       SPARK_SCHEMA: ${{ vars.SPARK_SCHEMA || 'default' }}
+      REDSHIFT_HOST: ${{ vars.REDSHIFT_HOST }}
+      REDSHIFT_PORT: ${{ vars.REDSHIFT_PORT || '5439' }}
+      REDSHIFT_USER: ${{ vars.REDSHIFT_USER || 'dbt_checks' }}
+      REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
+      REDSHIFT_DB: ${{ vars.REDSHIFT_DB || 'dbt_checks' }}
+      REDSHIFT_SCHEMA: ${{ vars.REDSHIFT_SCHEMA || 'public' }}
 
     steps:
       - name: Checkout repository
@@ -112,6 +120,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install dbt-core==1.11.7 "dbt-spark[PyHive]==1.9.3"
+
+      - name: Install dbt (redshift)
+        if: inputs.adapter == 'redshift'
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-redshift==1.11.1 psycopg2-binary
 
       - name: Write BigQuery service account keyfile
         if: inputs.adapter == 'bigquery'
@@ -660,6 +674,78 @@ jobs:
               cur.execute(f"select * from {os.environ['SPARK_SCHEMA']}.{table} limit 20")
 
               headers = [col[0] for col in cur.description]
+              rows = cur.fetchall()
+
+              if not rows:
+                  continue
+
+              output.append(f"## `{table}`")
+              output.append("")
+              output.append(to_markdown(headers, rows))
+              output.append("")
+
+          final_output = "\n".join(output)
+
+          print(final_output)
+
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as f:
+                  f.write(final_output)
+                  f.write("\n")
+          PY
+
+      - name: Print enriched failure outputs (redshift)
+        if: always() && inputs.adapter == 'redshift'
+        working-directory: integration_tests
+        run: |
+          python - <<'PY'
+          import os
+          import psycopg2
+
+          con = psycopg2.connect(
+              host=os.environ["REDSHIFT_HOST"],
+              port=os.environ["REDSHIFT_PORT"],
+              user=os.environ["REDSHIFT_USER"],
+              password=os.environ["REDSHIFT_PASSWORD"],
+              dbname=os.environ["REDSHIFT_DB"],
+          )
+          con.autocommit = True
+          cur = con.cursor()
+
+          cur.execute("""
+              select table_schema, table_name
+              from information_schema.tables
+              where table_schema ilike '%dbt_test__audit%'
+              order by table_name
+          """)
+          tables = cur.fetchall()
+
+          if not tables:
+              print("No stored failure tables found.")
+              raise SystemExit(0)
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+
+          def to_markdown(headers, rows):
+              lines = []
+              lines.append("| " + " | ".join(headers) + " |")
+              lines.append("| " + " | ".join(["---"] * len(headers)) + " |")
+
+              for row in rows:
+                  safe_values = [
+                      "" if v is None else str(v).replace("|", "\\|").replace("\n", " ")
+                      for v in row
+                  ]
+                  lines.append("| " + " | ".join(safe_values) + " |")
+
+              return "\n".join(lines)
+
+          output = ["# dbt-checks failure output", ""]
+
+          for schema, table in tables:
+              cur.execute(f'select * from "{schema}"."{table}" limit 20')
+
+              headers = [col.name for col in cur.description]
               rows = cur.fetchall()
 
               if not rows:

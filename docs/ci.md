@@ -61,6 +61,7 @@ bigquery
 snowflake
 databricks
 spark
+redshift
 ```
 
 Each matrix leg calls the reusable workflow
@@ -68,24 +69,26 @@ Each matrix leg calls the reusable workflow
 input. The reusable workflow:
 
 - installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
-  `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, `dbt-databricks`, or
-  `dbt-spark[PyHive]`)
+  `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, `dbt-databricks`,
+  `dbt-spark[PyHive]`, or `dbt-redshift`)
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
   `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
   DuckDB target, a `postgres` target, a `bigquery` target, a `snowflake`
-  target, a `databricks` target, and a `spark` target)
+  target, a `databricks` target, a `spark` target, and a `redshift`
+  target)
 - for the Postgres leg, starts a `postgres:16` service container for the
   job to connect to
 - runs the full integration + invalid-config suite identically against
   whichever adapter it was called with
 - prints stored failure rows to the job summary using an adapter-specific
   script (direct DuckDB file query, `psycopg2` against
-  `information_schema` for Postgres, the `google-cloud-bigquery` client
-  against `INFORMATION_SCHEMA.TABLES` for BigQuery,
-  `snowflake-connector-python` against `information_schema.tables` for
-  Snowflake, `databricks-sql-connector` against `information_schema.tables`
-  for Databricks, or `PyHive` against a Thrift server's `SHOW TABLES` for
+  `information_schema` for Postgres and Redshift (Redshift is
+  Postgres-wire-compatible), the `google-cloud-bigquery` client against
+  `INFORMATION_SCHEMA.TABLES` for BigQuery, `snowflake-connector-python`
+  against `information_schema.tables` for Snowflake,
+  `databricks-sql-connector` against `information_schema.tables` for
+  Databricks, or `PyHive` against a Thrift server's `SHOW TABLES` for
   Spark)
 
 This keeps the adapter-dependent steps in one place, so adding another
@@ -175,6 +178,29 @@ to `default`).
 When these values are not configured, the Spark CI leg is skipped rather
 than failed, the same way the BigQuery, Snowflake, and Databricks legs are
 gated above.
+
+## Redshift CI
+
+Like the other cloud warehouses, Redshift has no free local equivalent, so
+the leg requires a real Redshift cluster or Redshift Serverless workgroup.
+`dbt-redshift` connects over the Postgres wire protocol, so this leg reuses
+the same `psycopg2`-based failure-output script as the Postgres leg.
+
+The Redshift CI leg is gated and only runs when the required repository
+configuration is available.
+
+Required configuration:
+
+- Repository variable: `REDSHIFT_HOST`
+- Repository secret: `REDSHIFT_PASSWORD`
+
+Optional configuration (repository variables): `REDSHIFT_PORT` (defaults
+to `5439`), `REDSHIFT_USER` (defaults to `dbt_checks`), `REDSHIFT_DB`
+(defaults to `dbt_checks`), `REDSHIFT_SCHEMA` (defaults to `public`).
+
+When these values are not configured, the Redshift CI leg is skipped
+rather than failed, the same way the other cloud warehouse legs are gated
+above.
 
 ---
 
@@ -373,7 +399,8 @@ Planned future improvements include:
   configured (currently wired but gated — see "Databricks CI" above)
 - Spark CI leg fully exercised once a reachable Spark cluster is configured
   (currently wired but gated — see "Spark CI" above)
-- Redshift validation
+- Redshift CI leg fully exercised once Redshift credentials are configured
+  (currently wired but gated — see "Redshift CI" above)
 - dbt version matrix
 - package installation validation
 - release workflow validation

@@ -15,7 +15,15 @@
 {% endmacro %}
 
 {% macro redshift__regex_match(expr, pattern) %}
-  {{ expr }} ~ '{{ pattern }}'
+  {#-
+    Redshift is Postgres-derived and runs with standard_conforming_strings
+    on by default, so backslash is not a special character in a regular
+    string literal here (unlike Snowflake/BigQuery/Databricks/Spark, where
+    pattern also needs backslash-escaping). An unescaped `'` in `pattern`
+    would still terminate the literal early, so it's doubled per
+    standard SQL quote-escaping - the only transform this dialect needs.
+  -#}
+  {{ expr }} ~ '{{ pattern | replace("'", "''") }}'
 {% endmacro %}
 
 {% macro redshift__day_of_week_sun0(expr) %}

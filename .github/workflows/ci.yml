@@ -377,3 +377,41 @@ jobs:
       adapter: spark
 
     secrets: inherit
+
+  check-redshift-configuration:
+    name: check-redshift-configuration
+    runs-on: ubuntu-latest
+
+    outputs:
+      enabled: ${{ steps.configuration.outputs.enabled }}
+
+    steps:
+      - name: Check Redshift configuration
+        id: configuration
+        shell: bash
+        env:
+          REDSHIFT_HOST: ${{ vars.REDSHIFT_HOST }}
+          REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
+        run: |
+          if [[ -n "$REDSHIFT_HOST" && -n "$REDSHIFT_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Redshift integration tests are enabled."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Redshift integration tests are skipped because credentials are not configured."
+          fi
+
+  redshift-integration-tests:
+    name: integration-tests (redshift)
+
+    needs:
+      - check-redshift-configuration
+
+    if: needs.check-redshift-configuration.outputs.enabled == 'true'
+
+    uses: ./.github/workflows/adapter-integration-tests.yml
+
+    with:
+      adapter: redshift
+
+    secrets: inherit
