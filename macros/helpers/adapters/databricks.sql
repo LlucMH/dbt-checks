@@ -15,7 +15,21 @@
 {% endmacro %}
 
 {% macro databricks__regex_match(expr, pattern) %}
-  regexp_like(cast({{ expr }} as string), '{{ pattern }}')
+  {#-
+    Databricks SQL string literals only interpret a fixed set of
+    recognized escapes (\', \", \\, \n, \t, ...); unrecognized backslash
+    sequences like `\d` or `\s` pass through verbatim, so regex patterns
+    mostly "just work" unescaped. But an unescaped `'` still terminates
+    the literal early, and a pattern ending in a bare `\` would consume
+    the closing quote as an (incorrectly) recognized `\'` escape.
+    Backslash-escaping both `\` and `'` first avoids both cases: `\\`
+    round-trips to a literal `\` (so `\d` still compiles to `\d`), and the
+    closing quote can never be swallowed.
+  -#}
+  regexp_like(
+    cast({{ expr }} as string),
+    '{{ pattern | replace('\\', '\\\\') | replace("'", "\\'") }}'
+  )
 {% endmacro %}
 
 {% macro databricks__day_of_week_sun0(expr) %}
