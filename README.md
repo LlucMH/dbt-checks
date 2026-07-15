@@ -37,7 +37,7 @@ Add the package to your `packages.yml`:
 ```yaml
 packages:
   - git: https://github.com/LlucMH/dbt-checks.git
-    revision: v0.7.6
+    revision: v0.7.7
 ```
 
 Install dependencies:
@@ -138,15 +138,26 @@ Current compatibility targets include:
 
 Adapter-specific behavior is handled through dbt dispatch.
 
-| Warehouse  | Status                                             |
-| ---------- | --------------------------------------------------- |
-| DuckDB     | Fully tested in CI                                   |
-| Postgres   | Fully tested in CI                                   |
-| BigQuery   | Dialect-audited; CI wired, pending GCP credentials   |
-| Snowflake  | Dialect-audited; CI wired, pending Snowflake credentials |
-| Databricks | Dialect-audited; CI wired, pending Databricks credentials |
-| Spark      | Dialect-audited; CI wired, pending Spark cluster credentials |
-| Redshift   | Dialect-audited; CI wired, pending Redshift credentials |
+| Adapter    | Dialect audited | CI wired | Live tested |
+| ---------- | --------------- | -------- | ----------- |
+| DuckDB     | Yes              | Yes      | Yes         |
+| Postgres   | Yes              | Yes      | Yes         |
+| BigQuery   | Yes              | Yes      | No          |
+| Snowflake  | Yes              | Yes      | No          |
+| Databricks | Yes              | Yes      | No          |
+| Spark      | Yes              | Yes      | No          |
+| Redshift   | Yes              | Yes      | No          |
+
+* **Dialect audited** — the adapter's helper macros (date/time, casting,
+  regex, day-of-week) were manually reviewed against the warehouse's
+  documented SQL dialect for correctness.
+* **CI wired** — a matrix leg exists in `.github/workflows/ci.yml` that
+  installs the adapter and runs the full integration suite against it.
+* **Live tested** — that CI leg actually runs against a real warehouse
+  instance, rather than being skipped for missing credentials.
+
+"Dialect audited" is not a substitute for "live tested" — see
+[Known Limitations](docs/known-limitations.md#dialect-audited-does-not-mean-live-tested).
 
 ---
 
@@ -171,6 +182,7 @@ Documentation is organized under the `/docs` directory.
 
 * [Architecture](docs/architecture.md)
 * [CI](docs/ci.md)
+* [Known Limitations](docs/known-limitations.md)
 
 ## Usage Examples
 

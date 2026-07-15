@@ -1,0 +1,40 @@
+name: Check adapter credentials
+description: >
+  Checks whether a repository variable and secret pair are both configured,
+  so a gated cloud adapter CI leg can be skipped rather than failed when
+  they are not. Centralizes the gating logic shared by every cloud adapter
+  configuration check in ci.yml.
+
+inputs:
+  var-value:
+    description: Value of the repository variable to check (e.g. vars.BIGQUERY_PROJECT)
+    required: true
+  secret-value:
+    description: Value of the repository secret to check (e.g. secrets.GCP_SA_KEY)
+    required: true
+  adapter-name:
+    description: Human-readable adapter name used in log messages (e.g. BigQuery)
+    required: true
+
+outputs:
+  enabled:
+    description: "'true' if both the variable and secret are set, 'false' otherwise"
+    value: ${{ steps.check.outputs.enabled }}
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        VAR_VALUE: ${{ inputs.var-value }}
+        SECRET_VALUE: ${{ inputs.secret-value }}
+        ADAPTER_NAME: ${{ inputs.adapter-name }}
+      run: |
+        if [[ -n "$VAR_VALUE" && -n "$SECRET_VALUE" ]]; then
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+          echo "$ADAPTER_NAME integration tests are enabled."
+        else
+          echo "enabled=false" >> "$GITHUB_OUTPUT"
+          echo "$ADAPTER_NAME integration tests are skipped because credentials are not configured."
+        fi

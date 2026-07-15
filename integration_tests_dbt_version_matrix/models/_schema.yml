@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: version_matrix_smoke
+    description: >
+      Minimal fixture for the dbt Core version matrix. Uses the legacy
+      `tests:` key (rather than `data_tests:`, introduced in dbt 1.8) so this
+      project itself parses under the minimum supported dbt Core version
+      declared in `require-dbt-version` (dbt_project.yml). `data_tests:` vs
+      `tests:` is a project-author schema.yml syntax choice handled entirely
+      by dbt Core's parser — it is orthogonal to whether dbt-checks' own
+      macros run correctly under a given dbt Core version, which is what
+      this matrix validates.
+    columns:
+      - name: id
+        tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_pass"]
+      - name: amount
+        tests:
+          - dbt_checks.non_negative:
+              config:
+                tags: ["should_fail"]

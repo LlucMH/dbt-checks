@@ -6,6 +6,173 @@ The format follows semantic versioning.
 
 ---
 
+## [0.7.7] - 2026-07-15
+
+This is the closing release of the 0.7.x compatibility/audit series. It does
+not add another cross-adapter dialect audit — all seven adapters were
+already audited between 0.7.0 and 0.7.5 — and instead consolidates the CI
+architecture built up across that series and closes the remaining gaps in
+what it actually validates.
+
+### Added
+
+#### dbt Core Version Matrix
+
+Added `integration_tests_dbt_version_matrix/`, a minimal fixture project
+(one model, two column-level `non_negative` checks) separate from the main
+`integration_tests/` project. It exists specifically because the main
+project's schema.yml files use the `data_tests:` key (dbt Core 1.8+), which
+would fail to parse under dbt Core 1.5.0 for reasons unrelated to whether
+dbt-checks' own macros work under that version. This fixture uses the
+older `tests:` key instead, which is valid dbt Core syntax across the whole
+1.5.0–1.11.x range.
+
+Added `.github/workflows/dbt-version-matrix.yml`, a reusable workflow that
+runs `dbt deps`, `dbt parse`, `dbt run`, `dbt test` (both `should_pass` and
+`should_fail`), `dbt compile`, and `dbt docs generate` against that fixture
+on DuckDB. Wired into `.github/workflows/ci.yml` as a new
+`dbt-core-version-matrix` job, matrixed over two legs:
+
+- `minimum-supported` — dbt-core 1.5.0, dbt-duckdb 1.5.2 (matching
+  `require-dbt-version` in `dbt_project.yml`)
+- `latest-stable` — dbt-core 1.11.7, dbt-duckdb 1.10.1 (matching every
+  other adapter leg's existing pin)
+
+Deliberately does not test intermediate dbt Core releases — only the two
+ends of the supported range. Both legs were run locally against a real
+`dbt-core==1.5.0`/`dbt-duckdb==1.5.2` install (Python 3.11, matching CI's
+pinned Python version — dbt-core 1.5.0 requires `distutils`, removed in
+Python 3.12) before being wired into CI, to confirm the package's macros
+actually work under the version floor the package claims to support, not
+just that the pin resolves.
+
+#### Clean Installation Validation
+
+Added a `clean-installation-validation` job to `.github/workflows/ci.yml`
+that scaffolds a temporary consumer project (not checked into the repo) and
+runs `dbt deps`, `dbt parse`, and `dbt docs generate` against it, installing
+`dbt-checks` via `packages.yml`'s `git:` + `revision:` syntax — the same
+installation path documented in `README.md` and used by real consumers.
+Every other CI job installs the package via `packages: - local: ..`, which
+never exercised the git-clone install path at all.
+
+The revision pinned is the PR head commit
+(`github.event.pull_request.head.sha`) on `pull_request` events, falling
+back to `github.sha` on pushes to `main` — `github.sha` alone resolves to
+GitHub's synthetic PR merge commit on `pull_request` events, which is not
+reliably fetchable by a plain `git clone` of the canonical repository.
+Verified locally against the current `main` HEAD commit before being wired
+into CI.
+
+#### Known Limitations Documentation
+
+Added `docs/known-limitations.md`, documenting explicitly:
+
+- Postgres/Redshift's strict ISO 8601-only `try_cast_to_date`/
+  `try_cast_to_timestamp` (narrower than DuckDB/Snowflake's native
+  try-cast)
+- cloud adapter CI legs (BigQuery, Snowflake, Databricks, Spark, Redshift)
+  require credentials and are skipped, not failed, without them
+- Spark's `try_cast` requires Spark 3.2+
+- "dialect audited" is not "live tested" — an audit is a manual review
+  against vendor documentation, not an execution against a real warehouse
+- regex engine and escaping differences across all seven adapters (POSIX
+  `~` on DuckDB/Postgres/Redshift vs. `regexp_like`/`regexp_contains` with
+  backslash-escaping on Snowflake/BigQuery/Databricks/Spark)
+- performance smoke tests run on CI-scale DuckDB/Postgres only, and are not
+  comparable across releases or adapters
+
+Linked from `README.md` and `docs/README.md`.
+
+### Changed
+
+#### Adapter Capability Table
+
+Replaced the single-column adapter status table in `README.md` ("Fully
+tested in CI" / "Dialect-audited; CI wired, pending X credentials") with an
+explicit three-column table — Dialect audited / CI wired / Live tested —
+so each of the three claims can be verified independently instead of being
+folded into one prose string per adapter.
+
+#### CI Workflow Consolidation
+
+Reviewed `.github/workflows/ci.yml` and
+`.github/workflows/adapter-integration-tests.yml` for duplication called
+out across the 0.7.x series and centralized what was safely centralizable:
+
+- **Credential-gating jobs**: the five `check-{bigquery,snowflake,
+  databricks,spark,redshift}-configuration` jobs each re-implemented the
+  same "is this variable and this secret both set?" bash logic. Extracted
+  into a shared composite action,
+  `.github/actions/check-credentials/action.yml`, taking `var-value`,
+  `secret-value`, and `adapter-name` as inputs. Each of the five jobs is now
+  a two-line call into it instead of an inline script. (GitHub Actions job
+  `outputs` don't merge cleanly across matrix legs of a single job, which is
+  why this is five jobs calling one action rather than one matrixed job —
+  the five separate `needs:`/`if:` gates on the five `*-integration-tests`
+  jobs depend on five distinct outputs.)
+- **Adapter package installation mapping**: the seven `Install dbt (X)`
+  steps in `adapter-integration-tests.yml`, each a near-identical `if:
+  inputs.adapter == 'X'` guard around one `pip install` line, were
+  collapsed into a single `Install dbt` step with a bash `case` statement
+  keyed on `inputs.adapter`.
+- **Stored-failure reporting scripts**: the seven per-adapter inline Python
+  heredocs (~500 lines total) that queried `information_schema` and
+  rendered stored failure rows to the job summary were extracted into
+  `.github/scripts/print_stored_failures.py`, a single script dispatching
+  on `--adapter`. The Postgres and Redshift heredocs were byte-for-byte
+  identical logic under different env var names (Redshift is
+  Postgres-wire-compatible) and now share one `_list_psycopg2` helper.
+  Adapter-specific driver imports (`duckdb`, `psycopg2`,
+  `google-cloud-bigquery`, `snowflake-connector-python`,
+  `databricks-sql-connector`, `pyhive`) stay local to each adapter's own
+  function, since a given CI leg only has its own driver installed.
+  Verified against a real DuckDB stored-failures database (generated by
+  running the actual integration suite locally) before being wired into
+  CI; the Postgres/Redshift path was verified by code inspection only (no
+  local Postgres instance available) since the extracted logic is an exact
+  transcription of the original, parameterized.
+
+Reviewed but left unchanged: the per-adapter `env:` block in
+`adapter-integration-tests.yml` is already the single centralized home for
+every adapter's connection variables (that's what the reusable workflow is
+for) — there was nothing further to consolidate there. The credential
+repository-variable/secret *names* themselves (`BIGQUERY_PROJECT`,
+`GCP_SA_KEY`, etc.) still live in `ci.yml`, `adapter-integration-tests.yml`,
+and `docs/ci.md` — collapsing that mapping further would mean generating
+one of those from the other, which is out of scope for this release.
+
+#### Repo Governance Checks
+
+Added checks to `repo-governance` in `.github/workflows/ci.yml`:
+`docs/known-limitations.md` existence and its README link, the three
+adapter capability table headers ("Dialect audited" / "CI wired" / "Live
+tested"), and the existence of the new CI consolidation files
+(`dbt-version-matrix.yml`, `check-credentials/action.yml`,
+`print_stored_failures.py`, `integration_tests_dbt_version_matrix/`) — so
+this release's own claims stay enforced going forward, the same way every
+other documentation/architecture claim in this repository already is.
+
+### Notes
+
+- No SQL generation changes.
+- No macro behavior changes.
+- No API changes.
+- No existing test behavior changes — the stored-failure reporting output
+  format is unchanged (same markdown tables, same job summary target); only
+  where the code that produces it lives has changed. One cosmetic wording
+  change: the DuckDB leg now prints "No stored failure tables found."
+  instead of "No DuckDB database found." when no failures were stored, for
+  consistency with the other six adapters.
+- See [Known Limitations](docs/known-limitations.md) for what this release
+  documents as explicit trade-offs rather than open work.
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.6] - 2026-07-15
 
 ### Added

@@ -75,6 +75,7 @@ jobs:
           test -f docs/rule-composition.md
           test -f docs/architecture.md
           test -f docs/ci.md
+          test -f docs/known-limitations.md
           test -f docs/examples.md
 
       - name: Check README links to documentation
@@ -88,6 +89,7 @@ jobs:
           grep -i "docs/rule-composition.md" README.md
           grep -i "docs/architecture.md" README.md
           grep -i "docs/ci.md" README.md
+          grep -i "docs/known-limitations.md" README.md
           grep -i "docs/examples.md" README.md
 
       - name: Check documentation content coverage
@@ -103,6 +105,19 @@ jobs:
       - name: Check README installation version exists
         run: |
           grep -E "revision: v[0-9]+\.[0-9]+\.[0-9]+" README.md
+
+      - name: Check adapter capability table is unambiguous
+        run: |
+          grep -i "Dialect audited" README.md
+          grep -i "CI wired" README.md
+          grep -i "Live tested" README.md
+
+      - name: Check CI tooling consolidation files exist
+        run: |
+          test -f .github/workflows/dbt-version-matrix.yml
+          test -f .github/actions/check-credentials/action.yml
+          test -f .github/scripts/print_stored_failures.py
+          test -d integration_tests_dbt_version_matrix
 
       - name: Check version has matching CHANGELOG entry
         run: |
@@ -209,6 +224,90 @@ jobs:
           grep -i "Feature request" .github/ISSUE_TEMPLATE/feature_request.yml
           grep -i "Pull Request" .github/PULL_REQUEST_TEMPLATE.md
 
+  clean-installation-validation:
+    name: clean-installation-validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core==1.11.7 dbt-duckdb==1.10.1 duckdb
+
+      - name: Scaffold temporary consumer project
+        run: |
+          mkdir -p consumer_project/models
+
+          cat > consumer_project/dbt_project.yml <<'EOF'
+          name: dbt_checks_consumer
+          version: "1.0.0"
+          config-version: 2
+
+          profile: dbt_checks_consumer
+
+          model-paths: ["models"]
+          clean-targets:
+            - "target"
+            - "dbt_packages"
+          EOF
+
+          cat > consumer_project/packages.yml <<EOF
+          packages:
+            - git: https://github.com/LlucMH/dbt-checks.git
+              revision: ${{ github.event.pull_request.head.sha || github.sha }}
+          EOF
+
+          cat > consumer_project/profiles.yml <<'EOF'
+          dbt_checks_consumer:
+            target: dev
+            outputs:
+              dev:
+                type: duckdb
+                path: "consumer.duckdb"
+                threads: 2
+          EOF
+
+          cat > consumer_project/models/orders.sql <<'EOF'
+          select 1 as id, 100 as amount
+          EOF
+
+          cat > consumer_project/models/_schema.yml <<'EOF'
+          version: 2
+
+          models:
+            - name: orders
+              columns:
+                - name: amount
+                  data_tests:
+                    - dbt_checks.non_negative
+          EOF
+
+      - name: Install package from git revision
+        working-directory: consumer_project
+        env:
+          DBT_PROFILES_DIR: ${{ github.workspace }}/consumer_project
+        run: dbt deps
+
+      - name: Check dbt parsing
+        working-directory: consumer_project
+        env:
+          DBT_PROFILES_DIR: ${{ github.workspace }}/consumer_project
+        run: dbt parse
+
+      - name: Generate documentation
+        working-directory: consumer_project
+        env:
+          DBT_PROFILES_DIR: ${{ github.workspace }}/consumer_project
+        run: dbt docs generate
+
   integration-tests:
     name: integration-tests (${{ matrix.adapter }})
 
@@ -241,6 +340,26 @@ jobs:
     with:
       adapter: ${{ matrix.adapter }}
 
+  dbt-core-version-matrix:
+    name: dbt-core-version-matrix (${{ matrix.label }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: minimum-supported
+            dbt_core_version: "1.5.0"
+            dbt_duckdb_version: "1.5.2"
+          - label: latest-stable
+            dbt_core_version: "1.11.7"
+            dbt_duckdb_version: "1.10.1"
+
+    uses: ./.github/workflows/dbt-version-matrix.yml
+
+    with:
+      dbt_core_version: ${{ matrix.dbt_core_version }}
+      dbt_duckdb_version: ${{ matrix.dbt_duckdb_version }}
+
   check-bigquery-configuration:
     name: check-bigquery-configuration
     runs-on: ubuntu-latest
@@ -249,20 +368,16 @@ jobs:
       enabled: ${{ steps.configuration.outputs.enabled }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check BigQuery configuration
         id: configuration
-        shell: bash
-        env:
-          BIGQUERY_PROJECT: ${{ vars.BIGQUERY_PROJECT }}
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-        run: |
-          if [[ -n "$BIGQUERY_PROJECT" && -n "$GCP_SA_KEY" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "BigQuery integration tests are enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "BigQuery integration tests are skipped because credentials are not configured."
-          fi
+        uses: ./.github/actions/check-credentials
+        with:
+          var-value: ${{ vars.BIGQUERY_PROJECT }}
+          secret-value: ${{ secrets.GCP_SA_KEY }}
+          adapter-name: BigQuery
 
   bigquery-integration-tests:
     name: integration-tests (bigquery)
@@ -287,20 +402,16 @@ jobs:
       enabled: ${{ steps.configuration.outputs.enabled }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check Snowflake configuration
         id: configuration
-        shell: bash
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ vars.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-        run: |
-          if [[ -n "$SNOWFLAKE_ACCOUNT" && -n "$SNOWFLAKE_PASSWORD" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "Snowflake integration tests are enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Snowflake integration tests are skipped because credentials are not configured."
-          fi
+        uses: ./.github/actions/check-credentials
+        with:
+          var-value: ${{ vars.SNOWFLAKE_ACCOUNT }}
+          secret-value: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          adapter-name: Snowflake
 
   snowflake-integration-tests:
     name: integration-tests (snowflake)
@@ -325,20 +436,16 @@ jobs:
       enabled: ${{ steps.configuration.outputs.enabled }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check Databricks configuration
         id: configuration
-        shell: bash
-        env:
-          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-        run: |
-          if [[ -n "$DATABRICKS_HOST" && -n "$DATABRICKS_TOKEN" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "Databricks integration tests are enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Databricks integration tests are skipped because credentials are not configured."
-          fi
+        uses: ./.github/actions/check-credentials
+        with:
+          var-value: ${{ vars.DATABRICKS_HOST }}
+          secret-value: ${{ secrets.DATABRICKS_TOKEN }}
+          adapter-name: Databricks
 
   databricks-integration-tests:
     name: integration-tests (databricks)
@@ -363,20 +470,16 @@ jobs:
       enabled: ${{ steps.configuration.outputs.enabled }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check Spark configuration
         id: configuration
-        shell: bash
-        env:
-          SPARK_HOST: ${{ vars.SPARK_HOST }}
-          SPARK_PASSWORD: ${{ secrets.SPARK_PASSWORD }}
-        run: |
-          if [[ -n "$SPARK_HOST" && -n "$SPARK_PASSWORD" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "Spark integration tests are enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Spark integration tests are skipped because credentials are not configured."
-          fi
+        uses: ./.github/actions/check-credentials
+        with:
+          var-value: ${{ vars.SPARK_HOST }}
+          secret-value: ${{ secrets.SPARK_PASSWORD }}
+          adapter-name: Spark
 
   spark-integration-tests:
     name: integration-tests (spark)
@@ -401,20 +504,16 @@ jobs:
       enabled: ${{ steps.configuration.outputs.enabled }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Check Redshift configuration
         id: configuration
-        shell: bash
-        env:
-          REDSHIFT_HOST: ${{ vars.REDSHIFT_HOST }}
-          REDSHIFT_PASSWORD: ${{ secrets.REDSHIFT_PASSWORD }}
-        run: |
-          if [[ -n "$REDSHIFT_HOST" && -n "$REDSHIFT_PASSWORD" ]]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-            echo "Redshift integration tests are enabled."
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Redshift integration tests are skipped because credentials are not configured."
-          fi
+        uses: ./.github/actions/check-credentials
+        with:
+          var-value: ${{ vars.REDSHIFT_HOST }}
+          secret-value: ${{ secrets.REDSHIFT_PASSWORD }}
+          adapter-name: Redshift
 
   redshift-integration-tests:
     name: integration-tests (redshift)

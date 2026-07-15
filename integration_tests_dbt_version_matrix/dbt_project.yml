@@ -1,0 +1,15 @@
+name: version_matrix_smoke
+version: "1.0.0"
+config-version: 2
+
+profile: version_matrix_smoke
+
+model-paths: ["models"]
+analysis-paths: []
+test-paths: []
+seed-paths: []
+snapshot-paths: []
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
