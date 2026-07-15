@@ -111,3 +111,27 @@ models:
                 max_ratio: 0.8
               config:
                 tags: ["should_fail"]
+
+  - name: distinct_ratio_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: value
+                min_ratio: 0.6
+                max_ratio: 1.0
+              config:
+                tags: ["should_pass"]
+
+  - name: distinct_ratio_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: value
+                min_ratio: 0.6
+                max_ratio: 1.0
+              config:
+                tags: ["should_fail"]

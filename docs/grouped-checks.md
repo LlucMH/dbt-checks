@@ -100,6 +100,7 @@ Supported checks include:
 - `positive_ratio_between`
 - `negative_ratio_between`
 - `value_ratio_between`
+- `distinct_ratio_between`
 
 ## Example
 

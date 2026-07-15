@@ -282,6 +282,15 @@ models:
               config:
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
+                min_ratio: 0.60
+                max_ratio: 0.70
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
       - name: amount
         data_tests:
           - dbt_checks.positive_ratio_between:
@@ -322,6 +331,16 @@ models:
                 where: "is_active = true"
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
+                min_ratio: 0.60
+                max_ratio: 0.70
+                group_by: country
+              config:
+                where: "is_active = true"
+                tags: ["should_pass"]
+
       - name: amount
         data_tests:
           - dbt_checks.positive_ratio_between:
@@ -342,6 +361,15 @@ models:
                 value: "completed"
                 min_ratio: 0.50
                 max_ratio: 0.50
+                group_by: country
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
+                min_ratio: 1.0
+                max_ratio: 1.0
                 group_by: country
               config:
                 tags: ["should_pass"]
@@ -388,6 +416,15 @@ models:
                 value: "completed"
                 min_ratio: 0.40
                 max_ratio: 0.60
+                group_by: country
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
+                min_ratio: 0.5
+                max_ratio: 0.5
                 group_by: country
               config:
                 tags: ["should_fail"]
