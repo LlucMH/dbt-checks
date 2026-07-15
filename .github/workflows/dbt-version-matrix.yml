@@ -48,7 +48,7 @@ jobs:
 
       - name: Run passing check
         working-directory: integration_tests_dbt_version_matrix
-        run: dbt test --select tag:should_pass --warn-error
+        run: dbt --warn-error test --select tag:should_pass
 
       - name: Assert failing check fails
         working-directory: integration_tests_dbt_version_matrix

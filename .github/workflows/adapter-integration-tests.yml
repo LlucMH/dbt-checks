@@ -205,7 +205,7 @@ jobs:
 
       - name: Run passing tests
         working-directory: integration_tests
-        run: dbt test --select tag:should_pass --warn-error
+        run: dbt --warn-error test --select tag:should_pass
 
       - name: Assert passing tests passed
         working-directory: integration_tests
