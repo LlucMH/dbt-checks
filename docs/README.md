@@ -15,6 +15,7 @@
 
 - [Architecture](architecture.md)
 - [CI](ci.md)
+- [Known Limitations](known-limitations.md)
 
 ## Examples
 

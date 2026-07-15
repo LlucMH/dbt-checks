@@ -35,15 +35,22 @@ The main workflow runs on:
 - pull requests
 - pushes to `main`
 
-It is split into three jobs:
+It is split into the following jobs:
 
 - `repo-governance` — adapter-independent checks (documentation, macro
   structure, community health files). Runs once.
+- `clean-installation-validation` — installs the package via `git:` into a
+  temporary consumer project, the same way real consumers do (see "Clean
+  Installation Validation" below).
 - `integration-tests` — a matrix over supported adapters, each leg calling
   the `adapter-integration-tests.yml` reusable workflow.
 - `performance-smoke-tests` — a DuckDB/Postgres-only matrix calling the
   `performance-smoke-tests.yml` reusable workflow (see "Performance Smoke
   Tests" below).
+- `dbt-core-version-matrix` — a DuckDB-only matrix over the minimum
+  supported and latest stable dbt Core versions, calling the
+  `dbt-version-matrix.yml` reusable workflow (see "dbt Core Version Matrix"
+  below).
 
 The workflow validates the package using the integration test project under:
 
@@ -73,7 +80,9 @@ input. The reusable workflow:
 
 - installs `dbt-core` plus the adapter-specific package (`dbt-duckdb`,
   `dbt-postgres`, `dbt-bigquery`, `dbt-snowflake`, `dbt-databricks`,
-  `dbt-spark[PyHive]`, or `dbt-redshift`)
+  `dbt-spark[PyHive]`, or `dbt-redshift`) via a single "Install dbt" step
+  that switches on `inputs.adapter` — one centralized mapping instead of a
+  separate step per adapter
 - selects the matching dbt target via the `DBT_TARGET` env var, resolved
   against `integration_tests/profiles.yml` and
   `integration_tests_invalid_configs/profiles.yml` (which define a `dev`
@@ -84,19 +93,32 @@ input. The reusable workflow:
   job to connect to
 - runs the full integration + invalid-config suite identically against
   whichever adapter it was called with
-- prints stored failure rows to the job summary using an adapter-specific
-  script (direct DuckDB file query, `psycopg2` against
-  `information_schema` for Postgres and Redshift (Redshift is
-  Postgres-wire-compatible), the `google-cloud-bigquery` client against
-  `INFORMATION_SCHEMA.TABLES` for BigQuery, `snowflake-connector-python`
-  against `information_schema.tables` for Snowflake,
-  `databricks-sql-connector` against `information_schema.tables` for
-  Databricks, or `PyHive` against a Thrift server's `SHOW TABLES` for
-  Spark)
+- prints stored failure rows to the job summary via
+  [`.github/scripts/print_stored_failures.py`](../.github/scripts/print_stored_failures.py),
+  a single script (not a per-adapter inline heredoc) that dispatches on
+  `--adapter` to the matching connection logic: a direct DuckDB file query,
+  `psycopg2` against `information_schema` for Postgres and Redshift
+  (Redshift is Postgres-wire-compatible, so both share one helper), the
+  `google-cloud-bigquery` client against `INFORMATION_SCHEMA.TABLES` for
+  BigQuery, `snowflake-connector-python` against `information_schema.tables`
+  for Snowflake, `databricks-sql-connector` against
+  `information_schema.tables` for Databricks, or `PyHive` against a Thrift
+  server's `SHOW TABLES` for Spark. Each adapter's driver import stays local
+  to its own function, since a given CI leg only has that one driver
+  installed.
 
 This keeps the adapter-dependent steps in one place, so adding another
-adapter to the matrix means adding a matrix entry plus install/target
-wiring, not duplicating the whole pipeline.
+adapter to the matrix means adding a matrix entry, an install mapping entry,
+and a `list_*` function in `print_stored_failures.py` — not duplicating the
+whole pipeline.
+
+The five cloud adapter legs (BigQuery, Snowflake, Databricks, Spark,
+Redshift) are each gated behind a `check-*-configuration` job in
+`.github/workflows/ci.yml` that checks whether the adapter's repository
+variable and secret are both set. All five call the same shared composite
+action, [`.github/actions/check-credentials`](../.github/actions/check-credentials/action.yml),
+with the adapter's variable/secret names as inputs — the gating logic itself
+is defined once, not five times.
 
 ## BigQuery CI
 
@@ -476,6 +498,76 @@ These artifacts help inspect failures after CI runs.
 
 ---
 
+# dbt Core Version Matrix
+
+`dbt-core-version-matrix` runs as a matrix (`.github/workflows/ci.yml`) over:
+
+```text
+minimum-supported  (dbt-core 1.5.0, matching require-dbt-version in dbt_project.yml)
+latest-stable       (dbt-core 1.11.7, the version used by every adapter leg above)
+```
+
+calling the reusable workflow `.github/workflows/dbt-version-matrix.yml`,
+unconditionally, against DuckDB only — DuckDB is free and local, so this
+adds no credential dependency, and the point of this matrix is to validate
+compatibility with dbt Core itself, not with a specific warehouse (that's
+what the Adapter Matrix above is for).
+
+By design, this does **not** test every intermediate dbt Core release
+between 1.5.0 and 1.11.7 — only the two ends of the supported range, unless
+a specific regression gives reason to pin an intermediate version.
+
+## Why a separate fixture project
+
+This matrix runs against
+[`integration_tests_dbt_version_matrix/`](../integration_tests_dbt_version_matrix/),
+not the main `integration_tests/` project. The main project's schema.yml
+files use the `data_tests:` key, introduced in dbt Core 1.8 — a
+project-author schema.yml syntax choice unrelated to whether dbt-checks'
+own macros run correctly under a given dbt Core version. Using it here would
+make the minimum-supported leg fail on a dbt Core parser limitation that has
+nothing to do with the package. `integration_tests_dbt_version_matrix/`
+instead uses the older `tests:` key, which has been valid dbt Core syntax
+since long before 1.5.0 and remains valid (deprecated) through 1.11.x, so
+the same fixture parses under both ends of the matrix.
+
+The fixture is intentionally minimal: one model, two column-level
+`non_negative` checks (one tagged `should_pass`, one tagged `should_fail`),
+enough to exercise package install, macro dispatch, a validation guard, real
+query execution, and both pass/fail detection — not a re-run of the full
+integration suite.
+
+---
+
+# Clean Installation Validation
+
+`clean-installation-validation` (`.github/workflows/ci.yml`) validates the
+installation path real consumers use — installing via `git:` in
+`packages.yml` — rather than the `local: ..` path every other CI job uses.
+
+From a temporary consumer project scaffolded during the job (not checked
+into the repo), it runs:
+
+```text
+dbt deps    (installs dbt-checks from git, pinned to the commit under test)
+dbt parse
+dbt docs generate
+```
+
+The `packages.yml` revision is the PR head commit
+(`github.event.pull_request.head.sha`) on `pull_request` events, falling
+back to `github.sha` on pushes to `main` — `github.sha` alone would resolve
+to GitHub's synthetic PR merge commit on `pull_request` events, which is not
+reliably fetchable by a plain `git clone` of the canonical repository.
+
+**Known limitation:** this clones `https://github.com/LlucMH/dbt-checks.git`
+directly, so it only validates commits already reachable on that
+repository's branches. A pull request opened from a fork would need to be
+merged (or its branch pushed to the canonical repository) before this job
+can resolve its commit.
+
+---
+
 # Future CI Improvements
 
 Planned future improvements include:
@@ -490,10 +582,10 @@ Planned future improvements include:
   (currently wired but gated — see "Spark CI" above)
 - Redshift CI leg fully exercised once Redshift credentials are configured
   (currently wired but gated — see "Redshift CI" above)
-- dbt version matrix
-- package installation validation
 - release workflow validation
-- compatibility matrix generation
+
+See [Known Limitations](known-limitations.md) for limitations that are
+explicit trade-offs rather than open work.
 
 ---
 
@@ -505,4 +597,5 @@ Planned future improvements include:
 * [Conditional Checks](conditional-checks.md)
 * [Rule Composition](rule-composition.md)
 * [Architecture](architecture.md)
+* [Known Limitations](known-limitations.md)
 * [Examples](examples.md)

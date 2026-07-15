@@ -1,0 +1,7 @@
+version_matrix_smoke:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "test.duckdb"
+      threads: 2
