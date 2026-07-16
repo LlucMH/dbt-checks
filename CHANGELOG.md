@@ -6,7 +6,7 @@ The format follows semantic versioning.
 
 ---
 
-## [0.8.0] - 2026-07-15
+## [0.8.0] - 2026-07-16
 
 ### Added
 
@@ -22,16 +22,23 @@ checks in `macros/tests/ratio/`: standardized `actual_ratio` /
 division-by-zero-safe handling of empty/all-NULL inputs via the existing
 `safe_ratio` helper.
 
-NULL-aware semantics are the opposite asymmetry from the rest of the ratio
-checks: every other check in `macros/tests/ratio/` divides by `count(*)`, so
-NULL rows count in the denominator but not the numerator. `distinct_ratio_between`
-divides by `count(column_name)` instead, excluding NULLs from both the
-numerator and the denominator. This is deliberate — pairing
-`count(distinct column_name)` with `count(*)` would let a column with many
-NULLs report a misleadingly low ratio even when every non-NULL value is
-unique, which is the opposite of what duplicate-detection and key-quality
-use cases need. A column with no non-NULL values (including an empty table)
-correctly reports a ratio of 0 rather than raising an error.
+NULL handling intentionally differs from the rest of the ratio checks.
+
+Unlike the existing ratio checks, which all use `count(*)` as their
+denominator, `distinct_ratio_between` uses `count(column_name)`, excluding
+NULL values from both the numerator and the denominator. Whether NULL values
+contribute to the numerator of the existing ratio checks depends on the
+metric itself (for example, `null_ratio_*` intentionally counts NULL values,
+while other ratio checks do not).
+
+This behavior is deliberate. Pairing `count(distinct column_name)` with
+`count(*)` would allow a column containing many NULL values to report an
+artificially low distinct ratio even when every non-NULL value is unique,
+which is the opposite of what duplicate-detection and key-quality use cases
+need.
+
+A column containing no non-NULL values (including an empty table) safely
+reports a ratio of `0` rather than raising a division-by-zero error.
 
 Added a matching helper, `calculate_distinct_ratio_cte`, in
 `macros/helpers/ratio.sql`, alongside the existing `calculate_ratio_cte`.

@@ -99,7 +99,7 @@ Common use cases:
 
 # Ratio Checks
 
-Validate proportions of rows matching a condition.
+Validate proportions, completeness metrics, distributions and relative cardinality.
 
 Available checks:
 
