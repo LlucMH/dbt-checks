@@ -55,3 +55,13 @@ macros:
       - name: max_ratio
       - name: group_by
       - name: where
+
+  - name: test_distinct_ratio_between
+    description: "{{ doc('test_distinct_ratio_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_ratio
+      - name: max_ratio
+      - name: group_by
+      - name: where

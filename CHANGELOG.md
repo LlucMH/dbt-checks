@@ -6,6 +6,83 @@ The format follows semantic versioning.
 
 ---
 
+## [0.8.0] - 2026-07-16
+
+### Added
+
+#### `distinct_ratio_between`
+
+Added a new ratio check, `dbt_checks.distinct_ratio_between`, which validates
+that the ratio of distinct values in a column
+(`count(distinct column_name) / count(column_name)`) falls within a
+`min_ratio` / `max_ratio` range. It follows the same shape as the other
+checks in `macros/tests/ratio/`: standardized `actual_ratio` /
+`expected_min_ratio` / `expected_max_ratio` failure output, `group_by`
+(including multi-column grouping), a `where` argument, and
+division-by-zero-safe handling of empty/all-NULL inputs via the existing
+`safe_ratio` helper.
+
+NULL handling intentionally differs from the rest of the ratio checks.
+
+Unlike the existing ratio checks, which all use `count(*)` as their
+denominator, `distinct_ratio_between` uses `count(column_name)`, excluding
+NULL values from both the numerator and the denominator. Whether NULL values
+contribute to the numerator of the existing ratio checks depends on the
+metric itself (for example, `null_ratio_*` intentionally counts NULL values,
+while other ratio checks do not).
+
+This behavior is deliberate. Pairing `count(distinct column_name)` with
+`count(*)` would allow a column containing many NULL values to report an
+artificially low distinct ratio even when every non-NULL value is unique,
+which is the opposite of what duplicate-detection and key-quality use cases
+need.
+
+A column containing no non-NULL values (including an empty table) safely
+reports a ratio of `0` rather than raising a division-by-zero error.
+
+Added a matching helper, `calculate_distinct_ratio_cte`, in
+`macros/helpers/ratio.sql`, alongside the existing `calculate_ratio_cte`.
+Reuses `validate_required_column`, `validate_ratio_bounds`, and
+`validate_group_by` for compile-time argument validation, and required no
+adapter-specific dispatch overrides since `count(distinct ...)` is standard
+SQL across all seven target adapters.
+
+Use cases: duplicate detection, key quality monitoring, ingestion
+monitoring, and event integrity — complementing absolute distinct-count
+validation (an `aggregation`-style check) with a relative-cardinality
+measure that stays meaningful as table size changes, and that can surface
+duplication trends when compared over time or across `group_by` segments.
+
+#### Documentation
+
+Documented the new check in `macros/docs/ratio_docs.md` and
+`macros/tests/ratio/_schema.yml`, and added it to the ratio check listings
+in `docs/checks.md`, `docs/overview.md`, and the "Grouped Ratio Checks"
+section of `docs/grouped-checks.md`. Removed "distinctness metrics" from
+`docs/architecture.md`'s "Future Architecture Areas" now that it is
+delivered; "uniqueness metrics" (row-level uniqueness enforcement) and
+"duplicate observability" tooling remain future work.
+
+#### Integration tests
+
+Added integration coverage under `integration_tests/`: a standard
+valid/invalid pair, single- and multi-column grouped checks, NULL-column
+handling (including an all-NULL column), an empty-table case, and a
+`where`-scoped case. Added compile-time validation guard fixtures
+(`min_ratio > max_ratio`, an out-of-range ratio, and an empty
+`column_name`) to `integration_tests_invalid_configs/`.
+
+### Changed
+
+- Bumped package version to `0.8.0` per `VERSIONING.md` (adding a new check
+  is a MINOR change).
+
+### Breaking Changes
+
+- None.
+
+---
+
 ## [0.7.7] - 2026-07-15
 
 This is the closing release of the 0.7.x compatibility/audit series. It does

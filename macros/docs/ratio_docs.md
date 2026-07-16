@@ -348,3 +348,102 @@ tests:
 ```
 
 {% enddocs %}
+
+
+{% docs test_distinct_ratio_between %}
+Ensures that the ratio of distinct values in a column falls within a specified range.
+
+### Description
+
+Calculates the proportion of distinct values relative to the number of
+non-NULL values in the column:
+
+```
+count(distinct column_name)
+/
+count(column_name)
+```
+
+and verifies that it lies between `min_ratio` and `max_ratio`.
+
+NULL values are excluded from both the numerator and the denominator — unlike
+the other ratio checks in this package, which count NULL rows in the
+denominator. This asymmetry is intentional: `count(distinct column_name)`
+never counts NULL as a distinct value in any target adapter, and pairing it
+with `count(*)` would let a column with many NULLs report a misleadingly low
+ratio even when every non-NULL value is unique. Dividing by `count(column_name)`
+instead measures cardinality purely among the values that are actually
+present, which is what "duplicate detection" and "key quality" use cases
+need.
+
+If the column has no non-NULL values (including an empty table), the ratio
+defaults to 0.
+
+Useful for validating:
+
+- duplicate detection
+- key quality
+- ingestion monitoring
+- event integrity
+
+Complements aggregation-level distinct-count validation by monitoring relative
+cardinality instead of an absolute count, which makes it stable across
+datasets of varying size.
+
+Supports grouped validation through `group_by`.
+
+### Arguments
+
+- **column_name** *(string)*  
+Column to evaluate.
+
+- **min_ratio** *(float)*  
+Minimum allowed ratio (inclusive).
+
+- **max_ratio** *(float)*  
+Maximum allowed ratio (inclusive).
+
+- **group_by** *(string or list[string], optional)*  
+Column or columns used for grouped validation.
+
+- **where** *(string, optional)*  
+Optional SQL expression used to filter rows before applying the check.
+
+### Failure output
+
+| actual_ratio | expected_min_ratio | expected_max_ratio |
+| --- | --- | --- |
+| 0.40 | 0.90 | 1.0 |
+
+### Grouped failure output
+
+| grouped_by_source_system | actual_ratio | expected_min_ratio |
+| --- | --- | --- |
+| crm | 0.40 | 0.90 |
+
+### Example
+
+```yaml
+tests:
+  - dbt_checks.distinct_ratio_between:
+      arguments:
+        column_name: user_id
+        min_ratio: 0.9
+        max_ratio: 1.0
+```
+
+### Grouped example
+
+```yaml
+tests:
+  - dbt_checks.distinct_ratio_between:
+      arguments:
+        column_name: event_id
+        min_ratio: 0.95
+        max_ratio: 1.0
+        group_by:
+          - source_system
+          - event_date
+```
+
+{% enddocs %}

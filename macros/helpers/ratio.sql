@@ -26,3 +26,33 @@ ratio as (
 )
 
 {% endmacro %}
+
+
+{% macro calculate_distinct_ratio_cte(model, column_name, where=None, group_by=None) %}
+
+{%- set groups = dbt_checks.normalize_group_by(group_by) -%}
+
+ratio as (
+
+    select
+
+        {%- if groups | length > 0 %}
+            {{ dbt_checks.render_group_by_select(groups) }},
+        {%- endif %}
+
+        {{ dbt_checks.safe_ratio(
+            "count(distinct " ~ column_name ~ ")",
+            "count(" ~ column_name ~ ")"
+        ) }} as metric_ratio
+
+    from {{ model }}
+
+    {{ dbt_checks.apply_where(where) }}
+
+    {%- if groups | length > 0 %}
+        {{ dbt_checks.render_group_by_clause(groups) }}
+    {%- endif %}
+
+)
+
+{% endmacro %}

@@ -385,6 +385,14 @@ models:
               config:
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: value
+                min_ratio: 1.0
+                max_ratio: 1.0
+              config:
+                tags: ["should_pass"]
+
       - name: status
         data_tests:
           - dbt_checks.value_ratio_between:
@@ -392,6 +400,14 @@ models:
                 value: "active"
                 min_ratio: 0.4
                 max_ratio: 0.6
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
+                min_ratio: 0.60
+                max_ratio: 0.70
               config:
                 tags: ["should_pass"]
 
@@ -426,11 +442,27 @@ models:
               config:
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: value
+                min_ratio: 0.0
+                max_ratio: 0.0
+              config:
+                tags: ["should_pass"]
+
       - name: status
         data_tests:
           - dbt_checks.value_ratio_between:
               arguments:
                 value: "active"
+                min_ratio: 0.0
+                max_ratio: 0.0
+              config:
+                tags: ["should_pass"]
+
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: status
                 min_ratio: 0.0
                 max_ratio: 0.0
               config:

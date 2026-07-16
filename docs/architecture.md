@@ -333,12 +333,15 @@ A new check should generally fit into the existing architecture rather than intr
 
 Planned future areas include:
 
-* distinctness metrics
 * uniqueness metrics
 * duplicate observability
 * advanced grouped validation abstractions
 * expanded adapter compatibility
 * dbt Fusion compatibility
+
+`distinct_ratio_between` (added in 0.8.0) covers relative-cardinality
+monitoring; row-level uniqueness enforcement and duplicate observability
+tooling remain future work.
 
 The goal is to keep the public API simple while allowing internal architecture to evolve as the package grows.
 

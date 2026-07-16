@@ -236,6 +236,15 @@ models:
               config:
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_ratio_between:
+              arguments:
+                column_name: value
+                min_ratio: 1.0
+                max_ratio: 1.0
+                where: "status = 'active'"
+              config:
+                tags: ["should_pass"]
+
       - name: status
         data_tests:
           - dbt_checks.value_ratio_between:

@@ -99,7 +99,7 @@ Common use cases:
 
 # Ratio Checks
 
-Validate proportions of rows matching a condition.
+Validate proportions, completeness metrics, distributions and relative cardinality.
 
 Available checks:
 
@@ -108,12 +108,16 @@ Available checks:
 * `positive_ratio_between`
 * `negative_ratio_between`
 * `value_ratio_between`
+* `distinct_ratio_between`
 
 Common use cases:
 
 * completeness monitoring
 * quality thresholds
 * event distribution monitoring
+* duplicate detection
+* key quality monitoring
+* ingestion monitoring
 
 ---
 
