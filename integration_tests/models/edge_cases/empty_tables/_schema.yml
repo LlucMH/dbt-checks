@@ -156,6 +156,14 @@ models:
           config:
             tags: ["should_fail"]
 
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: value
+            min_value: 0
+            max_value: 0
+          config:
+            tags: ["should_pass"]
+
   - name: empty_ratio
     columns:
       - name: value

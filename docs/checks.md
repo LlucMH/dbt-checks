@@ -87,6 +87,7 @@ Available checks:
 * `avg_between`
 * `min_between`
 * `max_between`
+* `distinct_count_between`
 
 Common use cases:
 
@@ -94,6 +95,8 @@ Common use cases:
 * KPI validation
 * anomaly detection
 * business controls
+* duplicate detection
+* key quality monitoring
 
 ---
 
