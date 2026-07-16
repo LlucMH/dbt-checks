@@ -1,6 +1,11 @@
+{% macro distinct_count_expression(column_name) %}
+count(distinct {{ column_name }})
+{% endmacro %}
+
+
 {% macro render_aggregation_metric(aggregation, column_name=None) %}
 
-    {% set supported = ['count', 'sum', 'avg', 'min', 'max'] %}
+    {% set supported = ['count', 'count_distinct', 'sum', 'avg', 'min', 'max'] %}
 
     {% if aggregation not in supported %}
         {{ exceptions.raise_compiler_error(
@@ -10,6 +15,9 @@
 
     {% if aggregation == 'count' %}
         count(*) as metric_value
+
+    {% elif aggregation == 'count_distinct' %}
+        {{ dbt_checks.distinct_count_expression(column_name) }} as metric_value
 
     {% elif aggregation == 'sum' %}
         sum({{ dbt_checks.as_numeric(column_name) }}) as metric_value
@@ -55,7 +63,7 @@ with validation as (
 
     from {{ model }}
 
-    {% if aggregation == 'count' %}
+    {% if aggregation in ['count', 'count_distinct'] %}
         {{ dbt_checks.apply_where(where) }}
     {% else %}
         where {{ column_name }} is not null

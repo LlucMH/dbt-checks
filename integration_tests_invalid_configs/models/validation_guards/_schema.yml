@@ -21,6 +21,14 @@ models:
                 min_value: 100
                 max_value: 10
 
+          - dbt_checks.distinct_count_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                column_name: value
+                min_value: 10
+                max_value: 0
+
           - dbt_checks.length_between:
               config:
                 tags: [should_fail_compile]
@@ -92,6 +100,14 @@ models:
                 min_ratio: 0.1
                 max_ratio: 0.9
 
+          - dbt_checks.distinct_count_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                column_name: ""
+                min_value: 1
+                max_value: 10
+
   - name: invalid_boolean
     columns:
       - name: value
@@ -142,6 +158,14 @@ models:
               config:
                 tags: [should_fail_compile]
               arguments:
+                min_value: 0.5
+                max_value: 10
+
+          - dbt_checks.distinct_count_between:
+              config:
+                tags: [should_fail_compile]
+              arguments:
+                column_name: value
                 min_value: 0.5
                 max_value: 10
 

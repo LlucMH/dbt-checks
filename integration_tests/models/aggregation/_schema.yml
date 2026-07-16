@@ -139,3 +139,27 @@ models:
                 max_value: 50
               config:
                 tags: ["should_fail"]
+
+  - name: distinct_count_between_valid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.distinct_count_between:
+              arguments:
+                column_name: value
+                min_value: 3
+                max_value: 5
+              config:
+                tags: ["should_pass"]
+
+  - name: distinct_count_between_invalid
+    columns:
+      - name: value
+        data_tests:
+          - dbt_checks.distinct_count_between:
+              arguments:
+                column_name: value
+                min_value: 3
+                max_value: 5
+              config:
+                tags: ["should_fail"]

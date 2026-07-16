@@ -141,6 +141,82 @@ tests:
 {% enddocs %}
 
 
+{% docs test_distinct_count_between %}
+Ensures that the number of distinct values in a column falls within a specified range.
+
+### Description
+
+Calculates the cardinality of the column:
+
+```
+count(distinct column_name)
+```
+
+and verifies that it lies between `min_value` and `max_value` (inclusive).
+
+NULL values are excluded from the count, matching standard SQL
+`count(distinct ...)` semantics. If the column has no non-NULL values
+(including an empty table), the distinct count is `0`.
+
+Supports grouped validation through `group_by`.
+
+### Arguments
+
+- **column_name** *(string)*  
+Column to evaluate.
+
+- **min_value** *(non-negative integer)*  
+Minimum allowed distinct count.
+
+- **max_value** *(non-negative integer)*  
+Maximum allowed distinct count.
+
+- **group_by** *(string or list[string], optional)*  
+Column or columns used for grouped validation.
+
+- **where** *(string, optional)*  
+Optional SQL expression used to filter rows before applying the check.
+
+### Failure output
+
+| actual_distinct_count | expected_min_value | expected_max_value | failed_check |
+| --- | --- | --- | --- |
+| 3 | 5 | 10 | distinct_count_between |
+
+### Grouped failure output
+
+| grouped_by_country | actual_distinct_count | expected_min_value |
+| --- | --- | --- |
+| ES | 3 | 5 |
+
+### Example
+
+```yaml
+tests:
+  - dbt_checks.distinct_count_between:
+      arguments:
+        column_name: user_id
+        min_value: 100
+        max_value: 10000
+```
+
+### Grouped example
+
+```yaml
+tests:
+  - dbt_checks.distinct_count_between:
+      arguments:
+        column_name: session_id
+        min_value: 1
+        max_value: 500
+        group_by:
+          - country
+          - channel
+```
+
+{% enddocs %}
+
+
 {% docs test_sum_between %}
 Ensures that the sum of a column falls within a specified range.
 

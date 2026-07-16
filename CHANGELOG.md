@@ -6,6 +6,87 @@ The format follows semantic versioning.
 
 ---
 
+## [0.8.1] - 2026-07-16
+
+### Added
+
+#### `distinct_count_between`
+
+Added a new aggregation check, `dbt_checks.distinct_count_between`, which
+validates that the cardinality of a column (`count(distinct column_name)`)
+falls within a `min_value` / `max_value` range (inclusive). It follows the
+same shape as the other checks in `macros/tests/aggregation/`: standardized
+`actual_distinct_count` / `expected_min_value` / `expected_max_value` failure
+output, `group_by` (including multi-column grouping), a `where` argument, and
+compile-time validation of `min_value` / `max_value` as non-negative
+integers via the existing `validate_non_negative_integer` helper.
+
+NULL values are excluded from the count, matching standard SQL
+`count(distinct ...)` semantics. A column with no non-NULL values (including
+an empty table, or a group whose values are all NULL) reports a distinct
+count of `0` rather than NULL, so — unlike `sum_between`, `avg_between`,
+`min_between`, and `max_between` — this check needs no `metric_value is null`
+fallback in its failure predicate, and no `where column_name is not null`
+pre-filter in its validation CTE (pre-filtering would have dropped
+all-NULL groups from the result entirely instead of reporting `0`).
+
+Extended the shared aggregation helper architecture in
+`macros/helpers/aggregation.sql` rather than introducing a new one: added a
+`count_distinct` aggregation type to `render_aggregation_metric` and
+`build_aggregation_validation_cte`, so `distinct_count_between` is a thin
+test macro on top of the same `build_aggregation_validation_cte` used by
+`avg_between` / `max_between`.
+
+Introduced a single shared helper, `distinct_count_expression`, that renders
+the bare `count(distinct column_name)` expression. `render_aggregation_metric`
+uses it directly for `distinct_count_between`'s `metric_value`, and
+`calculate_distinct_ratio_cte` (in `macros/helpers/ratio.sql`) now calls the
+same helper for its numerator instead of duplicating the expression inline.
+This keeps `distinct_count_between` and `distinct_ratio_between` computing
+cardinality from one source of truth, and gives the rest of the 0.8.x
+distinctness/duplicate-check series (`duplicate_count_between`,
+`duplicate_ratio_between`, `unique_combination_ratio_between`) a reusable
+foundation to build on. Required no adapter-specific dispatch overrides,
+since `count(distinct ...)` is standard SQL across all seven target adapters.
+
+Use cases: duplicate detection, key quality monitoring, ingestion
+monitoring, and event integrity — complementing `distinct_ratio_between`'s
+relative-cardinality measure with an absolute distinct-count check for
+cases where the expected cardinality is a known, stable number (for example,
+a fixed set of countries or categories) rather than a proportion of table
+size.
+
+#### Documentation
+
+Documented the new check in `macros/docs/aggregation_docs.md` and
+`macros/tests/aggregation/_schema.yml`, and added it to the aggregation
+check listings in `docs/checks.md`, `docs/overview.md`, and the "Grouped
+Aggregation Checks" section of `docs/grouped-checks.md`. Updated
+`docs/architecture.md`'s "Future Architecture Areas" note to reflect that
+`distinct_count_between` now covers absolute distinct-count validation
+alongside `distinct_ratio_between`'s relative-cardinality measure; row-level
+uniqueness enforcement and duplicate observability tooling remain future
+work.
+
+#### Integration tests
+
+Added integration coverage under `integration_tests/`: a standard
+valid/invalid pair with a dedicated deterministic seed, single- and
+multi-column grouped checks (including a `where`-scoped grouped case and a
+grouped case with NULL column values), NULL-column handling (including an
+all-NULL column, reusing the existing `distinct_ratio_between` NULL
+fixtures), an empty-table case, and a `where`-scoped case. Added
+compile-time validation guard fixtures (`min_value > max_value`, a
+non-integer `min_value`, and an empty `column_name`) to
+`integration_tests_invalid_configs/`.
+
+### Changed
+
+- Bumped package version to `0.8.1` per `VERSIONING.md` (adding a new check
+  is a MINOR change).
+
+---
+
 ## [0.8.0] - 2026-07-16
 
 ### Added

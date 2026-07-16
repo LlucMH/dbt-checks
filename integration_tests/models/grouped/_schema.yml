@@ -101,6 +101,15 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: amount
+            min_value: 2
+            max_value: 2
+            group_by: category
+          config:
+            tags: ["should_pass"]
+
   - name: grouped_aggregation_where_valid
     data_tests:
       - dbt_checks.avg_between:
@@ -125,6 +134,16 @@ models:
 
       - dbt_checks.row_count_between:
           arguments:
+            min_value: 2
+            max_value: 2
+            group_by: category
+          config:
+            where: "is_active = true"
+            tags: ["should_pass"]
+
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: amount
             min_value: 2
             max_value: 2
             group_by: category
@@ -166,6 +185,15 @@ models:
             column_name: amount
             min_value: 20
             max_value: 40
+            group_by: category
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: amount
+            min_value: 2
+            max_value: 2
             group_by: category
           config:
             tags: ["should_pass"]
@@ -219,6 +247,15 @@ models:
       - dbt_checks.row_count_less_than:
           arguments:
             value: 2
+            group_by: category
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: amount
+            min_value: 3
+            max_value: 5
             group_by: category
           config:
             tags: ["should_fail"]

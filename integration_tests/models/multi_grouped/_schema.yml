@@ -59,6 +59,17 @@ models:
               config:
                 tags: ["should_pass"]
 
+          - dbt_checks.distinct_count_between:
+              arguments:
+                column_name: session_id
+                min_value: 1
+                max_value: 2
+                group_by:
+                  - country
+                  - channel
+              config:
+                tags: ["should_pass"]
+
   - name: multi_grouped_distinct_invalid
     columns:
       - name: session_id
@@ -69,6 +80,17 @@ models:
                 column_name: session_id
                 min_ratio: 1.0
                 max_ratio: 1.0
+                group_by:
+                  - country
+                  - channel
+              config:
+                tags: ["should_fail"]
+
+          - dbt_checks.distinct_count_between:
+              arguments:
+                column_name: session_id
+                min_value: 2
+                max_value: 2
                 group_by:
                   - country
                   - channel

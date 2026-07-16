@@ -70,6 +70,7 @@ Supported checks include:
 - `avg_between`
 - `min_between`
 - `max_between`
+- `distinct_count_between`
 
 ## Example
 

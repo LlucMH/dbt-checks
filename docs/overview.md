@@ -104,6 +104,7 @@ Examples:
 * sums
 * averages
 * minimum and maximum values
+* distinct counts
 
 ---
 

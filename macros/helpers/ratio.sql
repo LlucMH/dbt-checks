@@ -41,7 +41,7 @@ ratio as (
         {%- endif %}
 
         {{ dbt_checks.safe_ratio(
-            "count(distinct " ~ column_name ~ ")",
+            dbt_checks.distinct_count_expression(column_name),
             "count(" ~ column_name ~ ")"
         ) }} as metric_ratio
 

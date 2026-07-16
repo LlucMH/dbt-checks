@@ -340,8 +340,11 @@ Planned future areas include:
 * dbt Fusion compatibility
 
 `distinct_ratio_between` (added in 0.8.0) covers relative-cardinality
-monitoring; row-level uniqueness enforcement and duplicate observability
-tooling remain future work.
+monitoring, and `distinct_count_between` (added in 0.8.1) covers absolute
+distinct-count validation, reusing the same `distinct_count_expression`
+helper for the shared `count(distinct column_name)` metric; row-level
+uniqueness enforcement and duplicate observability tooling remain future
+work.
 
 The goal is to keep the public API simple while allowing internal architecture to evolve as the package grows.
 

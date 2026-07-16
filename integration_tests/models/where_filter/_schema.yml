@@ -201,6 +201,15 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.distinct_count_between:
+          arguments:
+            column_name: value
+            min_value: 2
+            max_value: 2
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
   - name: where_filter_ratio
     columns:
       - name: value

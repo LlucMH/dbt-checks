@@ -46,6 +46,16 @@ macros:
       - name: group_by
       - name: where
 
+  - name: test_distinct_count_between
+    description: "{{ doc('test_distinct_count_between') }}"
+    arguments:
+      - name: model
+      - name: column_name
+      - name: min_value
+      - name: max_value
+      - name: group_by
+      - name: where
+
   - name: test_row_count_between
     description: "{{ doc('test_row_count_between') }}"
     arguments:
