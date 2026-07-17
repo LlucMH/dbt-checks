@@ -208,3 +208,14 @@ models:
                 max_ratio: 0.0
               config:
                 tags: ["should_pass"]
+
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]

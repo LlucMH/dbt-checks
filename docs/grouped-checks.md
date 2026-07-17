@@ -102,6 +102,7 @@ Supported checks include:
 - `negative_ratio_between`
 - `value_ratio_between`
 - `distinct_ratio_between`
+- `unique_combination_ratio_between`
 
 ## Example
 

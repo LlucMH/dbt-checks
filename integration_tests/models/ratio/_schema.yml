@@ -135,3 +135,73 @@ models:
                 max_ratio: 1.0
               config:
                 tags: ["should_fail"]
+
+  - name: unique_combination_ratio_between_valid
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.5
+            max_ratio: 0.7
+          config:
+            tags: ["should_pass"]
+
+  - name: unique_combination_ratio_between_invalid
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.9
+            max_ratio: 1.0
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]
+
+  - name: unique_combination_ratio_between_fully_unique
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 1.0
+            max_ratio: 1.0
+          config:
+            tags: ["should_pass"]
+
+  - name: unique_combination_ratio_between_nulls
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.5
+            max_ratio: 0.5
+          config:
+            tags: ["should_pass"]
+
+  - name: unique_combination_ratio_between_all_null
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]

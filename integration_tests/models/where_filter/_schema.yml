@@ -264,3 +264,15 @@ models:
                 where: "category = 'A'"
               config:
                 tags: ["should_pass"]
+
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - value
+              - category
+            min_ratio: 1.0
+            max_ratio: 1.0
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]

@@ -27,11 +27,17 @@
 {% endmacro %}
 
 
+{% macro render_group_by_list(group_by) %}
+    {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
+    {{ return(groups | join(', ')) }}
+{% endmacro %}
+
+
 {% macro render_group_by_clause(group_by) %}
     {%- set groups = dbt_checks.normalize_group_by(group_by) -%}
 
     {%- if groups | length > 0 -%}
-        {{ return("group by " ~ (groups | join(", "))) }}
+        {{ return("group by " ~ dbt_checks.render_group_by_list(groups)) }}
     {%- endif -%}
 {% endmacro %}
 

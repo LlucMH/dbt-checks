@@ -253,3 +253,19 @@
     {% endfor %}
 
 {% endmacro %}
+
+
+{% macro validate_no_duplicate_columns(columns, arg_name='columns') %}
+
+    {% set seen = [] %}
+
+    {% for column in columns %}
+        {% if column in seen %}
+            {{ exceptions.raise_compiler_error(
+                "Invalid argument: " ~ arg_name ~ " contains duplicate column: " ~ column
+            ) }}
+        {% endif %}
+        {% do seen.append(column) %}
+    {% endfor %}
+
+{% endmacro %}

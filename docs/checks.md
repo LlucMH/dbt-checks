@@ -112,6 +112,7 @@ Available checks:
 * `negative_ratio_between`
 * `value_ratio_between`
 * `distinct_ratio_between`
+* `unique_combination_ratio_between`
 
 Common use cases:
 
@@ -121,6 +122,7 @@ Common use cases:
 * duplicate detection
 * key quality monitoring
 * ingestion monitoring
+* composite business key validation
 
 ---
 

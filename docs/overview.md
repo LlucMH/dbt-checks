@@ -118,6 +118,7 @@ Examples:
 * positive value ratios
 * business-event ratios
 * distinct-value ratios
+* composite-key uniqueness ratios
 
 ---
 
