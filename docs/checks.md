@@ -89,6 +89,8 @@ Available checks:
 * `max_between`
 * `distinct_count_between`
 * `duplicate_count_between`
+* `duplicate_group_count_between`
+* `max_duplicate_group_size_between`
 
 Common use cases:
 

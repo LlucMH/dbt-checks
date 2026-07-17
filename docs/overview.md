@@ -106,6 +106,8 @@ Examples:
 * minimum and maximum values
 * distinct counts
 * duplicate row counts
+* duplicate group counts
+* duplicate group concentration (severity)
 
 ---
 

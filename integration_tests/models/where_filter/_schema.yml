@@ -288,6 +288,28 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - value
+              - category
+            min_count: 0
+            max_count: 0
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - value
+              - category
+            min_count: 0
+            max_count: 0
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
       - dbt_checks.duplicate_ratio_between:
           arguments:
             columns:

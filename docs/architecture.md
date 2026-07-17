@@ -355,9 +355,65 @@ directly in its `validation` CTE, so `duplicate_count_between` reads it as a
 plain aggregation metric and `duplicate_ratio_between` layers a thin
 `calculate_duplicate_ratio_cte` ratio wrapper on top (mirroring
 `calculate_unique_combination_ratio_cte`) — no second window-function
-implementation was introduced. Duplicate-impact metrics beyond the row-count
-and row-ratio measures added in 0.8.3 (for example, an excess-copy count, or
-a duplicate-group count) remain future work.
+implementation was introduced.
+
+## Duplicate frequency pipeline
+
+`duplicate_group_count_between` and `max_duplicate_group_size_between`
+(added in 0.8.4) extend `build_composite_key_validation_cte` with a second
+semantic layer built on top of the same single window-function pass, rather
+than recalculating key occurrences:
+
+```text
+key frequencies
+    ↓
+row-impact metrics
+    ↓
+group-severity metrics
+```
+
+These are related but distinct layers. The `keyed` CTE (unchanged in
+purpose since 0.8.2) computes `key_occurrences` once, via
+`count(*) over (partition by group_by expressions, composite-key
+expressions)`, over every evaluated row. From there:
+
+* **Row-impact metrics** (`validation` CTE) aggregate `keyed` directly:
+  `evaluated_row_count`, `unique_row_count`, `duplicate_row_count`. These
+  answer "how many rows are affected?" and are unchanged since 0.8.3.
+* **Key frequencies** (`key_frequency` CTE) reduce `keyed` to one row per
+  distinct evaluated key via `select distinct`, reusing the same
+  `key_occurrences` values computed above instead of a second `group by
+  count(*)` pass.
+* **Group-severity metrics** (`key_frequency_summary` CTE) aggregate the
+  reduced key-frequency relation: `duplicate_group_count` (count of distinct
+  keys where `key_occurrences > 1`) and `max_duplicate_group_size` (the
+  largest `key_occurrences` among those keys, or `0` if none exist). These
+  answer "how many distinct keys repeat, and how badly?" — a question
+  `duplicate_row_count` cannot answer on its own, since it cannot
+  distinguish widespread low-volume duplication from a single severely
+  concentrated key.
+
+A final `severity` CTE joins `validation` and `key_frequency_summary` (by
+`group_by` expressions when present, or via a single-row cross join when
+ungrouped) so both new checks read a single relation exposing all five
+metrics. `duplicate_count_between`, `duplicate_ratio_between`, and
+`unique_combination_ratio_between` continue to read only from `validation`
+and are unaffected by the additional CTEs. This keeps the internal metric
+contract exposed by the helper layer at:
+
+* `evaluated_row_count`
+* `unique_row_count`
+* `duplicate_row_count`
+* `duplicate_group_count`
+* `max_duplicate_group_size`
+
+No second window-function implementation was introduced, and no
+adapter-specific dispatch was required — `select distinct`, the aggregate
+`case when` expressions, and the `group_by`-aware join are standard SQL
+across all seven target adapters. The `key_frequency` / `key_frequency_summary`
+layer is a general-purpose foundation for future frequency-distribution
+metrics (for example, percentile or histogram-style duplicate measures)
+without requiring another independent occurrence-counting pass.
 
 The goal is to keep the public API simple while allowing internal architecture to evolve as the package grows.
 

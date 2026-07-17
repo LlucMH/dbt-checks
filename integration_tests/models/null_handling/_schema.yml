@@ -448,6 +448,26 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
       - dbt_checks.duplicate_ratio_between:
           arguments:
             columns:
@@ -543,6 +563,26 @@ models:
             tags: ["should_pass"]
 
       - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_duplicate_group_size_between:
           arguments:
             columns:
               - value
