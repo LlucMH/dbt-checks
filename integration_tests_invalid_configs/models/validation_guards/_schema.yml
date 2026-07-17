@@ -46,6 +46,22 @@ models:
             min_count: 10
             max_count: 0
 
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 10
+            max_count: 0
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 10
+            max_count: 0
+
   - name: invalid_ratio
     columns:
       - name: value
@@ -219,6 +235,56 @@ models:
             max_count: 10
             group_by: ""
 
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: []
+            min_count: 1
+            max_count: 10
+
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value, value]
+            min_count: 1
+            max_count: 10
+
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 1
+            max_count: 10
+            group_by: ""
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: []
+            min_count: 1
+            max_count: 10
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value, value]
+            min_count: 1
+            max_count: 10
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 1
+            max_count: 10
+            group_by: ""
+
   - name: invalid_boolean
     columns:
       - name: value
@@ -288,6 +354,38 @@ models:
           arguments:
             columns: [value]
             min_count: 0.5
+            max_count: 10
+
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 0.5
+            max_count: 10
+
+      - dbt_checks.duplicate_group_count_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: -1
+            max_count: 10
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: 0.5
+            max_count: 10
+
+      - dbt_checks.max_duplicate_group_size_between:
+          config:
+            tags: [should_fail_compile]
+          arguments:
+            columns: [value]
+            min_count: -1
             max_count: 10
 
   - name: invalid_date_range

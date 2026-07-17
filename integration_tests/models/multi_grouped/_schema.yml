@@ -125,6 +125,32 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_count: 1
+            max_count: 1
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_count: 2
+            max_count: 2
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_pass"]
+
       - dbt_checks.duplicate_ratio_between:
           arguments:
             columns:
@@ -160,6 +186,32 @@ models:
               - line_no
             min_count: 3
             max_count: 4
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_count: 2
+            max_count: 5
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_count: 3
+            max_count: 10
             group_by:
               - country
               - channel

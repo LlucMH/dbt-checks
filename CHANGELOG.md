@@ -6,6 +6,164 @@ The format follows semantic versioning.
 
 ---
 
+## [0.8.4] - 2026-07-17
+
+### Added
+
+#### `duplicate_group_count_between` and `max_duplicate_group_size_between`
+
+Added two new checks, `dbt_checks.duplicate_group_count_between` and
+`dbt_checks.max_duplicate_group_size_between` (both in
+`macros/tests/aggregation/`), which extend the composite-key duplicate
+architecture introduced in 0.8.2/0.8.3 from row-impact metrics to
+duplicate-group severity metrics. Both accept the same `columns` argument
+as `duplicate_count_between` — a non-empty, non-duplicated list of column
+names or SQL expressions defining a composite key — plus `min_count` /
+`max_count`, and the standard `group_by` / `where` arguments.
+
+A **duplicate group** is a distinct evaluated key whose occurrence count is
+greater than 1. The metric definitions are:
+
+```
+duplicate_group_count =
+    count of distinct evaluated keys where key_occurrences > 1
+
+max_duplicate_group_size =
+    maximum key_occurrences among evaluated keys where key_occurrences > 1,
+    or 0 if no duplicate group exists
+```
+
+For
+
+```
+A
+A
+A
+B
+B
+C
+```
+
+the key frequencies are `A = 3`, `B = 2`, `C = 1`, giving
+`evaluated_row_count = 6`, `unique_row_count = 1`, `duplicate_row_count = 5`,
+`duplicate_group_count = 2`, and `max_duplicate_group_size = 3`. This is
+deliberately different from `duplicate_row_count`, which counts rows
+belonging to a repeated key (`5` here) rather than the number of distinct
+repeated keys (`2`) or the size of the worst one (`3`). `A, A, B, B, C, C`
+and `A, A, A, A, A, A` both produce `duplicate_row_count = 6`, but the first
+produces `duplicate_group_count = 3` / `max_duplicate_group_size = 2` while
+the second produces `duplicate_group_count = 1` /
+`max_duplicate_group_size = 6` — the same row-impact number with very
+different operational severity. `max_duplicate_group_size` is `0` when no
+duplicate group exists; it is never `1` merely because unique keys are
+present, since a key occurring exactly once is not a duplicate group.
+
+NULL handling, empty-input behavior, and grouped semantics follow the
+0.8.2/0.8.3 philosophy exactly: rows where any `columns` expression is NULL
+are excluded before key frequencies are calculated; an ungrouped check over
+an empty table or an all-excluded dataset reports all five metrics
+(`evaluated_row_count`, `unique_row_count`, `duplicate_row_count`,
+`duplicate_group_count`, `max_duplicate_group_size`) as `0`; and grouped
+checks omit groups with no evaluable keys entirely instead of emitting a
+zero row. Duplicate groups are always calculated within `group_by` when
+supplied — a key repeating once in Spain and once in France is two separate
+unique keys, not one duplicated key spanning both countries, while the same
+key repeating twice inside Spain is one duplicate group of size 2 there.
+
+No second window-function implementation was added.
+`build_composite_key_validation_cte` (`macros/helpers/duplicates.sql`) now
+also selects the raw composite-key expressions inside its existing `keyed`
+CTE (previously it selected only `group_by` columns and `key_occurrences`),
+and exposes two additional CTEs built on top of that same single window-
+function pass: `key_frequency`, which reduces `keyed` to one row per
+distinct evaluated key via `select distinct` (reusing the `key_occurrences`
+values already computed, rather than recalculating occurrence counts with a
+second `group by count(*)` pass), and `key_frequency_summary`, which
+aggregates `key_frequency` into `duplicate_group_count` and
+`max_duplicate_group_size` per group. A final `severity` CTE joins
+`validation` and `key_frequency_summary` (via `group_by` expressions when
+present, or a single-row cross join when ungrouped) so both new checks read
+one relation exposing all five metrics. `duplicate_count_between`,
+`duplicate_ratio_between`, and `unique_combination_ratio_between` continue
+to read only from `validation` and are unaffected — the two new CTEs are
+additional, unreferenced by those three checks, and do not change their
+generated results. Both new checks reuse `validate_expression_list`,
+`validate_no_duplicate_columns`, `validate_non_negative_integer`,
+`validate_min_max`, and `validate_group_by` without any new validation
+logic. Required no adapter-specific dispatch overrides: `select distinct`
+and the aggregate `case when` / `join ... using (...)` patterns used here
+are standard SQL across all seven target adapters.
+
+Use cases: distinguishing widespread low-volume duplication (many small
+duplicate groups) from a single severely corrupted key (one large
+concentrated duplicate group) even when both produce the same
+`duplicate_row_count` — for example, duplicated business IDs, repeated
+order-line keys, slowly changing dimension natural keys, event
+deduplication, and merged source streams where one corrupted source
+produces a highly concentrated duplicate key.
+
+#### Documentation
+
+Documented both checks in `macros/docs/aggregation_docs.md` (including the
+`A, A, A, B, B, C` example, the `A, A, B, B, C, C` vs. `A, A, A, A, A, A`
+contrast, an explicit statement that `max_duplicate_group_size` is `0` —
+not `1` — when no duplicate group exists, NULL handling, grouped versus
+ungrouped empty/all-excluded behavior, composite key expressions, and
+practical examples for duplicated business IDs, repeated order-line keys,
+SCD natural keys, event deduplication, and merged source streams), and
+added their argument metadata to `macros/tests/aggregation/_schema.yml`.
+Added both checks to the aggregation check listings in `docs/checks.md`,
+`docs/overview.md`, and the "Grouped Aggregation Checks" section of
+`docs/grouped-checks.md`. Updated `docs/architecture.md` with a new
+"Duplicate frequency pipeline" section describing the
+`key frequencies → row-impact metrics → group-severity metrics` layering
+and the resulting internal metric contract (`evaluated_row_count`,
+`unique_row_count`, `duplicate_row_count`, `duplicate_group_count`,
+`max_duplicate_group_size`), and marking duplicate-group-count and
+max-duplicate-group-size as delivered rather than future work.
+
+#### Integration tests
+
+Added integration coverage under `integration_tests/`: a dedicated
+deterministic seed reproducing the `A, A, A, B, B, C` example exactly
+(`evaluated_row_count = 6`, `unique_row_count = 1`, `duplicate_row_count =
+5`, `duplicate_group_count = 2`, `max_duplicate_group_size = 3`), and a
+dedicated seed contrasting `A, A, B, B, C, C` (`duplicate_group_count = 3`,
+`max_duplicate_group_size = 2`) against `A, A, A, A, A, A`
+(`duplicate_group_count = 1`, `max_duplicate_group_size = 6`) to prove
+group-count and max-size diverge even when `duplicate_row_count` is
+identical. Exercised both new checks with exact-lower-bound,
+exact-upper-bound, below-range, and above-range test cases. Reused the
+existing 0.8.2/0.8.3 composite-key fixtures for the remaining
+cross-cutting cases instead of adding new seeds: the multi-column
+`seed_unique_combination_ratio_between_valid` / `_unique` / `_invalid` /
+`_nulls` / `_all_null` seeds back models covering a multi-column composite
+key, all-rows-unique, all-rows-duplicated, a NULL in one key component, a
+partially NULL composite key, and an all-NULL input. Added a new dedicated
+seed for cross-group key reuse, proving that a key repeating once per group
+is not treated as a duplicate group globally, and that the same key
+repeating twice inside one group is a duplicate group of size 2 there.
+Added single-column `group_by` coverage by extending the existing
+`grouped_ratio_valid` / `grouped_ratio_invalid` fixtures in
+`integration_tests/models/grouped/`, and multi-column `group_by` coverage
+by extending `multi_grouped_unique_combination_valid` / `_invalid` in
+`integration_tests/models/multi_grouped/`. Reused `ratio_nulls` /
+`ratio_all_null` in `null_handling/`, `empty_aggregation` in
+`edge_cases/empty_tables/`, and `where_filter_ratio` in `where_filter/` for
+NULL handling, empty-table, and `where`-scoped coverage. Added a dedicated
+seed exercising SQL expressions in `columns` (`lower(...)` /
+`cast(... as date)`). Added compile-time validation guard fixtures (empty
+`columns`, duplicated `columns`, non-negative-integer and
+`min_count > max_count` count-bound violations, and an empty `group_by`)
+to `integration_tests_invalid_configs/models/validation_guards/_schema.yml`.
+
+### Changed
+
+- Bumped package version to `0.8.4` per `VERSIONING.md` (adding new checks
+  is a MINOR change).
+
+---
+
 ## [0.8.3] - 2026-07-17
 
 ### Added

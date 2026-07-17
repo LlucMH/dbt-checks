@@ -72,6 +72,38 @@ macros:
       - name: group_by
       - name: where
 
+  - name: test_duplicate_group_count_between
+    description: "{{ doc('test_duplicate_group_count_between') }}"
+    arguments:
+      - name: model
+      - name: columns
+        type: list
+        description: >
+          Non-empty list of column names or SQL expressions defining the composite
+          key. Each item is treated as one key component. Rows where any expression
+          evaluates to NULL are excluded from the metric. Duplicate expressions are
+          rejected at compile time.
+      - name: min_count
+      - name: max_count
+      - name: group_by
+      - name: where
+
+  - name: test_max_duplicate_group_size_between
+    description: "{{ doc('test_max_duplicate_group_size_between') }}"
+    arguments:
+      - name: model
+      - name: columns
+        type: list
+        description: >
+          Non-empty list of column names or SQL expressions defining the composite
+          key. Each item is treated as one key component. Rows where any expression
+          evaluates to NULL are excluded from the metric. Duplicate expressions are
+          rejected at compile time.
+      - name: min_count
+      - name: max_count
+      - name: group_by
+      - name: where
+
   - name: test_row_count_between
     description: "{{ doc('test_row_count_between') }}"
     arguments:

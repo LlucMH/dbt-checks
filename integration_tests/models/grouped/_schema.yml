@@ -369,6 +369,28 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_count: 0
+            max_count: 0
+            group_by: country
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_count: 0
+            max_count: 0
+            group_by: country
+          config:
+            tags: ["should_pass"]
+
       - dbt_checks.duplicate_ratio_between:
           arguments:
             columns:
@@ -537,6 +559,28 @@ models:
               - amount
             min_count: 1
             max_count: 10
+            group_by: country
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_group_count_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_count: 1
+            max_count: 5
+            group_by: country
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.max_duplicate_group_size_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_count: 1
+            max_count: 5
             group_by: country
           config:
             tags: ["should_fail"]
