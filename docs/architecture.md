@@ -347,11 +347,17 @@ helper for the shared `count(distinct column_name)` metric.
 composite-key uniqueness, built on a new generic composite-key helper layer
 (`macros/helpers/duplicates.sql`) — `build_composite_key_validation_cte`
 computes `evaluated_row_count` / `unique_row_count` for an arbitrary column
-list, independent of the ratio math layered on top in `ratio.sql` — so the
-same foundation can be reused by the `duplicate_count_between` and
-`duplicate_ratio_between` checks planned for the remainder of the 0.8.x
-series without duplicating the window-function/grouping logic. Duplicate
-observability tooling beyond those two checks remains future work.
+list, independent of the ratio math layered on top in `ratio.sql`.
+`duplicate_count_between` and `duplicate_ratio_between` (added in 0.8.3)
+reuse that same foundation: `build_composite_key_validation_cte` now also
+derives `duplicate_row_count` (`evaluated_row_count - unique_row_count`)
+directly in its `validation` CTE, so `duplicate_count_between` reads it as a
+plain aggregation metric and `duplicate_ratio_between` layers a thin
+`calculate_duplicate_ratio_cte` ratio wrapper on top (mirroring
+`calculate_unique_combination_ratio_cte`) — no second window-function
+implementation was introduced. Duplicate-impact metrics beyond the row-count
+and row-ratio measures added in 0.8.3 (for example, an excess-copy count, or
+a duplicate-group count) remain future work.
 
 The goal is to keep the public API simple while allowing internal architecture to evolve as the package grows.
 

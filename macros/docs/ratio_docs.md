@@ -592,3 +592,152 @@ Rows where any composite-key expression evaluates to NULL are excluded from
 both `evaluated_row_count` and `unique_row_count`.
 
 {% enddocs %}
+
+
+{% docs test_duplicate_ratio_between %}
+Ensures that the proportion of rows belonging to a duplicated composite key falls within a specified range.
+
+### Description
+
+Evaluates the composite key formed by `columns` and calculates:
+
+```
+duplicate_row_count
+/
+evaluated_row_count
+```
+
+where `duplicate_row_count = evaluated_row_count - unique_row_count`, and
+verifies that the resulting ratio lies between `min_ratio` and `max_ratio`
+using the existing `safe_ratio` helper.
+
+`duplicate_row_count` counts **every row that belongs to a duplicate
+group**, not the number of excess copies beyond the first occurrence. A row
+is part of a duplicate group when its full `columns` combination appears
+more than once among the evaluated rows. For example:
+
+```
+A
+A
+A
+B
+C
+```
+
+produces `evaluated_row_count = 5`, `unique_row_count = 2` (only `B` and
+`C`), `duplicate_row_count = 3`, and `duplicate_ratio = 3 / 5 = 0.60`. All
+three `A` rows count as duplicate rows, because none of them can be
+individually distinguished from the others in that group. This is not the
+same as an excess-copy count (`sum(group_size - 1)`, which would be `2` for
+this example); that alternative metric is not implemented by this check.
+
+Rows where **any** column in `columns` is NULL are excluded from
+`evaluated_row_count` entirely, matching the NULL-handling philosophy
+introduced by `distinct_ratio_between` and `unique_combination_ratio_between`:
+a composite key that is partially unknown cannot be judged unique or
+duplicate, so it is dropped from both the numerator and the denominator
+rather than being treated as a guaranteed match or guaranteed miss. Use
+NULL or completeness checks separately when missing key values must be
+detected.
+
+For an ungrouped check, if every row is excluded this way — including an
+empty table — the check produces `evaluated_row_count = 0`,
+`unique_row_count = 0`, `duplicate_row_count = 0`, and a ratio of `0`
+through the existing `safe_ratio` helper.
+
+When `group_by` is used, groups with no evaluable composite keys are omitted
+from the result entirely rather than appearing with a ratio of `0`.
+
+Supports grouped validation through `group_by`. When `group_by` is set,
+duplicate frequencies are evaluated independently within each group — the
+same key appearing once in Spain and once in France remains unique inside
+each country rather than being considered globally duplicated.
+
+Useful for validating:
+
+- duplicate IDs on a primary-key-like column
+- composite order-line keys, for example `(order_id, line_number)`
+- slowly changing dimensions, for example `(customer_id, effective_date)`
+- event deduplication, for example `(source_system, event_id)`
+- merged source streams where the same business key may arrive more than
+  once
+
+### Arguments
+
+- **columns** *(list[string])*  
+Column names or SQL expressions defining the composite key. Must be a
+non-empty list of distinct expressions.
+
+- **min_ratio** *(float)*  
+Minimum allowed ratio (inclusive).
+
+- **max_ratio** *(float)*  
+Maximum allowed ratio (inclusive).
+
+- **group_by** *(string or list[string], optional)*  
+Column or columns used for grouped validation.
+
+- **where** *(string, optional)*  
+Optional SQL expression used to filter rows before applying the check.
+
+### Failure output
+
+| actual_duplicate_ratio | expected_min_ratio | expected_max_ratio | evaluated_row_count | unique_row_count | duplicate_row_count | failed_check |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0.60 | 0.0 | 0.01 | 5 | 2 | 3 | duplicate_ratio_between |
+
+### Grouped failure output
+
+| grouped_by_country | actual_duplicate_ratio | expected_min_ratio | evaluated_row_count | unique_row_count | duplicate_row_count |
+| --- | --- | --- | --- | --- | --- |
+| ES | 0.60 | 0.0 | 5 | 2 | 3 |
+
+### Example
+
+```yaml
+tests:
+  - dbt_checks.duplicate_ratio_between:
+      arguments:
+        columns:
+          - order_id
+          - line_number
+        min_ratio: 0
+        max_ratio: 0.01
+```
+
+### Grouped example
+
+```yaml
+tests:
+  - dbt_checks.duplicate_ratio_between:
+      arguments:
+        columns:
+          - customer_id
+          - effective_date
+        min_ratio: 0
+        max_ratio: 0.05
+        group_by:
+          - source_system
+          - region
+```
+
+### Composite key expressions
+
+The `columns` argument accepts a non-empty list of column names or SQL
+expressions, each evaluated as one component of the composite key.
+
+```yaml
+tests:
+  - dbt_checks.duplicate_ratio_between:
+      arguments:
+        columns:
+          - lower(email)
+          - cast(created_at as date)
+        min_ratio: 0
+        max_ratio: 0.02
+```
+
+Expressions are rendered directly into the generated SQL and must be valid
+for the target adapter.
+
+{% enddocs %}

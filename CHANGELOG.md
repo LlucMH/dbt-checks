@@ -6,6 +6,156 @@ The format follows semantic versioning.
 
 ---
 
+## [0.8.3] - 2026-07-17
+
+### Added
+
+#### `duplicate_count_between` and `duplicate_ratio_between`
+
+Added two new checks, `dbt_checks.duplicate_count_between` (in
+`macros/tests/aggregation/`) and `dbt_checks.duplicate_ratio_between` (in
+`macros/tests/ratio/`), which validate operational duplicate-impact metrics
+on top of the composite-key helper layer introduced in 0.8.2. Both accept
+the same `columns` argument as `unique_combination_ratio_between` — a
+non-empty, non-duplicated list of column names or SQL expressions defining
+a composite key — plus `min_count` / `max_count` (for the count check) or
+`min_ratio` / `max_ratio` (for the ratio check), and the standard
+`group_by` / `where` arguments.
+
+The metric definition is:
+
+```
+duplicate_row_count =
+    evaluated_row_count - unique_row_count
+
+duplicate_ratio =
+    duplicate_row_count / evaluated_row_count
+```
+
+`duplicate_row_count` counts every row belonging to a duplicate group, not
+just the "excess" copies beyond the first occurrence — the same philosophy
+`unique_combination_ratio_between` already uses for `unique_row_count`, just
+from the other side of the same partition. A table of
+
+```
+A
+A
+A
+B
+C
+```
+
+reports `evaluated_row_count = 5`, `unique_row_count = 2` (only `B` and
+`C`), `duplicate_row_count = 3` (all three `A` rows, since none of them is
+individually distinguishable from the others in that group), and
+`duplicate_ratio = 3 / 5 = 0.60`. This release intentionally does not
+implement the alternative `excess_duplicate_count = sum(group_size - 1)`
+definition (which would report `2` for the example above); that metric may
+be introduced separately in a future release. NULL handling, empty-input
+behavior, and grouped semantics are unchanged from
+`unique_combination_ratio_between`: rows where any `columns` expression is
+NULL are excluded from `evaluated_row_count` (and therefore from both
+`unique_row_count` and `duplicate_row_count`); an ungrouped check over an
+empty table or an all-excluded dataset reports all three metrics as `0`
+(ratio `0` via `safe_ratio`); and grouped checks omit groups with no
+evaluable keys entirely instead of emitting a zero row. Duplicate frequency
+is always computed within `group_by` when it is supplied — a key that
+repeats once in Spain and once in France is not duplicated in either
+country's result.
+
+No second window-function implementation was added. `duplicate_row_count`
+is derived directly inside `build_composite_key_validation_cte`'s existing
+`validation` CTE (`macros/helpers/duplicates.sql`) as
+`evaluated_row_count - unique_row_count`, computed from the same
+`key_occurrences` window pass `unique_combination_ratio_between` already
+relies on. Because that CTE now exposes `duplicate_row_count` alongside
+`evaluated_row_count` and `unique_row_count`, `duplicate_count_between`
+reads it directly as a plain aggregation metric — no extra wrapper macro,
+matching how `distinct_count_between` and `row_count_between` call their
+respective validation CTEs directly. `duplicate_ratio_between` layers a new
+thin helper, `calculate_duplicate_ratio_cte` (in `macros/helpers/ratio.sql`),
+that wraps `build_composite_key_validation_cte` and computes
+`duplicate_row_count / evaluated_row_count` via the existing `safe_ratio`
+helper — mirroring `calculate_unique_combination_ratio_cte` exactly, just
+dividing by the complementary numerator. Both checks reuse
+`validate_expression_list`, `validate_no_duplicate_columns`,
+`validate_group_by`, and either `validate_non_negative_integer` +
+`validate_min_max` (count bounds) or `validate_ratio_bounds` (ratio bounds)
+without any new validation logic. Required no adapter-specific dispatch
+overrides, since the underlying `count(*) over (partition by ...)` window
+and `safe_ratio` division are already portable across all seven target
+adapters.
+
+Use cases: duplicate IDs on primary-key-like columns, composite order-line
+keys (for example `(order_id, line_number)`), slowly changing dimensions
+(for example `(customer_id, effective_date)`), event deduplication (for
+example `(source_system, event_id)`), and merged source streams where the
+same business key may arrive more than once — the same scenarios
+`unique_combination_ratio_between` targets, expressed as an explicit
+duplicate-impact measure instead of a uniqueness ratio.
+
+#### Documentation
+
+Documented both checks in `macros/docs/aggregation_docs.md` and
+`macros/docs/ratio_docs.md` respectively (including the `A, A, A, B, C`
+example, an explicit statement that `duplicate_row_count` is not an
+excess-copy count, NULL handling, grouped versus ungrouped all-excluded
+behavior, composite key expressions, and practical examples for duplicate
+IDs, composite order-line keys, slowly changing dimensions, event
+deduplication, and merged source streams), and added their argument
+metadata to `macros/tests/aggregation/_schema.yml` and
+`macros/tests/ratio/_schema.yml`. Added both checks to the aggregation and
+ratio check listings in `docs/checks.md` and `docs/overview.md`, and to the
+"Grouped Aggregation Checks" / "Grouped Ratio Checks" sections of
+`docs/grouped-checks.md`. Updated `docs/architecture.md`'s "Future
+Architecture Areas" note to describe how both checks reuse
+`macros/helpers/duplicates.sql` without a second window-function
+implementation, and to note that duplicate-impact metrics beyond row-count
+and row-ratio (for example, an excess-copy count or a duplicate-group
+count) remain future work.
+
+#### Integration tests
+
+Added integration coverage under `integration_tests/`: a dedicated
+deterministic seed reproducing the `A, A, A, B, C` example exactly
+(`evaluated_row_count = 5`, `unique_row_count = 2`, `duplicate_row_count =
+3`, `duplicate_ratio = 0.60`), exercised with exact-lower-bound,
+exact-upper-bound, below-range, and above-range test cases for both checks.
+Reused the existing 0.8.2 composite-key fixtures for the remaining
+cross-cutting cases instead of adding new seeds: the multi-column
+`seed_unique_combination_ratio_between_valid` /
+`_unique` / `_invalid` / `_nulls` / `_all_null` seeds now also back
+`duplicate_count_between` / `duplicate_ratio_between` models covering a
+multi-column composite key, all-rows-unique, all-rows-duplicated, a NULL in
+one key component, a partially NULL composite key, and an all-NULL input,
+each asserted with the complementary bound to the existing
+`unique_combination_ratio_between` case (for example, the fully-duplicated
+fixture that closes `unique_combination_ratio_between` at ratio `0.0`
+closes `duplicate_ratio_between` at ratio `1.0`). Added a new dedicated
+seed for cross-group key reuse, proving that a key repeating once per
+country is not treated as globally duplicated when `group_by` is supplied.
+Added single-column `group_by` coverage by extending the existing
+`grouped_ratio_valid` / `grouped_ratio_invalid` fixtures in
+`integration_tests/models/grouped/`, and multi-column `group_by` coverage
+by extending `multi_grouped_unique_combination_valid` /
+`_invalid` in `integration_tests/models/multi_grouped/`. Reused
+`ratio_nulls` / `ratio_all_null` in `null_handling/`, `empty_ratio` and
+`empty_aggregation` in `edge_cases/empty_tables/`, and `where_filter_ratio`
+in `where_filter/` for NULL handling, empty-table, and `where`-scoped
+coverage. Added a dedicated seed exercising SQL expressions in `columns`
+(`lower(...)` / `cast(... as date)`). Added compile-time validation guard
+fixtures (empty `columns`, duplicated `columns`, non-negative-integer and
+`min_count > max_count` count-bound violations, `min_ratio > max_ratio`,
+and an empty `group_by`) to
+`integration_tests_invalid_configs/models/validation_guards/_schema.yml`.
+
+### Changed
+
+- Bumped package version to `0.8.3` per `VERSIONING.md` (adding new checks
+  is a MINOR change).
+
+---
+
 ## [0.8.2] - 2026-07-17
 
 ### Added
