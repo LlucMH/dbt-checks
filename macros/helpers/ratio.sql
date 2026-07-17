@@ -60,6 +60,39 @@ ratio as (
 {% endmacro %}
 
 
+{% macro calculate_duplicate_ratio_cte(model, columns, where=None, group_by=None) %}
+
+{%- set groups = dbt_checks.normalize_group_by(group_by) -%}
+
+{{
+    dbt_checks.build_composite_key_validation_cte(
+        model=model,
+        columns=columns,
+        group_by=group_by,
+        where=where
+    )
+}},
+
+ratio as (
+
+    select
+
+        {%- if groups | length > 0 %}
+            {{ dbt_checks.render_group_by_output(groups) }},
+        {%- endif %}
+
+        evaluated_row_count,
+        unique_row_count,
+        duplicate_row_count,
+        {{ dbt_checks.safe_ratio('duplicate_row_count', 'evaluated_row_count') }} as metric_ratio
+
+    from validation
+
+)
+
+{% endmacro %}
+
+
 {% macro calculate_distinct_ratio_cte(model, column_name, where=None, group_by=None) %}
 
 {%- set groups = dbt_checks.normalize_group_by(group_by) -%}

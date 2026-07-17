@@ -71,6 +71,7 @@ Supported checks include:
 - `min_between`
 - `max_between`
 - `distinct_count_between`
+- `duplicate_count_between`
 
 ## Example
 
@@ -103,6 +104,7 @@ Supported checks include:
 - `value_ratio_between`
 - `distinct_ratio_between`
 - `unique_combination_ratio_between`
+- `duplicate_ratio_between`
 
 ## Example
 

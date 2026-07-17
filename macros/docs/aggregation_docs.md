@@ -217,6 +217,150 @@ tests:
 {% enddocs %}
 
 
+{% docs test_duplicate_count_between %}
+Ensures that the number of rows belonging to a duplicated composite key falls within a specified range.
+
+### Description
+
+Evaluates the composite key formed by `columns` and calculates:
+
+```
+duplicate_row_count =
+    evaluated_row_count - unique_row_count
+```
+
+and verifies that it lies between `min_count` and `max_count` (inclusive).
+
+`duplicate_row_count` counts **every row that belongs to a duplicate group**,
+not the number of excess copies beyond the first occurrence. A row is part
+of a duplicate group when its full `columns` combination appears more than
+once among the evaluated rows. For example:
+
+```
+A
+A
+A
+B
+C
+```
+
+produces `evaluated_row_count = 5`, `unique_row_count = 2` (only `B` and
+`C`), and `duplicate_row_count = 3` — all three `A` rows count as
+duplicates, because none of them can be individually distinguished from the
+others in that group. This is not the same as
+`excess_duplicate_count = sum(group_size - 1)` (which would report `2` for
+this example); that alternative metric is not implemented by this check.
+
+Rows where **any** column in `columns` is NULL are excluded from
+`evaluated_row_count` entirely, matching the NULL-handling philosophy
+introduced by `distinct_ratio_between` and `unique_combination_ratio_between`:
+a composite key that is partially unknown cannot be judged unique or
+duplicate, so it is dropped rather than being treated as a guaranteed match
+or guaranteed miss. Use NULL or completeness checks separately when missing
+key values must be detected.
+
+For an ungrouped check, if every row is excluded this way — including an
+empty table — the check produces `evaluated_row_count = 0`,
+`unique_row_count = 0`, and `duplicate_row_count = 0`.
+
+When `group_by` is used, groups with no evaluable composite keys are omitted
+from the result entirely rather than appearing with a duplicate count of
+`0`.
+
+Supports grouped validation through `group_by`. When `group_by` is set,
+duplicate frequencies are evaluated independently within each group — the
+same key appearing once in Spain and once in France remains unique inside
+each country rather than being considered globally duplicated.
+
+Useful for validating:
+
+- duplicate IDs on a primary-key-like column
+- composite order-line keys, for example `(order_id, line_number)`
+- slowly changing dimensions, for example `(customer_id, effective_date)`
+- event deduplication, for example `(source_system, event_id)`
+- merged source streams where the same business key may arrive more than
+  once
+
+### Arguments
+
+- **columns** *(list[string])*  
+Column names or SQL expressions defining the composite key. Must be a
+non-empty list of distinct expressions.
+
+- **min_count** *(non-negative integer)*  
+Minimum allowed duplicate row count.
+
+- **max_count** *(non-negative integer)*  
+Maximum allowed duplicate row count.
+
+- **group_by** *(string or list[string], optional)*  
+Column or columns used for grouped validation.
+
+- **where** *(string, optional)*  
+Optional SQL expression used to filter rows before applying the check.
+
+### Failure output
+
+| actual_duplicate_count | expected_min_count | expected_max_count | evaluated_row_count | unique_row_count | duplicate_row_count | failed_check |
+| --- | --- | --- | --- | --- | --- | --- |
+| 3 | 0 | 0 | 5 | 2 | 3 | duplicate_count_between |
+
+### Grouped failure output
+
+| grouped_by_country | actual_duplicate_count | expected_min_count | evaluated_row_count | unique_row_count | duplicate_row_count |
+| --- | --- | --- | --- | --- | --- |
+| ES | 3 | 0 | 5 | 2 | 3 |
+
+### Example
+
+```yaml
+tests:
+  - dbt_checks.duplicate_count_between:
+      arguments:
+        columns:
+          - order_id
+        min_count: 0
+        max_count: 10
+```
+
+### Grouped example
+
+```yaml
+tests:
+  - dbt_checks.duplicate_count_between:
+      arguments:
+        columns:
+          - customer_id
+          - effective_date
+        min_count: 0
+        max_count: 5
+        group_by:
+          - source_system
+          - region
+```
+
+### Composite key expressions
+
+The `columns` argument accepts a non-empty list of column names or SQL
+expressions, each evaluated as one component of the composite key.
+
+```yaml
+tests:
+  - dbt_checks.duplicate_count_between:
+      arguments:
+        columns:
+          - lower(email)
+          - cast(created_at as date)
+        min_count: 0
+        max_count: 0
+```
+
+Expressions are rendered directly into the generated SQL and must be valid
+for the target adapter.
+
+{% enddocs %}
+
+
 {% docs test_sum_between %}
 Ensures that the sum of a column falls within a specified range.
 

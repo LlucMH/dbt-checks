@@ -163,3 +163,176 @@ models:
                 max_value: 5
               config:
                 tags: ["should_fail"]
+
+  - name: duplicate_count_between_valid
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 2
+            max_count: 2
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 2
+            max_count: 100
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 0
+            max_count: 2
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_invalid
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 3
+            max_count: 10
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 0
+            max_count: 1
+          config:
+            tags: ["should_fail"]
+
+  - name: duplicate_count_between_fully_unique
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_fully_duplicated
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 5
+            max_count: 5
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_nulls
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 2
+            max_count: 2
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_all_null
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_aaabc
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_value
+            min_count: 3
+            max_count: 3
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_value
+            min_count: 3
+            max_count: 100
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_value
+            min_count: 0
+            max_count: 3
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_value
+            min_count: 4
+            max_count: 10
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_value
+            min_count: 0
+            max_count: 2
+          config:
+            tags: ["should_fail"]
+
+  - name: duplicate_count_between_expressions
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - lower(email)
+              - cast(created_at as date)
+            min_count: 2
+            max_count: 2
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_count_between_cross_group
+    data_tests:
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - key_col
+            min_count: 0
+            max_count: 0
+            group_by: group_col
+          config:
+            tags: ["should_pass"]

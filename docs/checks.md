@@ -88,6 +88,7 @@ Available checks:
 * `min_between`
 * `max_between`
 * `distinct_count_between`
+* `duplicate_count_between`
 
 Common use cases:
 
@@ -113,6 +114,7 @@ Available checks:
 * `value_ratio_between`
 * `distinct_ratio_between`
 * `unique_combination_ratio_between`
+* `duplicate_ratio_between`
 
 Common use cases:
 

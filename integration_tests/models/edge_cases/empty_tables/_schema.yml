@@ -164,6 +164,15 @@ models:
           config:
             tags: ["should_pass"]
 
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - value
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
   - name: empty_ratio
     columns:
       - name: value
@@ -211,6 +220,26 @@ models:
 
     data_tests:
       - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_count: 0
+            max_count: 0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
           arguments:
             columns:
               - value

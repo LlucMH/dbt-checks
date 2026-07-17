@@ -49,7 +49,8 @@ validation as (
         {%- endif %}
 
         count(*) as evaluated_row_count,
-        coalesce(sum(case when key_occurrences = 1 then 1 else 0 end), 0) as unique_row_count
+        coalesce(sum(case when key_occurrences = 1 then 1 else 0 end), 0) as unique_row_count,
+        count(*) - coalesce(sum(case when key_occurrences = 1 then 1 else 0 end), 0) as duplicate_row_count
 
     from keyed
 

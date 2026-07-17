@@ -105,6 +105,7 @@ Examples:
 * averages
 * minimum and maximum values
 * distinct counts
+* duplicate row counts
 
 ---
 
@@ -119,6 +120,7 @@ Examples:
 * business-event ratios
 * distinct-value ratios
 * composite-key uniqueness ratios
+* duplicate row ratios
 
 ---
 

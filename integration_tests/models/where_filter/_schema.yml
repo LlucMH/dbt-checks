@@ -276,3 +276,25 @@ models:
             where: "status = 'active'"
           config:
             tags: ["should_pass"]
+
+      - dbt_checks.duplicate_count_between:
+          arguments:
+            columns:
+              - value
+              - category
+            min_count: 0
+            max_count: 0
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - value
+              - category
+            min_ratio: 0.0
+            max_ratio: 0.0
+            where: "status = 'active'"
+          config:
+            tags: ["should_pass"]

@@ -205,3 +205,176 @@ models:
             max_ratio: 0.0
           config:
             tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_valid
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.4
+            max_ratio: 0.4
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.4
+            max_ratio: 1.0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.4
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_invalid
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.5
+            max_ratio: 1.0
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.3
+          config:
+            tags: ["should_fail"]
+
+  - name: duplicate_ratio_between_fully_unique
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_fully_duplicated
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 1.0
+            max_ratio: 1.0
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_nulls
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.5
+            max_ratio: 0.5
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_all_null
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_a
+              - key_b
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_aaabc
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_value
+            min_ratio: 0.6
+            max_ratio: 0.6
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_value
+            min_ratio: 0.6
+            max_ratio: 1.0
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_value
+            min_ratio: 0.0
+            max_ratio: 0.6
+          config:
+            tags: ["should_pass"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_value
+            min_ratio: 0.7
+            max_ratio: 1.0
+          config:
+            tags: ["should_fail"]
+
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_value
+            min_ratio: 0.0
+            max_ratio: 0.5
+          config:
+            tags: ["should_fail"]
+
+  - name: duplicate_ratio_between_expressions
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - lower(email)
+              - cast(created_at as date)
+            min_ratio: 0.5
+            max_ratio: 0.5
+          config:
+            tags: ["should_pass"]
+
+  - name: duplicate_ratio_between_cross_group
+    data_tests:
+      - dbt_checks.duplicate_ratio_between:
+          arguments:
+            columns:
+              - key_col
+            min_ratio: 0.0
+            max_ratio: 0.0
+            group_by: group_col
+          config:
+            tags: ["should_pass"]
