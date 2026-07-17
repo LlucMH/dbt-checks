@@ -6,6 +6,118 @@ The format follows semantic versioning.
 
 ---
 
+## [0.8.2] - 2026-07-17
+
+### Added
+
+#### `unique_combination_ratio_between`
+
+Added a new ratio check, `dbt_checks.unique_combination_ratio_between`,
+which validates that the proportion of unique composite-key combinations
+(`unique_row_count / evaluated_row_count`) falls within a `min_ratio` /
+`max_ratio` range (inclusive). Unlike the single-column `distinct_ratio_between`
+and `distinct_count_between`, this check accepts a `columns` argument — a
+list of column names defining a composite key — so it validates
+multi-column business keys such as `(order_id, line_number)` or
+`(customer_id, effective_date)` directly, instead of requiring a
+pre-computed concatenation column.
+
+A row counts as unique when its full `columns` combination appears exactly
+once among the evaluated rows; every row in a duplicate group (not just the
+"extra" copies) contributes zero to `unique_row_count`, since none of them
+can be individually distinguished from the others. Rows where **any**
+column in `columns` is NULL are excluded from `evaluated_row_count`
+entirely — a partially unknown composite key cannot be judged unique or
+duplicate — continuing the NULL-handling philosophy introduced by
+`distinct_ratio_between`. For ungrouped checks, if every row is excluded this way (including an empty
+table), the ratio defaults to `0` through the existing `safe_ratio` helper.
+When grouped validation is used, groups containing no evaluable composite
+keys are excluded from the result.
+The check follows the same shape as the rest of `macros/tests/ratio/`:
+standardized `actual_unique_ratio` / `expected_min_ratio` / `expected_max_ratio`
+/ `evaluated_row_count` / `unique_row_count` failure output, `group_by`
+(including multi-column grouping, evaluated independently per group), a
+`where` argument, and compile-time validation of `columns` (non-empty,
+non-duplicated, via the existing `validate_expression_list` helper plus a
+new `validate_no_duplicate_columns` helper) and `min_ratio` / `max_ratio`
+(via the existing `validate_ratio_bounds` helper).
+
+Introduced a new generic helper layer, `macros/helpers/duplicates.sql`,
+rather than folding composite-key logic into `ratio.sql` directly:
+`build_composite_key_validation_cte` takes a model, a `columns` list, and
+optional `group_by` / `where`, and produces `evaluated_row_count` /
+`unique_row_count` per group using a single `count(*) over (partition by
+...)` window pass followed by one aggregation pass — no per-key subquery,
+so the check still scans the source model once. `ratio.sql` adds a thin
+`calculate_unique_combination_ratio_cte` wrapper that layers the
+`metric_ratio` computation (via the existing `safe_ratio` helper) on top,
+mirroring how `calculate_distinct_ratio_cte` wraps
+`distinct_count_expression` in 0.8.0. Because `build_composite_key_validation_cte` exposes both
+`evaluated_row_count` and `unique_row_count` independently of the ratio
+calculation, it provides a reusable foundation for future duplicate-related
+checks without requiring a second window-function implementation. These
+metrics can support checks such as the proportion of rows belonging to
+duplicate groups, the number of duplicate groups, or the number of excess
+duplicate rows, while allowing each future check to define its semantics
+explicitly.
+
+Also extracted `render_group_by_list` in `macros/helpers/grouping.sql` — a
+bare comma-joined `group_by` column list, used by the new window function's
+`partition by` clause and by the second-stage aggregation's `group by`
+clause — and refactored the existing `render_group_by_clause` to call it
+instead of duplicating the `groups | join(", ")` expression inline.
+
+Required no adapter-specific dispatch overrides: `count(*) over (partition
+by ...)` is standard SQL across all seven target adapters, same as the
+existing aggregation and ratio helpers.
+
+Use cases: composite business key validation (order lines, slowly changing
+dimensions, merged event streams), duplicate detection across multiple
+columns, and referential/grain integrity checks where uniqueness is only
+meaningful across a combination of columns rather than any single one.
+
+#### Documentation
+
+Documented the new check in `macros/docs/ratio_docs.md` and
+`macros/tests/ratio/_schema.yml`, and added it to the ratio check listings
+in `docs/checks.md`, `docs/overview.md`, and the "Grouped Ratio Checks"
+section of `docs/grouped-checks.md`. Updated `docs/architecture.md`'s
+"Future Architecture Areas" note to describe the new
+`macros/helpers/duplicates.sql` foundation and how it's intended to be
+reused by the still-planned `duplicate_count_between` and
+`duplicate_ratio_between` checks.
+
+#### Integration tests
+
+Added integration coverage under `integration_tests/`: a standard
+valid/invalid pair with dedicated deterministic seeds, a fully-unique
+dataset (ratio `1.0`), an all-duplicated dataset (ratio `0.0`, verified both
+as a passing exact-bound check and as the basis for the failing "invalid"
+case), a NULL-handling dataset reproducing the `A, A, B, C` → `0.50`
+example from the check's own documentation with two additional rows
+carrying a NULL in one key column each (excluded from both the numerator
+and denominator), and an all-NULL dataset (ratio defaults to `0`). Added
+single- and multi-column grouped checks — the multi-column case
+(`multi_grouped/`) uses a dedicated 16-row fixture where every
+`(country, channel)` group has an identical `0.5` ratio, so the same
+dataset serves as both the valid case (tight bounds around `0.5`) and the
+invalid case (bounds that exclude it) — plus a single-column `group_by`
+case added to the existing `grouped_ratio_valid` / `grouped_ratio_invalid`
+fixtures in `integration_tests/models/grouped/`, reusing their `status` /
+`amount` columns as the composite key and incidentally re-exercising
+per-group NULL exclusion (each group's NULL `status` row is dropped from
+that group's count independently). Reused existing fixtures for the
+remaining cross-cutting cases instead of adding new seeds: the
+`ratio_nulls` / `ratio_all_null` models in `null_handling/`, `empty_ratio`
+in `edge_cases/empty_tables/`, and `where_filter_ratio` in `where_filter/`
+each gained a `unique_combination_ratio_between` entry over their existing
+`value` / `status` / `category` columns. Added compile-time validation
+guard fixtures (empty `columns`, duplicated `columns`, `min_ratio >
+max_ratio`, and an empty `group_by`) to
+`integration_tests_invalid_configs/models/validation_guards/_schema.yml`.
+
+---
+
 ## [0.8.1] - 2026-07-16
 
 ### Added

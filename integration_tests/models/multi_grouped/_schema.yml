@@ -96,3 +96,33 @@ models:
                   - channel
               config:
                 tags: ["should_fail"]
+
+  - name: multi_grouped_unique_combination_valid
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_ratio: 0.5
+            max_ratio: 0.5
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_pass"]
+
+  - name: multi_grouped_unique_combination_invalid
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - order_id
+              - line_no
+            min_ratio: 0.9
+            max_ratio: 1.0
+            group_by:
+              - country
+              - channel
+          config:
+            tags: ["should_fail"]

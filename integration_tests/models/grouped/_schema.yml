@@ -346,6 +346,18 @@ models:
               config:
                 tags: ["should_pass"]
 
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_ratio: 1.0
+            max_ratio: 1.0
+            group_by: country
+          config:
+            tags: ["should_pass"]
+
   - name: grouped_ratio_where_valid
     columns:
       - name: status
@@ -483,6 +495,18 @@ models:
                 group_by: country
               config:
                 tags: ["should_fail"]
+
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - status
+              - amount
+            min_ratio: 0.0
+            max_ratio: 0.0
+            group_by: country
+          config:
+            tags: ["should_fail"]
 
   - name: grouped_output_alias_invalid
     data_tests:

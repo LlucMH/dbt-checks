@@ -447,3 +447,148 @@ tests:
 ```
 
 {% enddocs %}
+
+
+{% docs test_unique_combination_ratio_between %}
+Ensures that the proportion of unique composite-key combinations falls within a specified range.
+
+### Description
+
+Evaluates the composite key formed by `columns` and calculates:
+
+```
+unique_row_count
+/
+evaluated_row_count
+```
+
+and verifies that it lies between `min_ratio` and `max_ratio`.
+
+A row is counted as unique when its full `columns` combination appears
+exactly once among the evaluated rows. Rows whose combination appears more
+than once (a duplicate group) contribute zero to `unique_row_count` — every
+row in that group is still duplicated, not just the extras — so a table of
+```
+A
+A
+B
+C
+```
+reports `unique_row_count = 2` (only `B` and `C`) and
+`evaluated_row_count = 4`, an actual ratio of `0.50`.
+
+Rows where **any** column in `columns` is NULL are excluded from
+`evaluated_row_count` entirely, the same distinctness philosophy introduced
+by `distinct_ratio_between`: a composite key that is partially unknown
+cannot be judged unique or duplicate, so it is dropped from both the
+numerator and the denominator rather than being treated as a guaranteed
+match or guaranteed miss.
+
+For an ungrouped check, if every row is excluded this way — including an
+empty table — the check produces `evaluated_row_count = 0`,
+`unique_row_count = 0`, and a ratio of `0` through the existing
+`safe_ratio` helper.
+
+When `group_by` is used, groups with no evaluable composite keys are omitted
+from the result entirely rather than appearing with a ratio of `0`. Use NULL
+or completeness checks separately when those groups must be detected.
+
+Supports grouped validation through `group_by`. When `group_by` is set,
+uniqueness is evaluated independently within each group — a combination
+that repeats in one group does not affect the ratio computed for another.
+
+Useful for validating composite business keys, for example:
+
+- `(order_id, line_number)` on an order lines table
+- `(customer_id, effective_date)` on a slowly changing dimension
+- `(source_system, event_id)` on a merged event stream
+
+### Arguments
+
+- **columns** *(list[string])*
+Column names defining the composite key. Must be a non-empty list of
+distinct column names.
+
+- **min_ratio** *(float)*
+Minimum allowed ratio (inclusive).
+
+- **max_ratio** *(float)*
+Maximum allowed ratio (inclusive).
+
+- **group_by** *(string or list[string], optional)*
+Column or columns used for grouped validation.
+
+- **where** *(string, optional)*
+Optional SQL expression used to filter rows before applying the check.
+
+### Failure output
+
+| actual_unique_ratio | expected_min_ratio | expected_max_ratio | evaluated_row_count | unique_row_count | failed_check |
+| --- | --- | --- | --- | --- | --- |
+| 0.50 | 0.95 | 1.0 | 4 | 2 | unique_combination_ratio_between |
+
+### Grouped failure output
+
+| grouped_by_country | actual_unique_ratio | expected_min_ratio | evaluated_row_count | unique_row_count |
+| --- | --- | --- | --- | --- |
+| ES | 0.50 | 0.95 | 4 | 2 |
+
+### Example
+
+```yaml
+tests:
+  - dbt_checks.unique_combination_ratio_between:
+      arguments:
+        columns:
+          - order_id
+          - line_number
+        min_ratio: 0.99
+        max_ratio: 1.0
+```
+
+### Grouped example
+
+```yaml
+tests:
+  - dbt_checks.unique_combination_ratio_between:
+      arguments:
+        columns:
+          - customer_id
+          - effective_date
+        min_ratio: 0.99
+        max_ratio: 1.0
+        group_by:
+          - source_system
+          - region
+```
+
+### Composite key expressions
+
+The `columns` argument accepts a non-empty list of column names or SQL
+expressions.
+
+Each item is evaluated as one component of the composite key. This allows
+the check to validate normalized or derived keys without requiring an
+intermediate model.
+
+For example:
+
+```yaml
+tests:
+  - dbt_checks.unique_combination_ratio_between:
+      arguments:
+        columns:
+          - lower(email)
+          - cast(created_at as date)
+        min_ratio: 1
+        max_ratio: 1
+```
+
+Expressions must be valid for the target warehouse. Because expressions are
+rendered directly into the generated SQL, adapter-specific functions may
+reduce portability across warehouses.
+
+Rows where any composite-key expression evaluates to NULL are excluded from
+both `evaluated_row_count` and `unique_row_count`.
+
+{% enddocs %}

@@ -427,6 +427,17 @@ models:
               config:
                 tags: ["should_pass"]
 
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_ratio: 1.0
+            max_ratio: 1.0
+          config:
+            tags: ["should_pass"]
+
   - name: ratio_all_null
     columns:
       - name: value
@@ -499,3 +510,14 @@ models:
                 max_value: 0
               config:
                 tags: ["should_pass"]
+
+    data_tests:
+      - dbt_checks.unique_combination_ratio_between:
+          arguments:
+            columns:
+              - value
+              - status
+            min_ratio: 0.0
+            max_ratio: 0.0
+          config:
+            tags: ["should_pass"]

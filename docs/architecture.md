@@ -342,9 +342,16 @@ Planned future areas include:
 `distinct_ratio_between` (added in 0.8.0) covers relative-cardinality
 monitoring, and `distinct_count_between` (added in 0.8.1) covers absolute
 distinct-count validation, reusing the same `distinct_count_expression`
-helper for the shared `count(distinct column_name)` metric; row-level
-uniqueness enforcement and duplicate observability tooling remain future
-work.
+helper for the shared `count(distinct column_name)` metric.
+`unique_combination_ratio_between` (added in 0.8.2) covers row-level
+composite-key uniqueness, built on a new generic composite-key helper layer
+(`macros/helpers/duplicates.sql`) — `build_composite_key_validation_cte`
+computes `evaluated_row_count` / `unique_row_count` for an arbitrary column
+list, independent of the ratio math layered on top in `ratio.sql` — so the
+same foundation can be reused by the `duplicate_count_between` and
+`duplicate_ratio_between` checks planned for the remainder of the 0.8.x
+series without duplicating the window-function/grouping logic. Duplicate
+observability tooling beyond those two checks remains future work.
 
 The goal is to keep the public API simple while allowing internal architecture to evolve as the package grows.
 
